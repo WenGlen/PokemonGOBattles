@@ -139,15 +139,15 @@ function BoxRow({ o, p, data, cp, box, open, onToggle }: {
       {open && (
         <tr className="detail">
           <td colSpan={9}>
+            {/* 整排編輯：等級、IV、快招、兩個大招擠在同一行。
+                兩個大招共用一個標籤，省掉「大招 1」「大招 2」兩次字 */}
             <div className="bx-edit">
-              <div className="bx-build">
-                <BuildFields
-                  level={o.level}
-                  ivs={o.ivs}
-                  onLevel={(n) => box.update(o.id, { level: n })}
-                  onIvs={(v) => box.update(o.id, { ivs: v })}
-                />
-              </div>
+              <BuildFields
+                level={o.level}
+                ivs={o.ivs}
+                onLevel={(n) => box.update(o.id, { level: n })}
+                onIvs={(v) => box.update(o.id, { ivs: v })}
+              />
               <div className="field">
                 <label>快招</label>
                 <MovePicker
@@ -157,21 +157,24 @@ function BoxRow({ o, p, data, cp, box, open, onToggle }: {
                   onChange={(id) => id && box.update(o.id, { fast: id })}
                 />
               </div>
-              {[0, 1].map((slot) => (
-                <div className="field" key={slot}>
-                  <label>大招 {slot + 1}</label>
-                  <MovePicker
-                    allowEmpty={slot === 1}
-                    moves={p.charged.map((id) => data.moveById.get(id)).filter(Boolean) as MoveData[]}
-                    value={o.charged[slot]}
-                    onChange={(id) => {
-                      const next: [string, string | null] = [...o.charged] as [string, string | null];
-                      next[slot] = id;
-                      box.update(o.id, { charged: next });
-                    }}
-                  />
+              <div className="field two">
+                <label>大招</label>
+                <div className="mp-pair">
+                  {[0, 1].map((slot) => (
+                    <MovePicker
+                      key={slot}
+                      allowEmpty={slot === 1}
+                      moves={p.charged.map((id) => data.moveById.get(id)).filter(Boolean) as MoveData[]}
+                      value={o.charged[slot]}
+                      onChange={(id) => {
+                        const next: [string, string | null] = [...o.charged] as [string, string | null];
+                        next[slot] = id;
+                        box.update(o.id, { charged: next });
+                      }}
+                    />
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </td>
         </tr>

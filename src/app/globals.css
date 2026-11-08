@@ -566,10 +566,14 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 }
 .bx-go:disabled { opacity: .4; cursor: not-allowed; }
 
-.bx-edit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px 14px; align-items: center; padding: 3px 2px 5px; }
-/* 等級／IV 自己一排；快招與兩個大招固定三欄，大招 2 才不會被擠到下一行 */
-.bx-build { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.bx-edit .field { margin-bottom: 0; min-width: 0; }
+/* 等級、IV、快招、兩個大招都在同一行；放不下才換行（窄視窗、手機） */
+.bx-edit { display: flex; align-items: center; gap: 9px 12px; flex-wrap: wrap; padding: 3px 2px 5px; }
+.bx-build { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bx-edit .field { flex: 1 1 170px; margin-bottom: 0; min-width: 0; }
+/* 兩個大招共用一個標籤，所以這一格要兩倍寬 */
+.bx-edit .field.two { flex: 2 1 340px; }
+.mp-pair { flex: 1; min-width: 0; display: flex; gap: 8px; }
+.mp-pair > .mp { flex: 1 1 0; min-width: 0; }
 
 /* 超過 CP 上限的那幾隻：留著看得到，但一眼要看得出這個聯盟用不了 */
 .tbl tbody tr.quiet { opacity: .45; }
@@ -595,5 +599,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 @media (max-width: 720px) {
   .bx-pick { flex-basis: 100%; }
   .bx-foe .bx-pick { flex-basis: 100%; }
-  .bx-edit { grid-template-columns: 1fr; }
+  .bx-edit .field, .bx-edit .field.two { flex-basis: 100%; }
+  .mp-pair { flex-wrap: wrap; }
+  .mp-pair > .mp { flex-basis: 100%; }
 }
