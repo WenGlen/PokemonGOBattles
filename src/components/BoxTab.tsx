@@ -13,13 +13,17 @@ import { zhName, type MoveData, type PokemonData } from '@/lib/types';
 /** 三個護盾情境都跑一次，因為同一組對位換個盾數常常就換邊 */
 const SHIELDS = [0, 1, 2] as const;
 
-/** 一隻的三圍輸入：等級與 IV */
+/**
+ * 一隻的三圍輸入：等級與 IV。
+ * @param cpText 要附在後面的 CP。展開那一區不用給——同一列左邊就有一欄 CP，
+ *   而且它跟著這裡的輸入即時變，再寫一次只是重複。
+ */
 function BuildFields({ level, ivs, onLevel, onIvs, cpText }: {
   level: number;
   ivs: [number, number, number];
   onLevel: (n: number) => void;
   onIvs: (v: [number, number, number]) => void;
-  cpText: string;
+  cpText?: string;
 }) {
   return (
     <>
@@ -39,7 +43,7 @@ function BuildFields({ level, ivs, onLevel, onIvs, cpText }: {
           onBlur={(e) => { const v = parseIvs(e.target.value); onIvs(v ?? ivs.map(clampIv) as [number, number, number]); }}
         />
       </label>
-      <span className="bx-cp">{cpText}</span>
+      {cpText && <span className="bx-cp">{cpText}</span>}
     </>
   );
 }
@@ -141,7 +145,6 @@ function BoxRow({ o, p, data, cp, box, open, onToggle }: {
                   ivs={o.ivs}
                   onLevel={(n) => box.update(o.id, { level: n })}
                   onIvs={(v) => box.update(o.id, { ivs: v })}
-                  cpText={fits ? `CP ${st.cp}` : `CP ${st.cp}（超過這個聯盟上限，進不去）`}
                 />
               </div>
               <div className="field">
