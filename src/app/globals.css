@@ -392,24 +392,57 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl tr.detail .mv { margin-right: 10px; }
 .blk .tbl-bar { border-bottom: 1px solid var(--line); }
 
-/* ── 單隻寶可夢的解析 ──────────────────────────────── */
-.pd { padding: 4px 2px 8px; }
-.pd-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 11px; }
+/* ── 單隻寶可夢的解析卡 ────────────────────────────── */
+/* 卡片放在表格上面、不在捲動區裡，所以翻表的時候卡片不會跟著跑掉 */
+.pd-deckwrap { margin-bottom: 14px; scroll-margin-top: 12px; }
+.pd-deck { display: grid; gap: 12px; }
+@media (min-width: 1000px) { .pd-deck.two { grid-template-columns: 1fr 1fr; } }
+
+.pd {
+  /* 卡片自己當量測基準：一隻獨佔整列、兩隻各半，左右欄要不要併都看卡片實際寬度 */
+  container-type: inline-size;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 13px 14px 15px;
+}
+
+.pd-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.pd-head .pic { background: var(--surface-2); border-radius: 14px; }
+.pd-head .pic.shadow { border-radius: 50%; }
+.pd-id { min-width: 0; }
+.pd-id h3 { margin: 0 0 5px; font-size: 17px; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.pd-id h3 small { font-size: 11.5px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.pd-ty { display: flex; gap: 5px; flex-wrap: wrap; }
+.pd-ty .chip { font-size: 11.5px; padding: 2px 9px 2px 5px; }
+
+.pd-tagbox { margin-bottom: 13px; }
+.pd-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag-pill {
-  font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--surface); cursor: help;
+  font: inherit; font-size: 11.5px; font-weight: 600; line-height: 1.5;
+  padding: 3px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
+  transition: background .12s;
 }
 .tag-pill.good { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
 .tag-pill.bad { color: var(--foe); border-color: color-mix(in srgb, var(--foe) 45%, transparent); }
 .tag-pill.plain { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+.tag-pill:hover, .tag-pill.on { background: color-mix(in srgb, currentColor 16%, transparent); }
+.pd-why {
+  margin: 8px 0 0; min-height: 2.6em; padding-left: 9px;
+  border-left: 2px solid var(--line); font-size: 11.5px; line-height: 1.55; color: var(--muted);
+}
+.pd-why b { color: var(--text); }
 
-.pd-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.pd-col h4, .pd-moves h4 { margin: 0 0 6px; font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.pd-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.pd-col { min-width: 0; }
+.pd-sec + .pd-sec { margin-top: 14px; }
+.pd-sec h4 { margin: 0 0 7px; font-size: 11.5px; color: var(--muted); font-weight: 600; }
+
 .pd-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
 .pd-label {
-  flex: none; width: 58px; font-size: 11px; font-variant-numeric: tabular-nums;
-  color: var(--muted); padding-top: 3px;
+  flex: none; width: 64px; font-size: 11.5px; font-variant-numeric: tabular-nums;
+  color: var(--muted); line-height: 1.3; padding-top: 1px;
 }
+.pd-label small { display: block; font-size: 10px; font-weight: 400; opacity: .75; }
 .pd-label.bad, .pd-label.bad2 { color: var(--foe); }
 .pd-label.good, .pd-label.good2 { color: var(--good); }
 .pd-types { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
@@ -418,14 +451,36 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .pd-types .chip.bad { border-color: color-mix(in srgb, var(--foe) 35%, transparent); }
 .pd-types .chip.good { border-color: color-mix(in srgb, var(--good) 35%, transparent); }
 .pd-types .chip.good2 { border-color: color-mix(in srgb, var(--good) 60%, transparent); }
+.pd-types .dim { font-size: 11px; color: var(--muted); }
 
-.pd-moves { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+.pd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 10px; margin: 0; }
+.pd-stats > div { min-width: 0; }
+.pd-stats dt { font-size: 10.5px; color: var(--muted); }
+.pd-stats dd { margin: 0; font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pd-stats dd small { font-size: 10.5px; font-weight: 400; color: var(--muted); }
+
 .pd-move { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 0; flex-wrap: wrap; }
-.pd-move .dim { font-size: 11px; font-variant-numeric: tabular-nums; }
-.pd-note { margin: 11px 0 0; font-size: 11px; color: var(--muted); line-height: 1.6; }
+.pd-move .dim { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.pd-rec {
+  font-size: 9.5px; font-weight: 600; padding: 0 5px; border-radius: 999px;
+  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.pd-empty { font-size: 11.5px; color: var(--muted); }
+
+.pd-note { margin: 10px 2px 0; font-size: 11px; color: var(--muted); line-height: 1.6; }
 .pd-note b { color: var(--text); }
 
+/* 被選起來的那幾列 */
+.tbl tbody tr.on { background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.tbl tbody tr.on:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.tbl .pick { color: var(--accent); font-weight: 700; }
+
+/* 卡片擠到一半寬度（兩隻並排）或手機時，左右欄改成上下疊 */
+@container (max-width: 470px) {
+  .pd-cols { grid-template-columns: 1fr; gap: 13px; }
+}
 @media (max-width: 720px) {
-  .pd-cols, .pd-moves { grid-template-columns: 1fr; }
-  .pd-label { width: 50px; }
+  .pd-cols { grid-template-columns: 1fr; gap: 13px; }
+  .pd-label { width: 58px; }
+  .pd-head .pic { border-radius: 12px; }
 }
