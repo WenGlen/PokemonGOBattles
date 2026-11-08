@@ -169,8 +169,12 @@ export interface Threat {
   rank: number;
   /** 打贏我方幾隻 */
   beats: number;
-  /** 對每一隻的結果，順序同隊伍 */
-  vs: { rating: number; win: boolean }[];
+  /**
+   * 對每一隻的結果，順序同隊伍。
+   * rating 是「放在面板上那三隻」的評分，oppRating 是這一列這隻的評分；
+   * 對手模式下要顯示的是後者，不然畫面上會出現「贏 182」這種讀不通的組合。
+   */
+  vs: { rating: number; oppRating: number; win: boolean }[];
   /** 平均評分，越低代表我方越吃虧 */
   avg: number;
   /** 牠帶的招，展開那一列時顯示 */
@@ -193,7 +197,7 @@ export function scanThreats(team: Loadout[], foes: { loadout: Loadout; rank: num
     const vs = team.map((mine) => {
       // a = 我方、b = 對手，rating.a > 500 代表我方佔上風
       const r = simulate(mine, f.loadout);
-      return { rating: r.analysis.rating.a, win: r.analysis.rating.a > 500 };
+      return { rating: r.analysis.rating.a, oppRating: r.analysis.rating.b, win: r.analysis.rating.a > 500 };
     });
     const beats = vs.filter((v) => !v.win).length;
     out.push({
