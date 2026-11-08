@@ -112,6 +112,10 @@ npm run build               # 產出 out/，直接丟任何靜態主機
   逐個抓 pvpoke 歷史上每一版 `gamemaster.min.json` 來比對，
   所以第一天就有紀錄可看，不是空的。
 
+部署在 Cloudflare Pages（免費方案）：框架選 **Next.js (Static HTML Export)**，
+build command `npx next build`、output directory `out`。
+`.node-version` 指定 Node 22，不依賴建置映像的預設值。
+
 `.github/workflows/daily-data.yml` 是每天跑一次的排程。推上 GitHub 之後要做兩件事：
 
 1. Settings → Actions → General → Workflow permissions 改成 **Read and write**
