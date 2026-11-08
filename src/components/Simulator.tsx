@@ -31,11 +31,10 @@ export default function Simulator({ data, cp }: { data: AppData; cp: LeagueCp })
 
   return (
     <>
-      <div className="leagues sub">
+      <div className="leagues sub center">
         {([['optimal', '最佳出招'], ['energy', '能量一滿就丟']] as const).map(([k, label]) => (
           <button key={k} aria-pressed={strategy === k} onClick={() => setStrategy(k)}>{label}</button>
         ))}
-        <span className="hint">切換看得出誘餌的價值</span>
       </div>
 
       <div className="sides">

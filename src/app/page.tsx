@@ -49,7 +49,7 @@ export default function Page() {
 
   const { meta, log } = data;
   const okCount = meta.checks.filter((c) => c.ok).length;
-  const showLeague = TABS.find((t) => t.id === tab)?.league;
+  const showLeague = TABS.find((t) => t.id === tab)?.league ?? false;
 
   return (
     <div className="wrap">
@@ -61,26 +61,34 @@ export default function Page() {
         </span>
       </header>
 
-      {log && log.entries.length > 0 && <ChangelogView log={log} />}
-
-      <nav className="tabs">
-        {TABS.map((t) => (
-          <button key={t.id} aria-pressed={tab === t.id} onClick={() => go(t.id)}>{t.label}</button>
-        ))}
-      </nav>
-
-      {showLeague && (
-        <div className="leagues">
-          {LEAGUES.map((lg) => (
-            <button key={lg.cp} aria-pressed={cp === lg.cp} onClick={() => setCp(lg.cp)}>{lg.name}</button>
+      <nav className="navbar">
+        <div className="tabs">
+          {TABS.map((t) => (
+            <button key={t.id} aria-pressed={tab === t.id} onClick={() => go(t.id)}>{t.label}</button>
           ))}
         </div>
-      )}
+        {/* 招式表不分聯盟。整排收掉會讓下面的內容往上跳一層，所以留著變暗 */}
+        <div className={`leagues${showLeague ? '' : ' off'}`}>
+          {LEAGUES.map((lg) => (
+            <button
+              key={lg.cp}
+              disabled={!showLeague}
+              title={showLeague ? undefined : '招式表不分聯盟'}
+              aria-pressed={cp === lg.cp}
+              onClick={() => setCp(lg.cp)}
+            >
+              {lg.name}
+            </button>
+          ))}
+        </div>
+      </nav>
 
       {tab === 'sim' && <Simulator data={data} cp={cp} />}
       {tab === 'moves' && <MoveTable data={data} />}
       {tab === 'pokemon' && <PokemonTable data={data} cp={cp} />}
       {tab === 'team' && <TeamTable data={data} cp={cp} />}
+
+      {log && log.entries.length > 0 && <ChangelogView log={log} />}
 
       <div className="foot">
         資料源 <a href="https://github.com/pvpoke/pvpoke" target="_blank" rel="noreferrer">pvpoke/pvpoke</a>（MIT）

@@ -90,17 +90,17 @@ export default function MoveTable({ data }: { data: AppData }) {
   return (
     <div className="tbl-wrap">
       <div className="tbl-bar">
-        {([['charged', '大招'], ['fast', '快招']] as const).map(([k, label]) => (
+        {([['fast', '快招'], ['charged', '大招']] as const).map(([k, label]) => (
           <button key={k} aria-pressed={kind === k} onClick={() => {
             setKind(k);
             setSort({ key: k === 'fast' ? 'ept' : 'dpe', dir: -1 });
           }}>{label}</button>
         ))}
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋招式（中文或英文）…" />
         <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="">所有屬性</option>
           {ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_ZH[t]}</option>)}
         </select>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋招式（中文或英文）…" />
         <span className="hint">{shown.length} 招</span>
       </div>
 

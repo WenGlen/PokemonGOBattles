@@ -85,7 +85,7 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
   return (
     <div className="pd">
       <div className="pd-head">
-        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={72} shadow={Boolean(p.shadow)} />
+        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={96} shadow={Boolean(p.shadow)} />
         <div className="pd-id">
           <h3>{zhName(p)}<small className="dim">#{p.dex}</small></h3>
           <div className="pd-ty">
@@ -94,11 +94,7 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
             ))}
           </div>
         </div>
-        <button type="button" className="panel-x" onClick={onClose} aria-label="收起這張卡">×</button>
-      </div>
-
-      {tags.length > 0 && (
-        <div className="pd-tagbox">
+        {tags.length > 0 && (
           <div className="pd-tags">
             {tags.map((t) => (
               <button
@@ -113,12 +109,16 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
               </button>
             ))}
           </div>
-          <p className="pd-why">
-            {why
-              ? <><b>{why.label}</b>：{why.why}</>
-              : '滑過或點一下標籤，看它是怎麼算出來的'}
-          </p>
-        </div>
+        )}
+        <button type="button" className="panel-x" onClick={onClose} aria-label="收起這張卡">×</button>
+      </div>
+
+      {tags.length > 0 && (
+        <p className="pd-why">
+          {why
+            ? <><b>{why.label}</b>：{why.why}</>
+            : '滑過或點一下標籤，看它是怎麼算出來的'}
+        </p>
       )}
 
       <div className="pd-cols">

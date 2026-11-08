@@ -358,14 +358,10 @@ export default function TeamTable({ data, cp }: { data: AppData; cp: LeagueCp })
 
   return (
     <>
-      <div className="leagues sub">
-        <span className="hint">這三隻是</span>
+      <div className="leagues sub center">
         {(['mine', 'foe'] as const).map((s) => (
           <button key={s} aria-pressed={side === s} onClick={() => setSide(s)}>{COPY[s].toggle}</button>
         ))}
-        <span className="hint">
-          {side === 'mine' ? '分析你會被什麼剋' : '分析你該拿什麼打'}
-        </span>
       </div>
 
       <div className="sides three">
@@ -401,22 +397,25 @@ export default function TeamTable({ data, cp }: { data: AppData; cp: LeagueCp })
         </span>
       </div>
 
-      <section className="blk">
-        <h3>{c.gridTitle}</h3>
-        <p className="blk-note">{c.gridNote}</p>
-        <TypeGrid team={mons} rows={pressure} side={side} />
-      </section>
+      {/* 屬性盤點與對位掃描講的是同一件事的兩面，放一起比對 */}
+      <div className="blk-row">
+        <section className="blk">
+          <h3>{c.gridTitle}</h3>
+          <p className="blk-note">{c.gridNote}</p>
+          <TypeGrid team={mons} rows={pressure} side={side} />
+        </section>
+
+        <section className="blk">
+          <h3>{c.threatTitle}</h3>
+          <p className="blk-note">{c.threatNote(metaN)}</p>
+          <ThreatList threats={threats} team={mons} side={side} />
+        </section>
+      </div>
 
       <section className="blk">
         <h3>{c.moveTitle}</h3>
         <p className="blk-note">{c.moveNote}</p>
         <ExposureList list={exposure} side={side} />
-      </section>
-
-      <section className="blk">
-        <h3>{c.threatTitle}</h3>
-        <p className="blk-note">{c.threatNote(metaN)}</p>
-        <ThreatList threats={threats} team={mons} side={side} />
       </section>
     </>
   );

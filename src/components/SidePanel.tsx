@@ -35,7 +35,7 @@ export default function SidePanel({
   return (
     <div className={`panel${cls ? ' ' + cls : ''}${compact ? ' compact' : ''}`}>
       <h2>
-        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={compact ? 28 : 34} shadow={Boolean(p.shadow)} />
+        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={compact ? 44 : 56} shadow={Boolean(p.shadow)} />
         {title}
         {onRemove && <button className="panel-x" onClick={onRemove} title="移除">×</button>}
       </h2>

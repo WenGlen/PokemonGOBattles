@@ -10,7 +10,7 @@ import { battleStats, suggestedBuild, type LeagueCp } from '@/lib/stats';
 import { TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type PokemonData } from '@/lib/types';
 
-type Key = 'rank' | 'zh' | 'dex' | 'cp' | 'atk' | 'def' | 'hp' | 'bulk';
+type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
 
 /** 同時能攤開幾隻來比 */
 const MAX_PICKED = 2;
@@ -160,11 +160,11 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
 
       <div className="tbl-wrap">
         <div className="tbl-bar">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋寶可夢（中文、英文或圖鑑編號）…" />
           <select value={type} onChange={(e) => setType(e.target.value)}>
             <option value="">所有屬性</option>
             {ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_ZH[t]}</option>)}
           </select>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋寶可夢（中文、英文或圖鑑編號）…" />
           <button aria-pressed={onlyRanked} onClick={() => setOnlyRanked((v) => !v)}>只看上榜的</button>
           <span className="hint">{shown.length} 隻 · 點一列看解析（最多兩隻）</span>
         </div>
@@ -176,7 +176,6 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
                 <SortHead k="rank" sort={sort} setSort={setSort} defaultDir={1} title="pvpoke 在這個聯盟的總排名">排名</SortHead>
                 <SortHead k="zh" sort={sort} setSort={setSort} defaultDir={1} align="left">寶可夢</SortHead>
                 <th className="left">屬性</th>
-                <SortHead k="cp" sort={sort} setSort={setSort}>CP</SortHead>
                 <SortHead k="atk" sort={sort} setSort={setSort}>攻擊</SortHead>
                 <SortHead k="def" sort={sort} setSort={setSort}>防禦</SortHead>
                 <SortHead k="hp" sort={sort} setSort={setSort}>HP</SortHead>
@@ -205,7 +204,6 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
                     <td className="left">
                       <span className="trow">{r.p.types.map((t) => <TypeIcon key={t} type={t} size={14} />)}</span>
                     </td>
-                    <td className="num">{r.cp}<small className="dim"> Lv{r.level}</small></td>
                     <td className="num">{r.atk.toFixed(1)}</td>
                     <td className="num">{r.def.toFixed(1)}</td>
                     <td className="num">{r.hp}</td>
