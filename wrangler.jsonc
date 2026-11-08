@@ -1,0 +1,19 @@
+{
+  // Cloudflare 的部署設定。
+  //
+  // 這個專案是純靜態站（next.config.ts 設了 output: 'export'），沒有伺服器端程式，
+  // 所以不設 "main"：沒有 Worker 腳本時，Cloudflare 直接把 out/ 當成網站內容送出去。
+  //
+  // 為什麼需要這個檔：Cloudflare 現在從 Git 建專案走的是 Workers Builds，
+  // 部署指令固定是 `npx wrangler deploy`，而那行指令要有這份設定才知道要部署什麼。
+  // 少了它，Build 會過但 Deploying 會失敗（2026-11-09 踩過）。
+  //
+  // "name" 必須和 Cloudflare 上那個 Worker 的名字一致，否則會部署到別的地方去。
+  "name": "pokemongobattles",
+  "compatibility_date": "2026-11-09",
+  "assets": {
+    "directory": "./out",
+    // 找不到的路徑回 out/404.html，而不是預設的空白 404
+    "not_found_handling": "404-page"
+  }
+}

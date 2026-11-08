@@ -112,9 +112,12 @@ npm run build               # 產出 out/，直接丟任何靜態主機
   逐個抓 pvpoke 歷史上每一版 `gamemaster.min.json` 來比對，
   所以第一天就有紀錄可看，不是空的。
 
-部署在 Cloudflare Pages（免費方案）：框架選 **Next.js (Static HTML Export)**，
-build command `npx next build`、output directory `out`。
-`.node-version` 指定 Node 22，不依賴建置映像的預設值。
+部署在 Cloudflare（免費方案）。從 Git 建專案現在走的是 **Workers Builds**，
+部署指令固定 `npx wrangler deploy`，所以 repo 裡要有 `wrangler.jsonc`：
+純靜態站不設 `main`，只指定 `assets.directory` 為 `out`，
+Cloudflare 就直接把它當網站內容送出去。少了這個檔，Build 會過但 Deploying 會失敗。
+`wrangler.jsonc` 裡的 `name` 必須和 Cloudflare 上那個 Worker 同名。
+`.node-version` 指定 Node 22，不依賴建置映像的預設值（wrangler 4 也要求 Node ≥22）。
 
 `.github/workflows/daily-data.yml` 是每天跑一次的排程。推上 GitHub 之後要做兩件事：
 
