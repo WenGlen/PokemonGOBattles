@@ -237,7 +237,10 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
                     onClick={() => toggle(r.p.id)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <td className="num">{r.rank ?? '—'}{r.score !== null && <small className="dim"> {r.score}</small>}</td>
+                    <td className="num rk">
+                      <span className="rk-n">{r.rank ?? '—'}</span>
+                      {r.score !== null && <small className="dim">{r.score.toFixed(1)}</small>}
+                    </td>
                     <td className="left nm">
                       <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={24} shadow={Boolean(r.p.shadow)} />
                       <span>{zhName(r.p)}</span>

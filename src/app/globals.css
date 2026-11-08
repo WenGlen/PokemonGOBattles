@@ -373,10 +373,15 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl th.sortable.left button { text-align: left; }
 .tbl th.sortable button:hover { color: var(--text); }
 .tbl th.sortable .arrow { margin-left: 3px; font-size: 8px; color: var(--accent); }
-.tbl td { padding: 5px 10px; text-align: right; border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent); }
+/* 數字一律等寬：少一個 .num 就整欄參差，不如讓所有格子都有（中文不受影響） */
+.tbl td { padding: 5px 10px; text-align: right; font-variant-numeric: tabular-nums; border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent); }
 .tbl tbody tr:hover { background: var(--surface-2); }
 .tbl tbody tr.hot { background: color-mix(in srgb, var(--warn) 9%, transparent); }
 .tbl .num { font-variant-numeric: tabular-nums; }
+/* 排名與分數是兩個數字擠在同一格，排名給固定寬度才不會被分數推著跑。
+   這裡不能用 display: flex——td 一旦不是 table-cell，整列會被拆成另一列 */
+.tbl td.rk .rk-n { display: inline-block; min-width: 2.2em; text-align: right; }
+.tbl td.rk small { margin-left: 6px; }
 .tbl .nm { display: flex; align-items: center; gap: 6px; }
 .tbl .nm > span { font-weight: 500; }
 .tbl .sm { font-size: 11.5px; }

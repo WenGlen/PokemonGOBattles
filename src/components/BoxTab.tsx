@@ -113,8 +113,9 @@ function BoxRow({ o, p, data, cp, box, open, onToggle }: {
           <span>{zhName(p)}</span>
           <small className="dim">{open ? '▾' : '▸'}</small>
         </td>
-        <td className="num">Lv{o.level}</td>
-        <td className="num">{o.ivs.join('/')}</td>
+        {/* 等級一律一位小數、IV 的個位數補一個數字寬的空白，欄位才不會一列一個位置 */}
+        <td className="num">{o.level.toFixed(1)}</td>
+        <td className="num">{o.ivs.map((v) => String(v).padStart(2, '\u2007')).join('/')}</td>
         <td className={`num${fits ? '' : ' bad'}`}>
           {st.cp}
           {!fits && <small className="dim"> 超過</small>}

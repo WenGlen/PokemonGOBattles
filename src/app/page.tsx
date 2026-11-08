@@ -13,25 +13,28 @@ import { LEAGUES, type LeagueCp } from '@/lib/stats';
 import type { PokemonData } from '@/lib/types';
 
 const TABS = [
-  { id: 'sim', label: '模擬器', league: true },
-  { id: 'moves', label: '招式表', league: false },
   { id: 'pokemon', label: '寶可夢表', league: true },
+  { id: 'moves', label: '招式表', league: false },
   { id: 'team', label: '對戰組合表', league: true },
+  { id: 'sim', label: '模擬器', league: true },
   { id: 'box', label: '我的箱子', league: true },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
 
+/** 沒帶 hash 就開第一個分頁，順序一改就跟著改 */
+const FIRST: TabId = TABS[0].id;
+
 /** 網址的 #hash 當分頁狀態，這樣分享連結可以直接開在同一頁 */
 function hashTab(): TabId {
-  if (typeof window === 'undefined') return 'sim';
+  if (typeof window === 'undefined') return FIRST;
   const h = window.location.hash.replace('#', '');
-  return TABS.some((t) => t.id === h) ? (h as TabId) : 'sim';
+  return TABS.some((t) => t.id === h) ? (h as TabId) : FIRST;
 }
 
 export default function Page() {
   const data = useAppData();
-  const [tab, setTab] = useState<TabId>('sim');
+  const [tab, setTab] = useState<TabId>(FIRST);
   const [cp, setCp] = useState<LeagueCp>(1500);
   const box = useBox();
 

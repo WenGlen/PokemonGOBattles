@@ -136,7 +136,7 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
             <dl className="pd-stats">
               <div>
                 <dt>排名</dt>
-                <dd>{st.rank ?? '—'}{st.score !== null && <small> 分 {st.score}</small>}</dd>
+                <dd>{st.rank ?? '—'}{st.score !== null && <small> 分 {st.score.toFixed(1)}</small>}</dd>
               </div>
               <div><dt>CP</dt><dd>{st.cp}</dd></div>
               <div><dt>耐久</dt><dd>{Math.round(st.bulk).toLocaleString()}</dd></div>
