@@ -9,7 +9,7 @@ import {
 } from '@/lib/analysis';
 import type { AppData, SideConfig } from '@/lib/app-data';
 import type { LeagueCp } from '@/lib/stats';
-import { TYPE_ZH } from '@/lib/typeChart';
+import { effBucket, TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type Loadout, type PokemonData } from '@/lib/types';
 
 /** 放進去的是誰的隊伍。同一份計算，但好壞相反。 */
@@ -82,10 +82,11 @@ const COPY = {
 function cellClass(mult: number, side: Side): string {
   const strong = side === 'mine' ? 'bad' : 'good';
   const weakC = side === 'mine' ? 'good' : 'bad';
-  if (mult > 1.6) return `${strong}2`;
-  if (mult > 1) return strong;
-  if (mult < 0.7) return `${weakC}2`;
-  if (mult < 1) return weakC;
+  const b = effBucket(mult);
+  if (b >= 2) return `${strong}2`;
+  if (b === 1) return strong;
+  if (b <= -2) return `${weakC}2`;
+  if (b === -1) return weakC;
   return '';
 }
 

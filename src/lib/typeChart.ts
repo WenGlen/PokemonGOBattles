@@ -55,5 +55,31 @@ export function effectiveness(moveType: string, targetTypes: string[]): number {
   return mult;
 }
 
+/**
+ * 倍率落在哪一桶：2 = 雙重被剋、1 = 被剋、0 = 普通、−1 = 抵抗、−2 = 雙重抵抗（含免疫）。
+ *
+ * 要分類一律用這個，不要自己拿倍率去跟 1 或 1.6 比大小。
+ * 上面那些常數帶著 Niantic 的浮點尾數：SUPER_EFFECTIVE 其實是
+ * 1.60000002384185791015625，於是
+ *
+ *   · 1.6 × 0.625 = 1.0000000149…  →「被剋一次又抵抗一次」的中性組合比 1 大，
+ *     被當成被剋。勾魂眼（幽靈／惡）多出來的蟲、幽靈、惡就是這樣來的，
+ *     巨沼怪（水／地面）多出來的水、冰也是。
+ *   · 1.6 > 1.6 為真 → 單純被剋會被當成雙重被剋。
+ *
+ * 尾數不能四捨五入掉（傷害 floor 之後的結果會變），所以留著常數、改比較方式：
+ * 每一桶之間的差距都很大（1.0 比 1.6、0.625 比 0.390625），
+ * 取中間值當門檻，尾數再怎麼跑都不會跨過去。
+ *
+ * @param mult effectiveness() 的輸出。不可以含本系加成——STAB 也帶著同樣的尾數。
+ */
+export function effBucket(mult: number): -2 | -1 | 0 | 1 | 2 {
+  if (mult > 2) return 2;
+  if (mult > 1.3) return 1;
+  if (mult < 0.5) return -2;
+  if (mult < 0.8) return -1;
+  return 0;
+}
+
 /** 18 屬性的中文名。唯一來源是 data/type-zh.json，抓資料腳本也讀同一份。 */
 export const TYPE_ZH: Record<string, string> = typeZh;

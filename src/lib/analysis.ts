@@ -5,7 +5,7 @@
  */
 
 import { simulate } from './battle';
-import { effectiveness, MULT, TYPE_ZH } from './typeChart';
+import { effBucket, effectiveness, MULT, TYPE_ZH } from './typeChart';
 import type { Loadout, MoveData, PokemonData } from './types';
 
 /** 一招快招的每回合傷害與每回合能量——PvP 評估快招就看這兩個數字 */
@@ -38,10 +38,11 @@ export function damageTakenBy(types: string[]): Record<string, number> {
 
 /** 倍率轉成好讀的標籤。數值直接來自 typeChart 的常數，不自己寫死。 */
 export function effLabel(mult: number): string {
-  if (mult >= MULT.SUPER_EFFECTIVE * MULT.SUPER_EFFECTIVE) return '雙重剋制';
-  if (mult > 1) return '剋制';
-  if (mult <= MULT.DOUBLE_RESISTED) return '雙重抵抗';
-  if (mult < 1) return '抵抗';
+  const b = effBucket(mult);
+  if (b >= 2) return '雙重剋制';
+  if (b === 1) return '剋制';
+  if (b <= -2) return '雙重抵抗';
+  if (b === -1) return '抵抗';
   return '普通';
 }
 
@@ -72,8 +73,8 @@ export function teamTypePressure(
     return {
       type,
       each,
-      weak: each.filter((m) => m > 1).length,
-      resist: each.filter((m) => m < 1).length,
+      weak: each.filter((m) => effBucket(m) > 0).length,
+      resist: each.filter((m) => effBucket(m) < 0).length,
       encounter: encounterByType[type] ?? 0,
     };
   });
@@ -143,7 +144,7 @@ export function moveExposure(
       move,
       rate: e.sum / meta.length,
       users: e.users,
-      hits: team.filter((p) => effectiveness(move.type, p.types) > 1).length,
+      hits: team.filter((p) => effBucket(effectiveness(move.type, p.types)) > 0).length,
     });
   }
   return out.sort((a, b) => b.rate - a.rate);
@@ -236,11 +237,11 @@ export interface DefenseProfile {
 export function defenseProfile(types: string[]): DefenseProfile {
   const out: DefenseProfile = { weak2: [], weak: [], resist: [], resist2: [] };
   for (const t of ALL_TYPES) {
-    const m = effectiveness(t, types);
-    if (m > MULT.SUPER_EFFECTIVE) out.weak2.push(t);
-    else if (m > 1) out.weak.push(t);
-    else if (m <= MULT.DOUBLE_RESISTED) out.resist2.push(t);
-    else if (m < 1) out.resist.push(t);
+    const b = effBucket(effectiveness(t, types));
+    if (b >= 2) out.weak2.push(t);
+    else if (b === 1) out.weak.push(t);
+    else if (b <= -2) out.resist2.push(t);
+    else if (b === -1) out.resist.push(t);
   }
   return out;
 }
@@ -294,8 +295,8 @@ export function offenseProfile(
   // 拿它跟 1.2 比大小，每一個「本系打中性」都會被誤判成剋制。
   return {
     best,
-    strong: ALL_TYPES.filter((t) => best[t] && best[t].eff > 1),
-    weak: ALL_TYPES.filter((t) => best[t] && best[t].eff < 1),
+    strong: ALL_TYPES.filter((t) => best[t] && effBucket(best[t].eff) > 0),
+    weak: ALL_TYPES.filter((t) => best[t] && effBucket(best[t].eff) < 0),
     coverage: [...new Set(moves.map((m) => m.type))],
   };
 }

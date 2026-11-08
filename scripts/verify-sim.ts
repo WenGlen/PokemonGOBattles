@@ -12,7 +12,8 @@ import gmJson from '../data/gamemaster.json';
 import type { GameMaster, Loadout, MoveData, PokemonData } from '../src/lib/types';
 import { simulate, damage, TURN_MS } from '../src/lib/battle';
 import { suggestedBuild } from '../src/lib/stats';
-import { effectiveness, MULT } from '../src/lib/typeChart';
+import { effBucket, effectiveness, MULT, TYPE_ZH } from '../src/lib/typeChart';
+import { defenseProfile } from '../src/lib/analysis';
 import { battleStats } from '../src/lib/stats';
 
 const gm = gmJson as unknown as GameMaster;
@@ -148,6 +149,64 @@ console.log('── A. 新系統五條規則 ──');
 }
 
 t('回合長度 500ms', TURN_MS === 500);
+
+// ── C. 屬性相剋的分桶 ──
+console.log('\n── C. 屬性相剋的分桶 ──');
+
+// 常數本身帶著 Niantic 的浮點尾數（1.6 其實是 1.60000002384…），
+// 所以分桶不能直接比大小。這一節就是守著那件事。
+{
+  const ok =
+    effBucket(MULT.SUPER_EFFECTIVE) === 1 &&
+    effBucket(MULT.RESISTED) === -1 &&
+    effBucket(MULT.DOUBLE_RESISTED) === -2 &&
+    effBucket(1) === 0 &&
+    effBucket(MULT.SUPER_EFFECTIVE * MULT.SUPER_EFFECTIVE) === 2;
+  t('單屬性倍率各自落在正確的桶', ok);
+}
+
+// 雙屬性的桶一定等於兩個單屬性的桶相加（夾在 ±2）。
+// 單屬性不經過乘法，沒有尾數問題，所以可以拿來當獨立的一份對照；
+// 乘積一旦跨過門檻（1.6 × 0.625 = 1.0000000149…）這裡就會對不上。
+{
+  const TY = Object.keys(TYPE_ZH);
+  const bad: string[] = [];
+  let checked = 0;
+  for (const atk of TY) {
+    for (let i = 0; i < TY.length; i++) {
+      for (let j = i + 1; j < TY.length; j++) {
+        const [x, y] = [TY[i], TY[j]];
+        const want = Math.max(-2, Math.min(2,
+          effBucket(effectiveness(atk, [x])) + effBucket(effectiveness(atk, [y]))));
+        const got = effBucket(effectiveness(atk, [x, y]));
+        checked++;
+        if (want !== got) bad.push(`${atk} 打 ${x}/${y}（算出 ${got}、應該 ${want}）`);
+      }
+    }
+  }
+  t('雙屬性的桶 = 兩個單屬性的桶相加', bad.length === 0,
+    `${checked} 組對照，${bad.length} 組不符${bad.length ? '：' + bad.slice(0, 4).join('、') : ''}`);
+}
+
+// 手算得出來的實例。上面那條規則對了但表本身抄錯的話，這裡會擋下來。
+{
+  const cases: { id: string; zh: string; weak2: string[]; weak: string[] }[] = [
+    { id: 'sableye', zh: '勾魂眼', weak2: [], weak: ['fairy'] },
+    { id: 'swampert', zh: '巨沼怪', weak2: ['grass'], weak: [] },
+    { id: 'melmetal', zh: '美錄梅塔', weak2: [], weak: ['fighting', 'ground', 'fire'] },
+  ];
+  const bad: string[] = [];
+  for (const c of cases) {
+    const p = monById.get(c.id);
+    if (!p) { bad.push(`${c.zh} 查無此寶可夢`); continue; }
+    const d = defenseProfile(p.types);
+    const same = (a: string[], b: string[]) => [...a].sort().join() === [...b].sort().join();
+    if (!same(d.weak2, c.weak2) || !same(d.weak, c.weak)) {
+      bad.push(`${c.zh} 被剋：雙重 [${d.weak2}]、一般 [${d.weak}]`);
+    }
+  }
+  t('手算實例的弱點一致', bad.length === 0, bad.length ? bad.join('；') : `${cases.length} 隻`);
+}
 
 // ── B. 對 pvpoke 排名的外部對帳 ──
 /** pvpoke gamemaster 的 rankingScenarios，逐字照抄 */
