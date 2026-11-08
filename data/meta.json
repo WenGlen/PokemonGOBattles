@@ -1,0 +1,124 @@
+{
+  "fetchedAt": "2026-11-08T13:29:55.215Z",
+  "gamemasterTimestamp": "2026-11-03 04:09:55",
+  "source": {
+    "url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.min.json",
+    "repo": "pvpoke/pvpoke",
+    "license": "MIT",
+    "path": "src/data/gamemaster.min.json"
+  },
+  "zhNameSources": {
+    "goEnglish": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/English.txt",
+    "goChinese": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/ChineseTraditional.txt",
+    "apiSpecies": "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species_names.csv",
+    "apiMoves": "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/move_names.csv",
+    "apiLang": "4",
+    "apiLangEn": "9"
+  },
+  "lastSourceCommit": {
+    "date": "2026-11-03T03:23:40Z",
+    "message": "Updated BF ML rankings, separated team builder prioritize meta threats and alternatives"
+  },
+  "counts": {
+    "pokemon": 1619,
+    "moves": 355
+  },
+  "changelogEntries": 39,
+  "checks": [
+    {
+      "name": "資料源可達",
+      "ok": true,
+      "detail": "pvpoke/pvpoke (MIT)"
+    },
+    {
+      "name": "有 timestamp",
+      "ok": true,
+      "detail": "2026-11-03 04:09:55"
+    },
+    {
+      "name": "資料夠新（≤14 天）",
+      "ok": true,
+      "detail": "距今 5.4 天"
+    },
+    {
+      "name": "寶可夢數量合理",
+      "ok": true,
+      "detail": "已上線 1619 隻（全部 1752）"
+    },
+    {
+      "name": "招式數量合理",
+      "ok": true,
+      "detail": "355 個招式"
+    },
+    {
+      "name": "每隻都有三圍",
+      "ok": true,
+      "detail": "全部通過"
+    },
+    {
+      "name": "屬性都在 18 種內",
+      "ok": true,
+      "detail": "全部通過"
+    },
+    {
+      "name": "招式池參照完整",
+      "ok": true,
+      "detail": "無斷鏈招式"
+    },
+    {
+      "name": "快招有 turns/能量",
+      "ok": true,
+      "detail": "98 個快招全部通過"
+    },
+    {
+      "name": "大招有能量需求",
+      "ok": true,
+      "detail": "254 個大招全部通過"
+    },
+    {
+      "name": "CP 引擎對帳（超級聯盟）",
+      "ok": true,
+      "detail": "1619 隻以 pvpoke 建議 IV 算出的 CP 全部 ≤1500"
+    },
+    {
+      "name": "排名資料：超級聯盟",
+      "ok": true,
+      "detail": "1154 筆，第一名 Melmetal（score 93.9）"
+    },
+    {
+      "name": "排名資料：高級聯盟",
+      "ok": true,
+      "detail": "851 筆，第一名 Tinkaton（score 94.3）"
+    },
+    {
+      "name": "排名資料：大師聯盟",
+      "ok": true,
+      "detail": "409 筆，第一名 Palkia (Origin)（score 98.7）"
+    },
+    {
+      "name": "型態後綴都有中文",
+      "ok": true,
+      "detail": "84 種後綴全部有對照"
+    },
+    {
+      "name": "寶可夢都有中文名",
+      "ok": true,
+      "detail": "1619 隻全部有中文名"
+    },
+    {
+      "name": "招式都有中文名",
+      "ok": true,
+      "detail": "355 個全部有中文名"
+    },
+    {
+      "name": "招式中文名沒有撞名",
+      "ok": true,
+      "detail": "355 個名字各自唯一"
+    },
+    {
+      "name": "寶可夢中文名沒有撞名",
+      "ok": true,
+      "detail": "1619 個名字各自唯一"
+    }
+  ]
+}

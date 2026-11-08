@@ -1,0 +1,56 @@
+# 每天抓一次 pvpoke 的資料，驗證過才寫檔，有變動就 commit 回來。
+#
+# 這個 repo 推到 GitHub 之後要做的事只有兩件：
+#   1. Settings → Actions → General → Workflow permissions 改成 Read and write
+#   2. 把 repo 接到 Cloudflare Pages（或任何會跟著 push 自動部署的靜態主機）
+# 之後資料就會自己更新，變動日誌也會自己長出來。
+#
+# 硬檢查失敗時這個 job 會紅燈且不會 commit——寧可停在舊資料，也不要推半套上線。
+
+name: 每日資料更新
+
+on:
+  schedule:
+    # UTC 20:30 ≈ 台灣早上 04:30。pvpoke 通常在 UTC 稍早更新。
+    - cron: '30 20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: 抓資料＋驗證＋比對變動
+        run: npm run data
+
+      - name: 型別與模擬器驗證
+        run: |
+          npm run typecheck
+          npm run verify
+
+      - name: 有變動就 commit
+        run: |
+          if git diff --quiet -- data public/data; then
+            echo "資料沒變，不 commit。" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data public/data
+          git commit -m "資料更新 $(date -u +%Y-%m-%d)"
+          git push
