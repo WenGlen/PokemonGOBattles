@@ -46,9 +46,9 @@ interface Side {
 }
 
 export type BattleEvent =
-  | { kind: 'fast'; side: SideKey; move: string; damage: number; energyGain: number; startTurn: number }
-  | { kind: 'charged'; side: SideKey; move: string; damage: number; shielded: boolean; energyCost: number; buffText?: string; cmpWin?: boolean }
-  | { kind: 'trigger'; side: SideKey; move: string; energyCost: number }
+  | { kind: 'fast'; side: SideKey; move: string; moveType: string; damage: number; energyGain: number; startTurn: number }
+  | { kind: 'charged'; side: SideKey; move: string; moveType: string; damage: number; shielded: boolean; energyCost: number; buffText?: string; cmpWin?: boolean }
+  | { kind: 'trigger'; side: SideKey; move: string; moveType: string; energyCost: number }
   | { kind: 'faint'; side: SideKey }
   | { kind: 'note'; side: SideKey | null; text: string };
 
@@ -428,7 +428,7 @@ export function simulate(la: Loadout, lb: Loadout): BattleResult {
         if (ch) {
           s.energy -= ch.energy;
           s.pendingCharged = { move: ch, triggerTurn: turn, resolveTurn: turn + 1 };
-          events.push({ kind: 'trigger', side: s.key, move: zhName(ch), energyCost: ch.energy });
+          events.push({ kind: 'trigger', side: s.key, move: zhName(ch), moveType: ch.type, energyCost: ch.energy });
         } else {
           const fm = s.loadout.fastMove;
           s.pendingFast = { move: fm, startTurn: turn, resolveTurn: turn + fm.turns - 1 };
@@ -460,6 +460,7 @@ export function simulate(la: Loadout, lb: Loadout): BattleResult {
         kind: 'charged',
         side: s.key,
         move: zhName(pc.move),
+        moveType: pc.move.type,
         damage: dealt,
         shielded,
         energyCost: pc.move.energy,
@@ -488,6 +489,7 @@ export function simulate(la: Loadout, lb: Loadout): BattleResult {
         kind: 'fast',
         side: r.s.key,
         move: zhName(r.move),
+        moveType: r.move.type,
         damage: r.dmg,
         energyGain: r.move.energyGain,
         startTurn: r.startTurn,

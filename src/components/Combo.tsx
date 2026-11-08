@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { PokemonIcon } from '@/components/Icon';
 import { zhName, type PokemonData } from '@/lib/types';
 
 /**
@@ -56,6 +57,11 @@ export default function Combo({
 
   return (
     <div className="combo" ref={boxRef}>
+      {selected && !open && (
+        <span className="combo-pic">
+          <PokemonIcon key={selected.icon} icon={selected.icon} alt={zhName(selected)} size={30} shadow={Boolean(selected.shadow)} />
+        </span>
+      )}
       <input
         type="text"
         value={open ? query : selected ? zhName(selected) : ''}
@@ -73,6 +79,7 @@ export default function Combo({
         <ul ref={listRef}>
           {filtered.map((p, i) => (
             <li key={p.id} data-active={i === active} onMouseEnter={() => setActive(i)} onClick={() => pick(p.id)}>
+              <PokemonIcon key={p.icon} icon={p.icon} alt="" size={26} shadow={Boolean(p.shadow)} />
               <span className="dex">#{String(p.dex).padStart(3, '0')}</span>
               <span>{zhName(p)}</span>
             </li>

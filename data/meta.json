@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-11-08T13:37:08.734Z",
+  "fetchedAt": "2026-11-08T15:06:50.724Z",
   "gamemasterTimestamp": "2026-11-03 04:09:55",
   "source": {
     "url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.min.json",
@@ -38,7 +38,7 @@
     {
       "name": "資料夠新（≤14 天）",
       "ok": true,
-      "detail": "距今 5.4 天"
+      "detail": "距今 5.5 天"
     },
     {
       "name": "寶可夢數量合理",
@@ -119,6 +119,21 @@
       "name": "寶可夢中文名沒有撞名",
       "ok": true,
       "detail": "1619 個名字各自唯一"
+    },
+    {
+      "name": "每隻都有圖示",
+      "ok": true,
+      "detail": "1619 隻全部對得到"
+    },
+    {
+      "name": "圖示來源分布",
+      "ok": true,
+      "detail": "GO 美術 1584 隻、PokeAPI 補 35 隻；另有 19 隻用本體圖代替（遊戲裡還沒有這個型態的美術）"
+    },
+    {
+      "name": "圖示網址抽驗",
+      "ok": true,
+      "detail": "抽 20 張全部抓得到"
     }
   ]
 }

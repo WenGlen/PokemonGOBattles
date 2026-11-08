@@ -6,6 +6,8 @@ export interface PokemonData {
   name: string;
   /** 中文名，由抓資料腳本掛上（見 scripts/fetch-data.mjs 的「寶可夢都有中文名」檢查） */
   zh: string;
+  /** 圖示識別碼，例如 go:pm487.fORIGIN 或 home:778；見 src/lib/icons.ts */
+  icon: string;
   types: string[];
   /** [攻擊, 防禦, HP] 種族值 */
   stats: [number, number, number];

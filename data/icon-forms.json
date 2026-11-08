@@ -1,0 +1,44 @@
+{
+  "_說明": [
+    "pvpoke 的型態後綴 → Pokémon GO 資產檔名裡的 form 代碼。",
+    "檔名規則是 pm{圖鑑編號}[.f{FORM}].icon.png，form 代碼是 Niantic 自己的英文列舉，",
+    "大多數情況把後綴轉大寫就對得上（Therian → THERIAN），這裡只收對不上的。",
+    "值是候選陣列，依序試；空陣列代表這個後綴在資產裡沒有對應，直接退回該species的基本圖。",
+    "解析順序與退回規則見 scripts/lib/icons.mjs。"
+  ],
+  "後綴": {
+    "Alolan": ["ALOLA"],
+    "Paldean": ["PALDEA"],
+    "Aqua": ["PALDEA_AQUA"],
+    "Blaze": ["PALDEA_BLAZE"],
+    "Combat": ["PALDEA_COMBAT"],
+    "Galarian": ["GALARIAN", "GALARIAN_STANDARD"],
+    "Sunshine": ["SUNNY"],
+    "Armored": ["A"],
+    "Jr": [],
+    "10% Forme": ["TEN_PERCENT"],
+    "50% Forme": ["FIFTY_PERCENT"],
+    "Complete Forme": ["COMPLETE"],
+    "Pom-Pom": ["POMPOM"],
+    "Pa'u": ["PAU"],
+    "5th Anniversary": ["FLYING_5TH_ANNIV"],
+    "Flying": ["FLYING_01"],
+    "Libre": ["LIBRE", "COSTUME_1"],
+    "Pop Star": ["POP_STAR"],
+    "Rock Star": ["ROCK_STAR"],
+    "Shaymin Scarf": ["SHAYMIN_SCARF"],
+    "Horizons": ["HORIZONS"],
+    "Kariyushi": ["KARIYUSHI"]
+  },
+  "預設型態": {
+    "_說明": "沒有括號後綴、但資產裡也沒有 pm{dex}.icon.png 的 species，指定要用哪一個型態當代表圖。",
+    "201": "UNOWN_A",
+    "327": "00",
+    "422": "WEST_SEA",
+    "423": "WEST_SEA",
+    "550": "RED_STRIPED",
+    "585": "SPRING",
+    "586": "SPRING",
+    "666": "MEADOW"
+  }
+}

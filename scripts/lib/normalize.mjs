@@ -164,9 +164,10 @@ export const released = (gm) => (gm.pokemon ?? []).filter((p) => p.released);
  * 把 pvpoke 的 gamemaster 瘦身成前端要的格式，順便掛上中文名。
  * @param {object} gm pvpoke gamemaster.min.json
  * @param {ReturnType<typeof buildZh>} zh
+ * @param {((p: object) => {icon: string}) | null} [icon] 圖示解析器；回填歷史時不需要，傳 null
  * @returns {{timestamp: string, pokemon: object[], moves: object[]}}
  */
-export function normalizeBundle(gm, zh) {
+export function normalizeBundle(gm, zh, icon = null) {
   const moveById = new Map((gm.moves ?? []).map((m) => [m.moveId, m]));
   const moveNames = zhMoveNames(gm.moves ?? [], zh);
   const mons = released(gm);
@@ -181,6 +182,8 @@ export function normalizeBundle(gm, zh) {
       dex: p.dex,
       name: p.speciesName,
       zh: zh.zhPokemon(p),
+      /** 圖示識別碼，例如 go:pm487.fORIGIN 或 home:778；見 scripts/lib/icons.mjs */
+      icon: icon ? icon({ dex: p.dex, name: p.speciesName }).icon : undefined,
       types: p.types.filter((t) => t !== 'none'),
       stats: [p.baseStats.atk, p.baseStats.def, p.baseStats.hp],
       fast: p.fastMoves,

@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { SOURCES, TYPES, fetchJson, calcCP } from './lib/sources.mjs';
 import { fetchZhNames, zhMoveNames, normalizeBundle, normalizeRankings } from './lib/normalize.mjs';
 import { diffBundles, diffRankings, isNotable, describe } from './lib/diff.mjs';
+import { fetchIconFileList, buildIconResolver, iconFor, iconUrl } from './lib/icons.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = join(ROOT, 'data');
@@ -79,6 +80,11 @@ async function main() {
   const { zhPokemon, zhMove, parens, formZh } = zh;
   console.log(`  GO 文字檔            ${zh.stats.goTexts} 條（繁中）`);
   console.log(`  中文名對照表          寶可夢 ${zh.stats.dexZh} 筆（PokeAPI 補 ${zh.stats.dexFromApi}）、招式 ${zh.stats.moveZh} 筆（PokeAPI 補 ${zh.stats.moveFromApi}）`);
+
+  const iconFiles = await fetchIconFileList();
+  const resolveIcon = buildIconResolver(iconFiles, JSON.parse(readFileSync(join(DATA_DIR, 'icon-forms.json'), 'utf8')));
+  const icon = (p) => iconFor(resolveIcon, p);
+  console.log(`  圖示資產清單          ${iconFiles.length} 個檔`);
 
   // ── 2. 驗證 ────────────────────────────────────────────────
   const moveById = new Map((gm.moves ?? []).map((m) => [m.moveId, m]));
@@ -199,6 +205,46 @@ async function main() {
     dupes.length ? `${dupes.length} 組重複：${dupes.slice(0, 3)}` : `${seen.size} 個名字各自唯一`
   );
 
+  // 圖示：每一隻都要指到某張圖，不能有空的格子
+  const iconResults = mons.map((p) => ({ p, r: icon({ dex: p.dex, name: p.speciesName }) }));
+  const noIcon = iconResults.filter((x) => !x.r.icon);
+  check(
+    '每隻都有圖示',
+    noIcon.length === 0,
+    noIcon.length ? `${noIcon.length} 隻沒有：${noIcon.slice(0, 5).map((x) => x.p.speciesName)}` : `${iconResults.length} 隻全部對得到`
+  );
+
+  const fromHome = iconResults.filter((x) => x.r.source === 'home');
+  const inexact = iconResults.filter((x) => x.r.source === 'go' && !x.r.exact);
+  check(
+    '圖示來源分布',
+    true,
+    `GO 美術 ${iconResults.length - fromHome.length} 隻、PokeAPI 補 ${fromHome.length} 隻；` +
+      `另有 ${inexact.length} 隻用本體圖代替（遊戲裡還沒有這個型態的美術）`,
+    false
+  );
+
+  // 抽驗真的抓得到。1619 張全驗太慢，固定間隔抽樣讓結果可重現。
+  // 張數不能太少：CDN 的失效是零星的（個別檔案 403），抽 20 張會漏掉。
+  const SAMPLE_N = 60;
+  const step = Math.ceil(iconResults.length / SAMPLE_N);
+  const sample = iconResults.filter((_, i) => i % step === 0).slice(0, SAMPLE_N);
+  const badUrls = [];
+  await Promise.all(sample.map(async (x) => {
+    try {
+      const res = await fetch(iconUrl(x.r.icon), { method: 'HEAD' });
+      if (!res.ok) badUrls.push(`${x.p.speciesName}=${res.status}`);
+    } catch (err) {
+      badUrls.push(`${x.p.speciesName}=${err.message}`);
+    }
+  }));
+  check(
+    '圖示網址抽驗',
+    badUrls.length === 0,
+    badUrls.length ? `${badUrls.length}/${sample.length} 抓不到：${badUrls.slice(0, 3)}` : `抽 ${sample.length} 張全部抓得到`,
+    false
+  );
+
   // ── 3. 報告 ────────────────────────────────────────────────
   console.log('\n─── 驗證結果 ───');
   const pad = Math.max(...checks.map((c) => [...c.name].reduce((n, ch) => n + (ch.charCodeAt(0) > 255 ? 2 : 1), 0)));
@@ -214,7 +260,7 @@ async function main() {
   }
 
   // ── 4. 正規化瘦身 ──────────────────────────────────────────
-  const bundle = normalizeBundle(gm, zh);
+  const bundle = normalizeBundle(gm, zh, icon);
   const outRankings = normalizeRankings(rankings);
 
   // ── 5. 跟上一版比對 ────────────────────────────────────────

@@ -241,3 +241,57 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   .cg-group { grid-template-columns: 1fr; gap: 1px; }
   .cg-label { font-weight: 600; }
 }
+
+/* ── 圖示 ──────────────────────────────────────────── */
+.pic { display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.pic img { object-fit: contain; display: block; }
+/* 遊戲裡暗影用的是本體的圖，自己補一圈紫光才分得出來 */
+.pic.shadow { border-radius: 50%; box-shadow: 0 0 0 2px color-mix(in srgb, #a855f7 70%, transparent); background: color-mix(in srgb, #a855f7 14%, transparent); }
+
+.tic { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+/* 圖示載入前先用屬性色的圓點墊著，避免版面跳動 */
+.tic-dot { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; flex: none; }
+.tic-dot img { display: block; border-radius: 50%; }
+
+.chip.type { display: inline-flex; align-items: center; gap: 4px; padding-left: 4px; }
+
+.combo { position: relative; display: flex; align-items: center; }
+.combo-pic { position: absolute; left: 8px; pointer-events: none; }
+.combo input { transition: padding-left .12s ease; }
+.combo:has(.combo-pic) input { padding-left: 44px; }
+.combo li { display: flex; align-items: center; gap: 7px; }
+
+.panel h2 { display: flex; align-items: center; gap: 8px; }
+
+/* ── 招式選單 ──────────────────────────────────────── */
+.mp { position: relative; }
+.mp-btn {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface-2); color: var(--text); font: inherit; font-size: 13px;
+  cursor: pointer; text-align: left;
+}
+.mp-btn:hover { border-color: var(--accent); }
+.mp-btn[aria-expanded='true'] { border-color: var(--accent); }
+.mp-name { font-weight: 500; white-space: nowrap; }
+.mp-empty { color: var(--muted); font-weight: 400; }
+.mp-num { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mp-chev { margin-left: auto; color: var(--muted); font-size: 10px; }
+
+.mp ul {
+  position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0;
+  margin: 0; padding: 4px; list-style: none; max-height: 260px; overflow: auto;
+  background: var(--surface); border: 1px solid var(--accent); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+}
+.mp li {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+.mp li[data-active='true'] { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.mp li[aria-selected='true'] .mp-name { color: var(--accent); }
+.mp li .mp-num { margin-left: auto; }
+
+.act .tic { margin-right: -2px; }
+.act .tag .tic { margin-right: 3px; }
+.cg-chip { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }

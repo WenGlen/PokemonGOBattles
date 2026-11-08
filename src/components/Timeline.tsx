@@ -1,5 +1,6 @@
 'use client';
 
+import { TypeIcon } from '@/components/Icon';
 import type { BattleResult, SideKey, TurnRecord } from '@/lib/battle';
 
 /** HP 或能量的小長條 */
@@ -22,6 +23,7 @@ function Act({ turn, side }: { turn: TurnRecord; side: SideKey }) {
     if (e.kind === 'fast') {
       return (
         <span key={i} style={{ display: 'contents' }}>
+          {e.moveType && <TypeIcon type={e.moveType} size={13} />}
           <span className="nm">{e.move}</span>
           <span className={`dmg ${color}`}>−{e.damage}</span>
           <span className="prog">⚡+{e.energyGain}</span>
@@ -29,11 +31,16 @@ function Act({ turn, side }: { turn: TurnRecord; side: SideKey }) {
       );
     }
     if (e.kind === 'trigger') {
-      return <span key={i} className="tag">按下 {e.move}</span>;
+      return (
+        <span key={i} className="tag">
+          {e.moveType && <TypeIcon type={e.moveType} size={12} />}按下 {e.move}
+        </span>
+      );
     }
     if (e.kind === 'charged') {
       return (
         <span key={i} style={{ display: 'contents' }}>
+          {e.moveType && <TypeIcon type={e.moveType} size={13} />}
           <span className="nm">💥 {e.move}</span>
           {e.shielded ? <span className="tag shield">被擋</span> : <span className={`dmg ${color}`}>−{e.damage}</span>}
           {e.cmpWin && <span className="tag cmp">CMP 搶先</span>}

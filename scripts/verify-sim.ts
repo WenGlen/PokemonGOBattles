@@ -29,7 +29,7 @@ function t(name: string, ok: boolean, detail = '') {
 
 /** 造一個測試用的假寶可夢，方便隔離單一規則 */
 function dummy(id: string, types: string[], stats: [number, number, number]): PokemonData {
-  return { id, dex: 0, name: id, zh: id, types, stats, fast: [], charged: [] };
+  return { id, dex: 0, name: id, zh: id, icon: 'go:pm0', types, stats, fast: [], charged: [] };
 }
 function fastMove(id: string, type: string, power: number, gain: number, turns: number): MoveData {
   return { id, name: id, zh: id, type, power, energy: 0, energyGain: gain, turns };

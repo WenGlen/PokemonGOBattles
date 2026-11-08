@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import Combo from '@/components/Combo';
 import TimelineView from '@/components/Timeline';
 import ChangelogView from '@/components/Changelog';
+import MovePicker from '@/components/MovePicker';
+import { PokemonIcon, TypeIcon } from '@/components/Icon';
 import { simulate } from '@/lib/battle';
 import { LEAGUES, battleStats, suggestedBuild, type LeagueCp } from '@/lib/stats';
 import { TYPE_ZH } from '@/lib/typeChart';
@@ -217,42 +219,41 @@ function SidePanel({
 
   return (
     <div className={`panel ${cls}`}>
-      <h2>{title}</h2>
+      <h2>
+        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={34} shadow={Boolean(p.shadow)} />
+        {title}
+      </h2>
       <div className="field">
         <Combo list={list} value={cfg.id} onChange={(id) => set(defaultsFor(id))} />
       </div>
       <div className="chips" style={{ marginBottom: 9 }}>
-        {p.types.map((t) => <span key={t} className="chip">{TYPE_ZH[t] ?? t}</span>)}
+        {p.types.map((t) => <span key={t} className="chip type"><TypeIcon type={t} size={15} label /></span>)}
         {p.shadow && <span className="chip">暗影</span>}
       </div>
 
       <div className="field">
-        <label>快招{fm ? `（${fm.turns} 回合 · 能量 +${fm.energyGain}）` : ''}</label>
-        <select value={cfg.fast} onChange={(e) => set({ ...cfg, fast: e.target.value })}>
-          {p.fast.map((id) => {
-            const m = moveById.get(id);
-            return <option key={id} value={id}>{m ? zhName(m) : id}{m ? ` · ${m.power}力 ${m.turns}回合 +${m.energyGain}` : ''}</option>;
-          })}
-        </select>
+        <label>快招</label>
+        <MovePicker
+          fast
+          moves={p.fast.map((id) => moveById.get(id)).filter(Boolean) as MoveData[]}
+          value={cfg.fast}
+          onChange={(id) => id && set({ ...cfg, fast: id })}
+        />
       </div>
 
       {[0, 1].map((slot) => (
         <div className="field" key={slot}>
           <label>大招 {slot + 1}</label>
-          <select
-            value={cfg.charged[slot] ?? ''}
-            onChange={(e) => {
+          <MovePicker
+            allowEmpty={slot === 1}
+            moves={p.charged.map((id) => moveById.get(id)).filter(Boolean) as MoveData[]}
+            value={cfg.charged[slot]}
+            onChange={(id) => {
               const next: [string, string | null] = [...cfg.charged] as [string, string | null];
-              next[slot] = e.target.value || null;
+              next[slot] = id;
               set({ ...cfg, charged: next });
             }}
-          >
-            {slot === 1 && <option value="">（不帶第二招）</option>}
-            {p.charged.map((id) => {
-              const m = moveById.get(id);
-              return <option key={id} value={id}>{m ? zhName(m) : id}{m ? ` · ${m.power}力 ${m.energy}能量` : ''}</option>;
-            })}
-          </select>
+          />
         </div>
       ))}
 

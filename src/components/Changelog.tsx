@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { TypeIcon } from '@/components/Icon';
 import { TYPE_ZH } from '@/lib/typeChart';
 import type { Changelog, ChangelogEntry, FieldChange, MoveChange, MovesetChange, StatChange, TypeChange } from '@/lib/types';
 
@@ -44,6 +45,7 @@ function MoveChangeRow({ m }: { m: MoveChange }) {
   return (
     <div className="cg-item">
       <span className={`cg-dir ${dir === '⬆' ? 'up' : dir === '⬇' ? 'down' : ''}`}>{dir}</span>
+      <TypeIcon type={m.type} size={13} />
       <b>{m.zh}</b>
       {m.fields.map((f) => (
         <span key={f.key} className="cg-delta">
@@ -108,12 +110,22 @@ function Entry({ e }: { e: ChangelogEntry }) {
       )}
       {c.movesAdded > 0 && (
         <Group label="新招式">
-          <div className="cg-item">{e.moves.added.items.map((m) => m.zh).join('、')}<More n={e.moves.added.more} /></div>
+          <div className="cg-item">
+            {e.moves.added.items.map((m) => (
+              <span key={m.id} className="cg-chip"><TypeIcon type={m.type} size={13} />{m.zh}</span>
+            ))}
+            <More n={e.moves.added.more} />
+          </div>
         </Group>
       )}
       {c.movesRemoved > 0 && (
         <Group label="移除招式">
-          <div className="cg-item">{e.moves.removed.items.map((m) => m.zh).join('、')}<More n={e.moves.removed.more} /></div>
+          <div className="cg-item">
+            {e.moves.removed.items.map((m) => (
+              <span key={m.id} className="cg-chip"><TypeIcon type={m.type} size={13} />{m.zh}</span>
+            ))}
+            <More n={e.moves.removed.more} />
+          </div>
         </Group>
       )}
       {c.statChanged > 0 && (
