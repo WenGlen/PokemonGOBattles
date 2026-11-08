@@ -120,7 +120,7 @@ async function main() {
     .sort((a, b) => (a.to < b.to ? 1 : -1))
     .slice(0, 200);
 
-  const out = JSON.stringify({ entries: merged, updatedAt: new Date().toISOString() });
+  const out = JSON.stringify({ entries: merged });
   mkdirSync(PUBLIC_DIR, { recursive: true });
   writeFileSync(existingPath, out);
   writeFileSync(join(PUBLIC_DIR, 'changelog.json'), out);

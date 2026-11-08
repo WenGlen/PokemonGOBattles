@@ -6,6 +6,8 @@
 # 之後資料就會自己更新，變動日誌也會自己長出來。
 #
 # 硬檢查失敗時這個 job 會紅燈且不會 commit——寧可停在舊資料，也不要推半套上線。
+# 模擬器驗證（含對 pvpoke 官方對位結果 75% 門檻）也擋在 commit 之前，
+# 所以資料源改動大到讓模擬偏掉的時候，會是紅燈而不是默默吃下去。
 
 name: 每日資料更新
 
@@ -38,15 +40,19 @@ jobs:
       - name: 抓資料＋驗證＋比對變動
         run: npm run data
 
-      - name: 型別與模擬器驗證
-        run: |
-          npm run typecheck
-          npm run verify
+      - name: 模擬器驗證
+        run: npm run verify
+
+      - name: 確認新資料還建得起來
+        run: npm run build
 
       - name: 有變動就 commit
         run: |
-          if git diff --quiet -- data public/data; then
-            echo "資料沒變，不 commit。" >> "$GITHUB_STEP_SUMMARY"
+          # meta.json 每次都會變（抓取時間、距今幾天），不能拿它判斷資料有沒有動，
+          # 否則每天都會多一個什麼都沒改的 commit。
+          if git diff --quiet -- data/gamemaster.json data/rankings.json data/changelog.json; then
+            echo '資料沒變，不 commit。' >> "$GITHUB_STEP_SUMMARY"
+            git checkout -- data public/data
             exit 0
           fi
           git config user.name  'github-actions[bot]'

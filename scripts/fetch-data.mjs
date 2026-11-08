@@ -256,9 +256,9 @@ async function main() {
   // ── 6. 寫出 ────────────────────────────────────────────────
   const bundleJson = JSON.stringify(bundle);
   const rankingsJson = JSON.stringify(outRankings);
-  changelog.entries = changelog.entries.slice(0, 200);
-  changelog.updatedAt = new Date().toISOString();
-  const changelogJson = JSON.stringify(changelog);
+  // 刻意不放「更新時間」這種每次都會變的欄位：日誌沒變的日子檔案就該一模一樣，
+  // 排程才判斷得出來今天到底有沒有東西要 commit。抓取時間放在 meta.json。
+  const changelogJson = JSON.stringify({ entries: changelog.entries.slice(0, 200) });
 
   const meta = {
     fetchedAt: new Date().toISOString(),

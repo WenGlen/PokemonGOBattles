@@ -183,5 +183,4 @@ export interface ChangelogEntry {
 
 export interface Changelog {
   entries: ChangelogEntry[];
-  updatedAt?: string;
 }
