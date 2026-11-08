@@ -96,7 +96,7 @@ export default function MoveTable({ data }: { data: AppData }) {
             setSort({ key: k === 'fast' ? 'ept' : 'dpe', dir: -1 });
           }}>{label}</button>
         ))}
-        <select value={type} onChange={(e) => setType(e.target.value)}>
+        <select value={type} data-on={type ? 'true' : undefined} onChange={(e) => setType(e.target.value)}>
           <option value="">所有屬性</option>
           {ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_ZH[t]}</option>)}
         </select>

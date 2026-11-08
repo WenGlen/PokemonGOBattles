@@ -7,7 +7,7 @@ import PokemonDetail from '@/components/PokemonDetail';
 import { ALL_TYPES, buildTagContext, fastRates } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
 import { battleStats, suggestedBuild, type LeagueCp } from '@/lib/stats';
-import { TYPE_ZH } from '@/lib/typeChart';
+import { effBucket, effectiveness, TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type PokemonData } from '@/lib/types';
 
 type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
@@ -35,14 +35,19 @@ interface Row {
  *
  * 右邊對齊是為了跟右對齊的數字共用同一條邊，掃一眼就比得出長短；
  * 最小留 2% 才不會讓小數值看起來像沒有。
+ * 每 20% 換一個顏色（紅→橙→黃→黃綠→綠），長度相近時用顏色補一刀；
+ * 顏色是長度的重複編碼，不是唯一資訊，所以色覺差異不影響判讀。
  *
  * @param v 這一列的值
  * @param max 這一欄目前的最大值
  */
 function Bar({ v, max }: { v: number; max: number }) {
+  const ratio = v / max;
+  // [0,20) 是第 1 段…[80,100] 是第 5 段；剛好 100% 會算成第 6 段，夾回來
+  const band = Math.min(5, Math.floor(ratio * 5) + 1);
   return (
     <span className="bar" aria-hidden="true">
-      <i style={{ width: `${Math.max(2, (v / max) * 100).toFixed(1)}%` }} />
+      <i className={`b${band}`} style={{ width: `${Math.max(2, ratio * 100).toFixed(1)}%` }} />
     </span>
   );
 }
@@ -60,6 +65,8 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
   const [q, setQ] = useState('');
   const [type, setType] = useState('');
   const [onlyRanked, setOnlyRanked] = useState(true);
+  /** 擅長抵抗：只留挨這個屬性的招式會被減傷的那些（×0.63 或 ×0.39） */
+  const [resist, setResist] = useState('');
   const [sort, setSort] = useState<Sort<Key>>({ key: 'rank', dir: 1 });
   const [picked, setPicked] = useState<string[]>([]);
   const deckRef = useRef<HTMLDivElement>(null);
@@ -113,6 +120,7 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
     const filtered = rows.filter((r) =>
       (!onlyRanked || r.rank !== null) &&
       (!type || r.p.types.includes(type)) &&
+      (!resist || effBucket(effectiveness(resist, r.p.types)) < 0) &&
       (!needle || zhName(r.p).includes(needle) || r.p.name.toLowerCase().includes(needle) || String(r.p.dex) === needle)
     );
     return filtered.sort((a, b) => {
@@ -128,7 +136,7 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
       } else c = (a[sort.key] as number) - (b[sort.key] as number);
       return c * sort.dir;
     });
-  }, [rows, q, type, onlyRanked, sort]);
+  }, [rows, q, type, resist, onlyRanked, sort]);
 
   /** 長條圖的基準：拿目前這張表看得到的那一批比，換聯盟或篩選就跟著重算 */
   const max = useMemo(() => ({
@@ -185,13 +193,23 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
 
       <div className="tbl-wrap">
         <div className="tbl-bar">
-          <select value={type} onChange={(e) => setType(e.target.value)}>
+          <select value={type} data-on={type ? 'true' : undefined} onChange={(e) => setType(e.target.value)}>
             <option value="">所有屬性</option>
             {ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_ZH[t]}</option>)}
           </select>
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋寶可夢（中文、英文或圖鑑編號）…" />
           <button aria-pressed={onlyRanked} onClick={() => setOnlyRanked((v) => !v)}>只看上榜的</button>
-          <span className="hint">{shown.length} 隻 · 點一列看解析（最多兩隻）</span>
+          {/* 挑換上去能擋住對手主力的那一隻用的：只留挨這個屬性會減傷的 */}
+          <select
+            className="pick-right"
+            value={resist}
+            data-on={resist ? 'true' : undefined}
+            title="只留挨這個屬性的招式會被減傷的寶可夢"
+            onChange={(e) => setResist(e.target.value)}
+          >
+            <option value="">擅長抵抗…</option>
+            {ALL_TYPES.map((t) => <option key={t} value={t}>擅長抵抗 {TYPE_ZH[t]}</option>)}
+          </select>
         </div>
 
         <div className="tbl-scroll">
