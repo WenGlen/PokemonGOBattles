@@ -569,7 +569,10 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 等級、IV、快招、兩個大招都在同一行；放不下才換行（窄視窗、手機） */
 .bx-edit { display: flex; align-items: center; gap: 9px 12px; flex-wrap: wrap; padding: 3px 2px 5px; }
 .bx-build { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.bx-edit .field { flex: 1 1 170px; margin-bottom: 0; min-width: 0; }
+.bx-edit .field { flex: 1 1 170px; gap: 6px; margin-bottom: 0; min-width: 0; }
+/* 面板裡的標籤要固定寬度才對得成一欄，這裡是橫著排的，固定寬度只會在
+   標籤與選單之間多出一截空白，看起來像分成兩段。改成貼著字走 */
+.bx-edit .field > label { width: auto; }
 /* 兩個大招共用一個標籤，所以這一格要兩倍寬 */
 .bx-edit .field.two { flex: 2 1 340px; }
 .mp-pair { flex: 1; min-width: 0; display: flex; gap: 8px; }
