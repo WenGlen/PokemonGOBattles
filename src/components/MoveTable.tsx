@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import { TypeIcon } from '@/components/Icon';
 import SortHead, { type Sort } from '@/components/SortHead';
-import { ALL_TYPES, dpe, fastRates, isFast } from '@/lib/analysis';
+import TypePicker from '@/components/TypePicker';
+import { dpe, fastRates, isFast } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
 import { TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type MoveData } from '@/lib/types';
@@ -96,10 +97,7 @@ export default function MoveTable({ data }: { data: AppData }) {
             setSort({ key: k === 'fast' ? 'ept' : 'dpe', dir: -1 });
           }}>{label}</button>
         ))}
-        <select value={type} data-on={type ? 'true' : undefined} onChange={(e) => setType(e.target.value)}>
-          <option value="">所有屬性</option>
-          {ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_ZH[t]}</option>)}
-        </select>
+        <TypePicker value={type} onChange={setType} anyLabel="所有屬性" title="只看這個屬性的招式" />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋招式（中文或英文）…" />
         <span className="hint">{shown.length} 招</span>
       </div>

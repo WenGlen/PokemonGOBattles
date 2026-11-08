@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PokemonIcon, TypeIcon } from '@/components/Icon';
 import SortHead, { type Sort } from '@/components/SortHead';
+import TypePicker from '@/components/TypePicker';
 import PokemonDetail from '@/components/PokemonDetail';
-import { ALL_TYPES, buildTagContext, fastRates } from '@/lib/analysis';
+import { buildTagContext, fastRates } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
+import type { Box } from '@/lib/collection';
 import { battleStats, suggestedBuild, type LeagueCp } from '@/lib/stats';
-import { effBucket, effectiveness, TYPE_ZH } from '@/lib/typeChart';
+import { effBucket, effectiveness } from '@/lib/typeChart';
 import { zhName, type PokemonData } from '@/lib/types';
 
 type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
@@ -61,7 +63,7 @@ function Bar({ v, max }: { v: number; max: number }) {
  * 點一列會把那隻攤成一張卡，放在表格上面而不是插在列中間：
  * 卡片不跟著列表捲動，所以可以一邊翻表一邊對照，最多同時放兩隻比較。
  */
-export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp }) {
+export default function PokemonTable({ data, cp, box }: { data: AppData; cp: LeagueCp; box: Box }) {
   const [q, setQ] = useState('');
   const [type, setType] = useState('');
   const [onlyRanked, setOnlyRanked] = useState(true);
@@ -193,23 +195,20 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
 
       <div className="tbl-wrap">
         <div className="tbl-bar">
-          <select value={type} data-on={type ? 'true' : undefined} onChange={(e) => setType(e.target.value)}>
-            <option value="">所有屬性</option>
-            {ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_ZH[t]}</option>)}
-          </select>
+          <TypePicker value={type} onChange={setType} anyLabel="所有屬性" title="只看這個屬性的寶可夢" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋寶可夢（中文、英文或圖鑑編號）…" />
           <button aria-pressed={onlyRanked} onClick={() => setOnlyRanked((v) => !v)}>只看上榜的</button>
           {/* 挑換上去能擋住對手主力的那一隻用的：只留挨這個屬性會減傷的 */}
-          <select
-            className="pick-right"
-            value={resist}
-            data-on={resist ? 'true' : undefined}
-            title="只留挨這個屬性的招式會被減傷的寶可夢"
-            onChange={(e) => setResist(e.target.value)}
-          >
-            <option value="">擅長抵抗…</option>
-            {ALL_TYPES.map((t) => <option key={t} value={t}>擅長抵抗 {TYPE_ZH[t]}</option>)}
-          </select>
+          <div className="pick-right">
+            <TypePicker
+              value={resist}
+              onChange={setResist}
+              anyLabel="擅長抵抗…"
+              label={(zh) => `抵抗 ${zh}`}
+              wide
+              title="只留挨這個屬性的招式會被減傷的寶可夢"
+            />
+          </div>
         </div>
 
         <div className="tbl-scroll">
@@ -224,6 +223,7 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
                 <SortHead k="hp" sort={sort} setSort={setSort}>HP</SortHead>
                 <SortHead k="bulk" sort={sort} setSort={setSort} title="防禦 × HP，越大越耐打">耐久</SortHead>
                 <th className="left">推薦招式</th>
+                <th title="加進我的箱子" />
               </tr>
             </thead>
             <tbody>
@@ -258,6 +258,22 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
                             return m ? <span key={id} className="mv"><TypeIcon type={m.type} size={12} />{zhName(m)}</span> : null;
                           })
                         : '—'}
+                    </td>
+                    <td className="num">
+                      {/* 先用這個聯盟的建議個體加進去，之後到箱子裡改成自己的等級與 IV */}
+                      <button
+                        className={`bx-btn${box.has(r.p.id) ? ' on' : ''}`}
+                        title={box.has(r.p.id) ? '已經在箱子裡，按一下移除' : '加進我的箱子（之後可以改成你自己的等級與 IV）'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (box.has(r.p.id)) { box.remove(r.p.id); return; }
+                          const b = suggestedBuild(r.p, cp);
+                          const d = data.defaultsFor(r.p.id, cp);
+                          box.add({ id: r.p.id, level: b.level, ivs: b.ivs, fast: d.fast, charged: d.charged, added: Date.now() });
+                        }}
+                      >
+                        {box.has(r.p.id) ? '✓' : '＋'}
+                      </button>
                     </td>
                   </tr>
                 );

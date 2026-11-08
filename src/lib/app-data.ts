@@ -33,8 +33,17 @@ export interface AppData {
   listFor: (cp: LeagueCp) => PokemonData[];
   /** 用 pvpoke 推薦的招式組當預設 */
   defaultsFor: (id: string, cp: LeagueCp) => SideConfig;
-  /** 設定轉成模擬器吃的 Loadout，資料不全時回 null */
-  toLoadout: (cfg: SideConfig, cp: LeagueCp, strategy: 'optimal' | 'energy') => Loadout | null;
+  /**
+   * 設定轉成模擬器吃的 Loadout，資料不全時回 null。
+   * @param build 指定等級與 IV；不給就用 pvpoke 在這個聯盟的建議個體。
+   *   箱子裡的那幾隻要用你自己的數值，所以要帶這個。
+   */
+  toLoadout: (
+    cfg: SideConfig,
+    cp: LeagueCp,
+    strategy: 'optimal' | 'energy',
+    build?: { level: number; ivs: [number, number, number] }
+  ) => Loadout | null;
 }
 
 /**
@@ -94,16 +103,21 @@ export function useAppData(): AppData | null {
       return { id, fast, charged: [c1, c2], shields: 1 };
     };
 
-    const toLoadout = (cfg: SideConfig, cp: LeagueCp, strategy: 'optimal' | 'energy'): Loadout | null => {
+    const toLoadout = (
+      cfg: SideConfig,
+      cp: LeagueCp,
+      strategy: 'optimal' | 'energy',
+      build?: { level: number; ivs: [number, number, number] }
+    ): Loadout | null => {
       const p = monById.get(cfg.id);
       const fm = moveById.get(cfg.fast);
       if (!p || !fm) return null;
       const cms = cfg.charged.map((id) => (id ? moveById.get(id) : null)).filter(Boolean) as MoveData[];
       if (!cms.length) return null;
-      const build = suggestedBuild(p, cp);
+      const b = build ?? suggestedBuild(p, cp);
       return {
         pokemon: p, fastMove: fm, chargedMoves: cms,
-        level: build.level, ivs: build.ivs, shields: cfg.shields,
+        level: b.level, ivs: b.ivs, shields: cfg.shields,
         shadow: Boolean(p.shadow), strategy,
       };
     };

@@ -1,19 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import BoxTab from '@/components/BoxTab';
 import ChangelogView from '@/components/Changelog';
 import Simulator from '@/components/Simulator';
 import MoveTable from '@/components/MoveTable';
 import PokemonTable from '@/components/PokemonTable';
 import TeamTable from '@/components/TeamTable';
 import { useAppData } from '@/lib/app-data';
+import { useBox } from '@/lib/collection';
 import { LEAGUES, type LeagueCp } from '@/lib/stats';
+import type { PokemonData } from '@/lib/types';
 
 const TABS = [
   { id: 'sim', label: '模擬器', league: true },
   { id: 'moves', label: '招式表', league: false },
   { id: 'pokemon', label: '寶可夢表', league: true },
   { id: 'team', label: '對戰組合表', league: true },
+  { id: 'box', label: '我的箱子', league: true },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -29,6 +33,7 @@ export default function Page() {
   const data = useAppData();
   const [tab, setTab] = useState<TabId>('sim');
   const [cp, setCp] = useState<LeagueCp>(1500);
+  const box = useBox();
 
   // 開啟時讀網址，之後跟著上一頁／下一頁走
   useEffect(() => {
@@ -48,6 +53,8 @@ export default function Page() {
   }
 
   const { meta, log } = data;
+  /** 箱子裡那幾隻的完整資料，變動日誌要用它標出「打到你頭上」的那幾版 */
+  const owned = box.list.map((o) => data.monById.get(o.id)).filter(Boolean) as PokemonData[];
   const okCount = meta.checks.filter((c) => c.ok).length;
   const showLeague = TABS.find((t) => t.id === tab)?.league ?? false;
 
@@ -85,10 +92,11 @@ export default function Page() {
 
       {tab === 'sim' && <Simulator data={data} cp={cp} />}
       {tab === 'moves' && <MoveTable data={data} />}
-      {tab === 'pokemon' && <PokemonTable data={data} cp={cp} />}
+      {tab === 'pokemon' && <PokemonTable data={data} cp={cp} box={box} />}
       {tab === 'team' && <TeamTable data={data} cp={cp} />}
+      {tab === 'box' && <BoxTab data={data} cp={cp} box={box} />}
 
-      {log && log.entries.length > 0 && <ChangelogView log={log} />}
+      {log && log.entries.length > 0 && <ChangelogView log={log} owned={owned} />}
 
       <div className="foot">
         資料源 <a href="https://github.com/pvpoke/pvpoke" target="_blank" rel="noreferrer">pvpoke/pvpoke</a>（MIT）

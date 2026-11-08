@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import { TypeIcon } from '@/components/Icon';
+import { boxHits } from '@/lib/collection';
 import { TYPE_ZH } from '@/lib/typeChart';
-import type { Changelog, ChangelogEntry, FieldChange, MoveChange, MovesetChange, StatChange, TypeChange } from '@/lib/types';
+import type { Changelog, ChangelogEntry, FieldChange, MoveChange, MovesetChange, PokemonData, StatChange, TypeChange } from '@/lib/types';
 
 const LEAGUE_ZH: Record<string, string> = { '1500': '超級', '2500': '高級', '10000': '大師' };
 
@@ -91,16 +92,29 @@ function MovesetRow({ p }: { p: MovesetChange }) {
 }
 
 /** 一次更新的完整內容 */
-function Entry({ e }: { e: ChangelogEntry }) {
+function Entry({ e, owned }: { e: ChangelogEntry; owned: PokemonData[] }) {
   const c = e.counts;
   const ranked = e.rankings?.total ?? 0;
+  const hits = boxHits(e, owned);
   return (
-    <div className={`cg-entry${e.notable ? '' : ' quiet'}`}>
+    <div className={`cg-entry${e.notable ? '' : ' quiet'}${hits.length ? ' mine' : ''}`}>
       <div className="cg-head">
         <b>{e.date}</b>
         {e.message && <span className="cg-msg">{e.message}</span>}
         {!e.notable && <span className="cg-tag">沒有影響對戰的變動</span>}
+        {hits.length > 0 && <span className="cg-tag mine">打到你箱子裡的 {hits.length} 隻</span>}
       </div>
+
+      {hits.length > 0 && (
+        <Group label="你的箱子" tone="hot">
+          {hits.map((h) => (
+            <div key={h.zh} className="cg-item">
+              <b>{h.zh}</b>
+              <span className="cg-delta">{h.why}</span>
+            </div>
+          ))}
+        </Group>
+      )}
 
       {c.movesChanged > 0 && (
         <Group label="招式調整" tone="hot">
@@ -183,13 +197,21 @@ function Entry({ e }: { e: ChangelogEntry }) {
  * 招式平衡調整是輸球的隱形原因，官方不會發公告；這一區就是把資料源每一版的
  * 差異攤開來，預設只顯示有影響對戰的那些。
  */
-export default function ChangelogView({ log }: { log: Changelog }) {
+export default function ChangelogView({ log, owned = [] }: { log: Changelog; owned?: PokemonData[] }) {
   const [open, setOpen] = useState(false);
   const [onlyNotable, setOnlyNotable] = useState(true);
+  /** 只看打到我箱子的那幾版。箱子空的時候這個選項沒有意義，不顯示 */
+  const [onlyMine, setOnlyMine] = useState(false);
 
-  const shown = useMemo(
-    () => (onlyNotable ? log.entries.filter((e) => e.notable) : log.entries),
-    [log.entries, onlyNotable]
+  const shown = useMemo(() => {
+    let list = onlyNotable ? log.entries.filter((e) => e.notable) : log.entries;
+    if (onlyMine) list = list.filter((e) => boxHits(e, owned).length > 0);
+    return list;
+  }, [log.entries, onlyNotable, onlyMine, owned]);
+
+  const mineCount = useMemo(
+    () => (owned.length ? log.entries.filter((e) => boxHits(e, owned).length > 0).length : 0),
+    [log.entries, owned]
   );
   const latest = log.entries.find((e) => e.notable);
   const notableCount = log.entries.filter((e) => e.notable).length;
@@ -217,6 +239,7 @@ export default function ChangelogView({ log }: { log: Changelog }) {
         ) : (
           <span className="cg-sum cg-muted">還沒有紀錄，跑 npm run changelog:backfill 可以補歷史</span>
         )}
+        {mineCount > 0 && <span className="cg-tag mine">{mineCount} 版打到你的箱子</span>}
         <span className="cg-count">{notableCount}／{log.entries.length} 版有變</span>
         <span className="cg-chev">{open ? '收合' : '展開'}</span>
       </button>
@@ -227,11 +250,18 @@ export default function ChangelogView({ log }: { log: Changelog }) {
             {([[true, '只看影響對戰的'], [false, '全部版本']] as const).map(([v, label]) => (
               <button key={String(v)} aria-pressed={onlyNotable === v} onClick={() => setOnlyNotable(v)}>{label}</button>
             ))}
+            {owned.length > 0 && (
+              <button aria-pressed={onlyMine} onClick={() => setOnlyMine((v) => !v)}>只看打到我箱子的</button>
+            )}
             <span className="cg-muted">資料源每次重算排名都會出一版，大多數版本其實沒動到對戰數值</span>
           </div>
           <div className="cg-list">
-            {shown.map((e) => <Entry key={`${e.from}->${e.to}`} e={e} />)}
-            {shown.length === 0 && <div className="cg-item cg-muted">這段期間沒有影響對戰的變動</div>}
+            {shown.map((e) => <Entry key={`${e.from}->${e.to}`} e={e} owned={owned} />)}
+            {shown.length === 0 && (
+              <div className="cg-item cg-muted">
+                {onlyMine ? '這段期間沒有動到你箱子裡的那幾隻' : '這段期間沒有影響對戰的變動'}
+              </div>
+            )}
           </div>
         </div>
       )}
