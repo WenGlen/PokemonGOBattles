@@ -363,6 +363,10 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl .sm { font-size: 11.5px; }
 .tbl .dim { color: var(--muted); font-weight: 400; }
 .tbl .trow { display: inline-flex; gap: 4px; }
+/* 數值下面的比例長條：底是整欄寬，填色靠右跟數字對齊 */
+.tbl .bar { display: block; height: 3px; margin: 2px 0 1px; border-radius: 2px; background: color-mix(in srgb, var(--line) 65%, transparent); }
+.tbl .bar i { display: block; height: 100%; margin-left: auto; border-radius: 2px; background: color-mix(in srgb, var(--accent) 65%, transparent); }
+.tbl tbody tr.on .bar i { background: var(--accent); }
 .tbl .mv { display: inline-flex; align-items: center; gap: 3px; margin-right: 8px; white-space: nowrap; }
 .tbl-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12.5px; }
 
@@ -427,16 +431,19 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 }
 
 /* 頭像、名字、定位標籤同一排；頭像的高度決定這一排多高 */
-.pd-head { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.pd-head { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 13px; }
 .pd-head .pic { background: var(--surface-2); border-radius: 16px; }
 .pd-head .pic.shadow { border-radius: 50%; }
-.pd-id { min-width: 0; flex: none; padding-top: 2px; }
+/* 可縮不可長：擠的時候名字自己折行，不要把 × 推到下一列 */
+.pd-id { min-width: 0; flex: 0 1 auto; padding-top: 2px; }
 .pd-id h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
 .pd-id h3 small { font-size: 11.5px; font-weight: 400; font-variant-numeric: tabular-nums; }
 .pd-ty { display: flex; gap: 5px; flex-wrap: wrap; }
 .pd-ty .chip { font-size: 11.5px; padding: 2px 9px 2px 5px; }
 
-.pd-tags { display: flex; gap: 6px; flex-wrap: wrap; align-content: flex-start; flex: 1; min-width: 0; padding-top: 2px; }
+/* 標籤跟編號之間留寬一點，不然會黏成一團 */
+.pd-tagbox { flex: 1; min-width: 0; margin-left: 10px; padding-top: 2px; }
+.pd-tags { display: flex; gap: 6px; flex-wrap: wrap; align-content: flex-start; }
 .tag-pill {
   font: inherit; font-size: 11.5px; font-weight: 600; line-height: 1.5;
   padding: 3px 10px; border-radius: 999px; cursor: pointer;
@@ -448,7 +455,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tag-pill.plain { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
 .tag-pill:hover, .tag-pill.on { background: color-mix(in srgb, currentColor 16%, transparent); }
 .pd-why {
-  margin: 10px 0 13px; min-height: 2.6em; padding-left: 9px;
+  margin: 9px 0 0; min-height: 2.6em; padding-left: 9px;
   border-left: 2px solid var(--line); font-size: 11.5px; line-height: 1.55; color: var(--muted);
 }
 .pd-why b { color: var(--text); }
@@ -499,12 +506,14 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 卡片擠到一半寬度（兩隻並排）或手機時，左右欄改成上下疊 */
 @container (max-width: 470px) {
   .pd-cols { grid-template-columns: 1fr; gap: 13px; }
-  /* 窄到這裡標籤擠在頭像旁邊會變成一行一個，改成自己占一列（排在 × 之後） */
-  .pd-tags { order: 4; flex-basis: 100%; padding-top: 6px; }
+}
+/* 兩隻並排或手機：標籤擠在頭像旁邊會變成一行一個，改成自己占一列（排在 × 之後） */
+@container (max-width: 620px) {
+  .pd-tagbox { order: 4; flex-basis: 100%; margin-left: 0; padding-top: 7px; }
 }
 @media (max-width: 720px) {
   .pd-cols { grid-template-columns: 1fr; gap: 13px; }
   .pd-label { width: 58px; }
   .pd-head .pic { border-radius: 14px; }
-  .pd-tags { order: 4; flex-basis: 100%; padding-top: 6px; }
+  .pd-tagbox { order: 4; flex-basis: 100%; margin-left: 0; padding-top: 7px; }
 }

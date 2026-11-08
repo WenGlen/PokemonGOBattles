@@ -31,6 +31,23 @@ interface Row {
 }
 
 /**
+ * 數值底下的細長條，拿表上最高的當 100%。
+ *
+ * 右邊對齊是為了跟右對齊的數字共用同一條邊，掃一眼就比得出長短；
+ * 最小留 2% 才不會讓小數值看起來像沒有。
+ *
+ * @param v 這一列的值
+ * @param max 這一欄目前的最大值
+ */
+function Bar({ v, max }: { v: number; max: number }) {
+  return (
+    <span className="bar" aria-hidden="true">
+      <i style={{ width: `${Math.max(2, (v / max) * 100).toFixed(1)}%` }} />
+    </span>
+  );
+}
+
+/**
  * 寶可夢表。
  *
  * 三圍是「在這個聯盟的實戰值」——照 pvpoke 建議的等級與 IV 算出來的，
@@ -112,6 +129,14 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
       return c * sort.dir;
     });
   }, [rows, q, type, onlyRanked, sort]);
+
+  /** 長條圖的基準：拿目前這張表看得到的那一批比，換聯盟或篩選就跟著重算 */
+  const max = useMemo(() => ({
+    atk: Math.max(1, ...shown.map((r) => r.atk)),
+    def: Math.max(1, ...shown.map((r) => r.def)),
+    hp: Math.max(1, ...shown.map((r) => r.hp)),
+    bulk: Math.max(1, ...shown.map((r) => r.bulk)),
+  }), [shown]);
 
   const deck = picked.map((id) => rowById.get(id)).filter(Boolean) as Row[];
 
@@ -204,10 +229,10 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
                     <td className="left">
                       <span className="trow">{r.p.types.map((t) => <TypeIcon key={t} type={t} size={14} />)}</span>
                     </td>
-                    <td className="num">{r.atk.toFixed(1)}</td>
-                    <td className="num">{r.def.toFixed(1)}</td>
-                    <td className="num">{r.hp}</td>
-                    <td className="num">{Math.round(r.bulk).toLocaleString()}</td>
+                    <td className="num">{r.atk.toFixed(1)}<Bar v={r.atk} max={max.atk} /></td>
+                    <td className="num">{r.def.toFixed(1)}<Bar v={r.def} max={max.def} /></td>
+                    <td className="num">{r.hp}<Bar v={r.hp} max={max.hp} /></td>
+                    <td className="num">{Math.round(r.bulk).toLocaleString()}<Bar v={r.bulk} max={max.bulk} /></td>
                     <td className="left sm">
                       {r.moveset
                         ? r.moveset.map((id) => {
