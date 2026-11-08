@@ -6,7 +6,7 @@
   "scripts": {
     "data": "node scripts/fetch-data.mjs",
     "changelog:backfill": "node scripts/backfill-changelog.mjs",
-    "verify": "tsc -p tsconfig.verify.json && node .verify/scripts/verify-sim.js",
+    "verify": "tsc -p tsconfig.verify.json && node scripts/mark-verify-cjs.mjs && node .verify/scripts/verify-sim.js",
     "typecheck": "tsc --noEmit",
     "dev": "next dev -p 4321",
     "build": "next build",
