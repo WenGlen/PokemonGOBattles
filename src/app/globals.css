@@ -388,6 +388,44 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   .tbl td, .tbl thead th { padding: 5px 7px; }
 }
 
-.tbl tr.detail td { background: var(--surface-2); padding-top: 7px; padding-bottom: 8px; }
+.tbl tr.detail td { background: var(--surface-2); padding-top: 7px; padding-bottom: 8px; text-align: left; }
 .tbl tr.detail .mv { margin-right: 10px; }
 .blk .tbl-bar { border-bottom: 1px solid var(--line); }
+
+/* ── 單隻寶可夢的解析 ──────────────────────────────── */
+.pd { padding: 4px 2px 8px; }
+.pd-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 11px; }
+.tag-pill {
+  font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); cursor: help;
+}
+.tag-pill.good { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.tag-pill.bad { color: var(--foe); border-color: color-mix(in srgb, var(--foe) 45%, transparent); }
+.tag-pill.plain { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+
+.pd-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pd-col h4, .pd-moves h4 { margin: 0 0 6px; font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.pd-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+.pd-label {
+  flex: none; width: 58px; font-size: 11px; font-variant-numeric: tabular-nums;
+  color: var(--muted); padding-top: 3px;
+}
+.pd-label.bad, .pd-label.bad2 { color: var(--foe); }
+.pd-label.good, .pd-label.good2 { color: var(--good); }
+.pd-types { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.pd-types .chip { font-size: 11px; padding: 1px 7px 1px 4px; }
+.pd-types .chip.bad2 { border-color: color-mix(in srgb, var(--foe) 60%, transparent); }
+.pd-types .chip.bad { border-color: color-mix(in srgb, var(--foe) 35%, transparent); }
+.pd-types .chip.good { border-color: color-mix(in srgb, var(--good) 35%, transparent); }
+.pd-types .chip.good2 { border-color: color-mix(in srgb, var(--good) 60%, transparent); }
+
+.pd-moves { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+.pd-move { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 0; flex-wrap: wrap; }
+.pd-move .dim { font-size: 11px; font-variant-numeric: tabular-nums; }
+.pd-note { margin: 11px 0 0; font-size: 11px; color: var(--muted); line-height: 1.6; }
+.pd-note b { color: var(--text); }
+
+@media (max-width: 720px) {
+  .pd-cols, .pd-moves { grid-template-columns: 1fr; }
+  .pd-label { width: 50px; }
+}

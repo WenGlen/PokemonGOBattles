@@ -214,3 +214,214 @@ export function scanThreats(team: Loadout[], foes: { loadout: Loadout; rank: num
   }
   return out.sort((a, b) => b.beats - a.beats || a.avg - b.avg);
 }
+
+/* ── 單隻寶可夢的解析 ─────────────────────────────── */
+
+/** 防守面：挨打時的屬性優劣 */
+export interface DefenseProfile {
+  /** 雙重被剋（×2.56） */
+  weak2: string[];
+  /** 被剋（×1.6） */
+  weak: string[];
+  /** 抵抗（×0.625） */
+  resist: string[];
+  /** 雙重抵抗或免疫（×0.39 以下） */
+  resist2: string[];
+}
+
+/**
+ * 這組屬性挨各種攻擊的結果，分桶。
+ * @param types 防守方的屬性
+ */
+export function defenseProfile(types: string[]): DefenseProfile {
+  const out: DefenseProfile = { weak2: [], weak: [], resist: [], resist2: [] };
+  for (const t of ALL_TYPES) {
+    const m = effectiveness(t, types);
+    if (m > MULT.SUPER_EFFECTIVE) out.weak2.push(t);
+    else if (m > 1) out.weak.push(t);
+    else if (m <= MULT.DOUBLE_RESISTED) out.resist2.push(t);
+    else if (m < 1) out.resist.push(t);
+  }
+  return out;
+}
+
+/** 攻擊面：這隻的招式能打到誰、打不動誰 */
+export interface OffenseProfile {
+  /**
+   * 對每個單屬性對手，這隻最好的一招。
+   * eff 是純相剋倍率，mult 再乘上本系加成——分桶看 eff、顯示看 mult。
+   */
+  best: Record<string, { eff: number; mult: number; move: MoveData }>;
+  /** 有招打得出剋制的屬性 */
+  strong: string[];
+  /** 所有招都被抵抗的屬性 */
+  weak: string[];
+  /** 這隻實際帶得出來的攻擊屬性 */
+  coverage: string[];
+}
+
+/**
+ * 招式的屬性覆蓋。
+ *
+ * 看的是「對單屬性對手，牠最好的一招能打出多少倍」——
+ * 本系加成算進去，因為那是實戰真的會有的傷害差。
+ *
+ * @param p 寶可夢
+ * @param moveById 招式查表
+ * @param pool 只看這些招（預設是牠學得會的全部）
+ */
+export function offenseProfile(
+  p: PokemonData,
+  moveById: Map<string, MoveData>,
+  pool?: string[]
+): OffenseProfile {
+  const moves = (pool ?? [...p.fast, ...p.charged])
+    .map((id) => moveById.get(id))
+    .filter(Boolean) as MoveData[];
+  const best: OffenseProfile['best'] = {};
+  for (const target of ALL_TYPES) {
+    let top: OffenseProfile['best'][string] | null = null;
+    for (const m of moves) {
+      const stab = p.types.includes(m.type) ? MULT.STAB : 1;
+      const eff = effectiveness(m.type, [target]);
+      const mult = eff * stab;
+      if (!top || mult > top.mult) top = { eff, mult, move: m };
+    }
+    if (top) best[target] = top;
+  }
+  // 分桶一定要看純相剋倍率，不能看含本系的那個。
+  // MULT.STAB 是 1.2000000476837158…（Niantic 的浮點尾數），
+  // 拿它跟 1.2 比大小，每一個「本系打中性」都會被誤判成剋制。
+  return {
+    best,
+    strong: ALL_TYPES.filter((t) => best[t] && best[t].eff > 1),
+    weak: ALL_TYPES.filter((t) => best[t] && best[t].eff < 1),
+    coverage: [...new Set(moves.map((m) => m.type))],
+  };
+}
+
+/** 標籤門檻：從這個聯盟上榜的那一批算出來，不是寫死的數字 */
+export interface TagContext {
+  bulk: { p20: number; p80: number };
+  atk: { p20: number; p80: number };
+  ept: { p80: number };
+  dpt: { p80: number };
+}
+
+/** 取分位數 */
+function quantile(values: number[], t: number): number {
+  const v = [...values].sort((a, b) => a - b);
+  return v[Math.min(v.length - 1, Math.floor(v.length * t))] ?? 0;
+}
+
+/**
+ * 從聯盟上榜名單算出標籤門檻。
+ *
+ * 寫死「耐久大於 18000 算肉盾」這種數字，換個聯盟就不成立；
+ * 改成跟同聯盟的其他人比，標籤才一直有意義。
+ *
+ * @param pool 上榜寶可夢在這個聯盟的實戰數值
+ */
+export function buildTagContext(
+  pool: { atk: number; def: number; hp: number; ept: number; dpt: number }[]
+): TagContext {
+  const bulks = pool.map((x) => x.def * x.hp);
+  const atks = pool.map((x) => x.atk);
+  return {
+    bulk: { p20: quantile(bulks, 0.2), p80: quantile(bulks, 0.8) },
+    atk: { p20: quantile(atks, 0.2), p80: quantile(atks, 0.8) },
+    ept: { p80: quantile(pool.map((x) => x.ept), 0.8) },
+    dpt: { p80: quantile(pool.map((x) => x.dpt), 0.8) },
+  };
+}
+
+export interface RoleTag {
+  label: string;
+  /** good = 優點、bad = 缺點、plain = 中性描述 */
+  tone: 'good' | 'bad' | 'plain';
+  /** 滑過去看到的依據，數字都寫出來才查得了 */
+  why: string;
+}
+
+/**
+ * 這隻的定位標籤。
+ *
+ * 每個標籤都附上判斷依據——不講清楚「肉盾」是跟誰比、門檻多少，
+ * 這種標籤就只是感覺，沒辦法驗。
+ */
+export function roleTags(
+  p: PokemonData,
+  st: { atk: number; def: number; hp: number },
+  moveById: Map<string, MoveData>,
+  ctx: TagContext
+): RoleTag[] {
+  const tags: RoleTag[] = [];
+  const fasts = p.fast.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
+  const chargeds = p.charged.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
+  const bulk = st.def * st.hp;
+  const bestEpt = Math.max(0, ...fasts.map((m) => fastRates(m).ept));
+  const bestDpt = Math.max(0, ...fasts.map((m) => fastRates(m).dpt));
+  const n = (x: number) => Math.round(x).toLocaleString();
+
+  // ── 體質 ──
+  const tanky = bulk >= ctx.bulk.p80;
+  const frail = bulk <= ctx.bulk.p20;
+  const hitsHard = st.atk >= ctx.atk.p80;
+  if (hitsHard && frail) {
+    tags.push({ tone: 'plain', label: '玻璃炮', why: `攻擊 ${st.atk.toFixed(1)} 在同聯盟前 20%，但耐久 ${n(bulk)} 在後 20%` });
+  } else {
+    if (tanky) tags.push({ tone: 'good', label: '肉盾', why: `耐久（防禦×HP）${n(bulk)}，同聯盟前 20%（門檻 ${n(ctx.bulk.p80)}）` });
+    if (frail) tags.push({ tone: 'bad', label: '脆', why: `耐久 ${n(bulk)}，同聯盟後 20%（門檻 ${n(ctx.bulk.p20)}）` });
+    if (hitsHard) tags.push({ tone: 'good', label: '高攻', why: `攻擊 ${st.atk.toFixed(1)}，同聯盟前 20%（門檻 ${ctx.atk.p80.toFixed(1)}）` });
+  }
+
+  // ── 快招 ──
+  if (fasts.some((m) => m.turns === 1)) {
+    tags.push({ tone: 'good', label: '出招快', why: '有 1 回合（0.5 秒）的快招，搶 CMP 與反應都佔便宜' });
+  }
+  if (bestEpt >= ctx.ept.p80) {
+    tags.push({ tone: 'good', label: '充能快', why: `最佳快招每回合 ${bestEpt.toFixed(2)} 能量，同聯盟前 20%（門檻 ${ctx.ept.p80.toFixed(2)}）` });
+  }
+  if (bestDpt >= ctx.dpt.p80) {
+    tags.push({ tone: 'good', label: '快招就會痛', why: `最佳快招每回合 ${bestDpt.toFixed(2)} 傷害，同聯盟前 20%（門檻 ${ctx.dpt.p80.toFixed(2)}）` });
+  }
+
+  // ── 大招 ──
+  const energies = chargeds.map((m) => m.energy).filter((e) => e > 0);
+  const cheapest = energies.length ? Math.min(...energies) : 0;
+  if (cheapest && cheapest <= 35) {
+    tags.push({ tone: 'good', label: '大招便宜', why: `最便宜的大招只要 ${cheapest} 能量，壓力給得快` });
+  }
+  const bestDpe = Math.max(0, ...chargeds.map((m) => dpe(m)));
+  if (bestDpe >= 2) {
+    tags.push({ tone: 'good', label: '高爆發', why: `最佳大招每點能量 ${bestDpe.toFixed(2)} 傷害（DPE ≥ 2 算高）` });
+  }
+  if (energies.length >= 2 && Math.max(...energies) - cheapest >= 15) {
+    tags.push({ tone: 'good', label: '誘餌好用', why: `便宜 ${cheapest} 與最貴 ${Math.max(...energies)} 能量差 ${Math.max(...energies) - cheapest}，騙盾空間大` });
+  }
+  const selfBuff = chargeds.find((m) => m.buffTarget === 'self' && m.buffs && (m.buffs[0] > 0 || m.buffs[1] > 0));
+  if (selfBuff) tags.push({ tone: 'good', label: '自帶強化', why: `${zhOf(selfBuff)} 會提升自己的能力` });
+  const debuff = chargeds.find((m) => m.buffTarget !== 'self' && m.buffs && (m.buffs[0] < 0 || m.buffs[1] < 0));
+  if (debuff) tags.push({ tone: 'good', label: '能降對手', why: `${zhOf(debuff)} 會降低對手的能力` });
+  const selfDebuff = chargeds.every((m) => m.buffTarget === 'self' && m.buffs && (m.buffs[0] < 0 || m.buffs[1] < 0));
+  if (chargeds.length > 0 && selfDebuff) {
+    tags.push({ tone: 'bad', label: '丟招有代價', why: '所有大招丟出去都會降自己的能力，不能亂丟' });
+  }
+
+  // ── 屬性 ──
+  const d = defenseProfile(p.types);
+  const weakCount = d.weak.length + d.weak2.length;
+  if (weakCount <= 2) tags.push({ tone: 'good', label: '弱點少', why: `只被 ${weakCount} 種屬性剋` });
+  if (weakCount >= 5) tags.push({ tone: 'bad', label: '弱點多', why: `被 ${weakCount} 種屬性剋` });
+  if (d.resist.length + d.resist2.length >= 7) {
+    tags.push({ tone: 'good', label: '抗性廣', why: `抵抗 ${d.resist.length + d.resist2.length} 種屬性` });
+  }
+  if (d.weak2.length) {
+    tags.push({ tone: 'bad', label: '有雙重弱點', why: `被 ${d.weak2.map((t) => TYPE_ZH[t]).join('、')} 打到 ×2.56` });
+  }
+
+  return tags;
+}
+
+/** 招式的顯示名，沒有中文就退回英文 */
+const zhOf = (m: MoveData) => m.zh || m.name;

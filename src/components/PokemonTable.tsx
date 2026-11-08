@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { PokemonIcon, TypeIcon } from '@/components/Icon';
 import SortHead, { type Sort } from '@/components/SortHead';
-import { ALL_TYPES } from '@/lib/analysis';
+import PokemonDetail from '@/components/PokemonDetail';
+import { ALL_TYPES, buildTagContext, fastRates } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
 import { battleStats, suggestedBuild, type LeagueCp } from '@/lib/stats';
 import { TYPE_ZH } from '@/lib/typeChart';
@@ -37,6 +38,7 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
   const [type, setType] = useState('');
   const [onlyRanked, setOnlyRanked] = useState(true);
   const [sort, setSort] = useState<Sort<Key>>({ key: 'rank', dir: 1 });
+  const [open, setOpen] = useState<string | null>(null);
 
   const rows = useMemo<Row[]>(() => {
     const rowsFor = data.rowsFor(cp);
@@ -59,6 +61,26 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
       };
     });
   }, [data, cp]);
+
+  /**
+   * 標籤門檻跟同聯盟上榜的那一批比，所以每換一個聯盟就要重算一次。
+   * 用整個聯盟當母體（不是全部 1619 隻），因為「肉盾」要比的對象是實戰會遇到的人。
+   */
+  const tagCtx = useMemo(() => {
+    const ranked = new Set(data.rowsFor(cp).map((r) => r.id));
+    const pool = rows
+      .filter((r) => ranked.has(r.p.id))
+      .map((r) => {
+        const fasts = r.p.fast.map((id) => data.moveById.get(id)).filter(Boolean);
+        const rates = fasts.map((m) => fastRates(m!));
+        return {
+          atk: r.atk, def: r.def, hp: r.hp,
+          ept: Math.max(0, ...rates.map((x) => x.ept)),
+          dpt: Math.max(0, ...rates.map((x) => x.dpt)),
+        };
+      });
+    return buildTagContext(pool);
+  }, [rows, data, cp]);
 
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -91,7 +113,7 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
           {ALL_TYPES.map((t) => <option key={t} value={t}>{TYPE_ZH[t]}</option>)}
         </select>
         <button aria-pressed={onlyRanked} onClick={() => setOnlyRanked((v) => !v)}>只看上榜的</button>
-        <span className="hint">{shown.length} 隻</span>
+        <span className="hint">{shown.length} 隻 · 點一列看詳情</span>
       </div>
 
       <div className="tbl-scroll">
@@ -111,12 +133,14 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
           </thead>
           <tbody>
             {shown.slice(0, 400).map((r) => (
-              <tr key={r.p.id}>
+              <Fragment key={r.p.id}>
+              <tr onClick={() => setOpen(open === r.p.id ? null : r.p.id)} style={{ cursor: 'pointer' }}>
                 <td className="num">{r.rank ?? '—'}{r.score !== null && <small className="dim"> {r.score}</small>}</td>
                 <td className="left nm">
                   <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={24} shadow={Boolean(r.p.shadow)} />
                   <span>{zhName(r.p)}</span>
                   <small className="dim">#{r.p.dex}</small>
+                  <small className="dim">{open === r.p.id ? '▾' : '▸'}</small>
                 </td>
                 <td className="left">
                   <span className="trow">{r.p.types.map((t) => <TypeIcon key={t} type={t} size={14} />)}</span>
@@ -135,6 +159,14 @@ export default function PokemonTable({ data, cp }: { data: AppData; cp: LeagueCp
                     : '—'}
                 </td>
               </tr>
+              {open === r.p.id && (
+                <tr className="detail">
+                  <td colSpan={9}>
+                    <PokemonDetail p={r.p} data={data} ctx={tagCtx} st={{ atk: r.atk, def: r.def, hp: r.hp }} />
+                  </td>
+                </tr>
+              )}
+              </Fragment>
             ))}
           </tbody>
         </table>
