@@ -220,18 +220,51 @@ export function normalizeBundle(gm, zh, icon = null) {
   return { timestamp: gm.timestamp, pokemon, moves };
 }
 
+/** 前幾名算「主流」：只有這些需要帶招式使用率，用來推估對手會帶什麼 */
+const META_N = 100;
+/** 每隻最多留幾個大招的使用率 */
+const USAGE_N = 6;
+
+/**
+ * 把 pvpoke 的招式使用次數轉成百分比，只留前幾名。
+ * 存百分比而不是原始次數：數字短很多，而且要的本來就是比例。
+ * @param {{moveId: string, uses: number}[]} list
+ * @param {number} keep
+ * @returns {[string, number][]} [招式 id, 百分比]
+ */
+function usagePct(list, keep) {
+  const items = (list ?? []).filter((m) => m.uses > 0);
+  const total = items.reduce((n, m) => n + m.uses, 0);
+  if (!total) return [];
+  return items
+    .sort((a, b) => b.uses - a.uses)
+    .slice(0, keep)
+    .map((m) => [m.moveId, Math.round((m.uses / total) * 100)]);
+}
+
 /**
  * 排名只留前 300 名與精簡欄位。
+ * 前 100 名另外帶招式使用率——「對手可能帶什麼招」要的是實際使用比例，
+ * 不是牠學得會什麼。再後面的用不到，不佔空間。
  * @param {Record<string, object[]>} rankings 以 cp 為鍵
  */
 export function normalizeRankings(rankings) {
   const out = {};
   for (const lg of SOURCES.rankings.leagues) {
-    out[lg.cp] = (rankings[lg.cp] ?? []).slice(0, 300).map((r) => ({
-      id: r.speciesId,
-      score: r.score,
-      moveset: r.moveset,
-    }));
+    out[lg.cp] = (rankings[lg.cp] ?? []).slice(0, 300).map((r, i) => {
+      const row = {
+        id: r.speciesId,
+        score: r.score,
+        moveset: r.moveset,
+      };
+      if (i < META_N) {
+        row.use = {
+          f: usagePct(r.moves?.fastMoves, USAGE_N),
+          c: usagePct(r.moves?.chargedMoves, USAGE_N),
+        };
+      }
+      return row;
+    });
   }
   return out;
 }

@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-11-08T15:06:50.724Z",
+  "fetchedAt": "2026-11-08T17:01:30.121Z",
   "gamemasterTimestamp": "2026-11-03 04:09:55",
   "source": {
     "url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.min.json",
@@ -133,7 +133,7 @@
     {
       "name": "圖示網址抽驗",
       "ok": true,
-      "detail": "抽 20 張全部抓得到"
+      "detail": "抽 60 張全部抓得到"
     }
   ]
 }
