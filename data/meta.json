@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-11-08T17:01:30.121Z",
-  "gamemasterTimestamp": "2026-11-03 04:09:55",
+  "fetchedAt": "2026-11-10T02:51:32.484Z",
+  "gamemasterTimestamp": "2026-11-09 18:40:51",
   "source": {
     "url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.min.json",
     "repo": "pvpoke/pvpoke",
@@ -16,14 +16,14 @@
     "apiLangEn": "9"
   },
   "lastSourceCommit": {
-    "date": "2026-11-03T03:23:40Z",
-    "message": "Updated BF ML rankings, separated team builder prioritize meta threats and alternatives"
+    "date": "2026-11-09T18:06:19Z",
+    "message": "LAIC GBL rankings"
   },
   "counts": {
     "pokemon": 1619,
     "moves": 355
   },
-  "changelogEntries": 39,
+  "changelogEntries": 40,
   "checks": [
     {
       "name": "資料源可達",
@@ -33,12 +33,12 @@
     {
       "name": "有 timestamp",
       "ok": true,
-      "detail": "2026-11-03 04:09:55"
+      "detail": "2026-11-09 18:40:51"
     },
     {
       "name": "資料夠新（≤14 天）",
       "ok": true,
-      "detail": "距今 5.5 天"
+      "detail": "距今 0.3 天"
     },
     {
       "name": "寶可夢數量合理",
