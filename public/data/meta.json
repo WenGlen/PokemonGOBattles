@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-11-10T02:51:32.484Z",
-  "gamemasterTimestamp": "2026-11-09 18:40:51",
+  "fetchedAt": "2026-11-13T01:21:42.739Z",
+  "gamemasterTimestamp": "2026-11-12 03:17:57",
   "source": {
     "url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.min.json",
     "repo": "pvpoke/pvpoke",
@@ -16,14 +16,14 @@
     "apiLangEn": "9"
   },
   "lastSourceCommit": {
-    "date": "2026-11-09T18:06:19Z",
-    "message": "LAIC GBL rankings"
+    "date": "2026-11-12T02:20:34Z",
+    "message": "Mega updates and Soak stats"
   },
   "counts": {
     "pokemon": 1619,
-    "moves": 355
+    "moves": 357
   },
-  "changelogEntries": 40,
+  "changelogEntries": 41,
   "checks": [
     {
       "name": "資料源可達",
@@ -33,22 +33,22 @@
     {
       "name": "有 timestamp",
       "ok": true,
-      "detail": "2026-11-09 18:40:51"
+      "detail": "2026-11-12 03:17:57"
     },
     {
       "name": "資料夠新（≤14 天）",
       "ok": true,
-      "detail": "距今 0.3 天"
+      "detail": "距今 0.9 天"
     },
     {
       "name": "寶可夢數量合理",
       "ok": true,
-      "detail": "已上線 1619 隻（全部 1752）"
+      "detail": "已上線 1619 隻（全部 1753）"
     },
     {
       "name": "招式數量合理",
       "ok": true,
-      "detail": "355 個招式"
+      "detail": "357 個招式"
     },
     {
       "name": "每隻都有三圍",
@@ -68,12 +68,12 @@
     {
       "name": "快招有 turns/能量",
       "ok": true,
-      "detail": "98 個快招全部通過"
+      "detail": "99 個快招全部通過"
     },
     {
       "name": "大招有能量需求",
       "ok": true,
-      "detail": "254 個大招全部通過"
+      "detail": "255 個大招全部通過"
     },
     {
       "name": "CP 引擎對帳（超級聯盟）",
@@ -108,12 +108,12 @@
     {
       "name": "招式都有中文名",
       "ok": true,
-      "detail": "355 個全部有中文名"
+      "detail": "357 個全部有中文名"
     },
     {
       "name": "招式中文名沒有撞名",
       "ok": true,
-      "detail": "355 個名字各自唯一"
+      "detail": "357 個名字各自唯一"
     },
     {
       "name": "寶可夢中文名沒有撞名",
