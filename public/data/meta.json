@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-11-13T01:21:42.739Z",
-  "gamemasterTimestamp": "2026-11-12 03:17:57",
+  "fetchedAt": "2026-11-17T03:04:13.552Z",
+  "gamemasterTimestamp": "2026-11-16 18:41:19",
   "source": {
     "url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.min.json",
     "repo": "pvpoke/pvpoke",
@@ -16,14 +16,14 @@
     "apiLangEn": "9"
   },
   "lastSourceCommit": {
-    "date": "2026-11-12T02:20:34Z",
-    "message": "Mega updates and Soak stats"
+    "date": "2026-11-16T20:28:09Z",
+    "message": "Hisuian Sliggoo and Goodra rankings, update Dunsparce moveset, fixes for Morpeko and 0 turn swaps"
   },
   "counts": {
-    "pokemon": 1619,
+    "pokemon": 1621,
     "moves": 357
   },
-  "changelogEntries": 41,
+  "changelogEntries": 42,
   "checks": [
     {
       "name": "資料源可達",
@@ -33,17 +33,17 @@
     {
       "name": "有 timestamp",
       "ok": true,
-      "detail": "2026-11-12 03:17:57"
+      "detail": "2026-11-16 18:41:19"
     },
     {
       "name": "資料夠新（≤14 天）",
       "ok": true,
-      "detail": "距今 0.9 天"
+      "detail": "距今 0.3 天"
     },
     {
       "name": "寶可夢數量合理",
       "ok": true,
-      "detail": "已上線 1619 隻（全部 1753）"
+      "detail": "已上線 1621 隻（全部 1753）"
     },
     {
       "name": "招式數量合理",
@@ -78,22 +78,22 @@
     {
       "name": "CP 引擎對帳（超級聯盟）",
       "ok": true,
-      "detail": "1619 隻以 pvpoke 建議 IV 算出的 CP 全部 ≤1500"
+      "detail": "1621 隻以 pvpoke 建議 IV 算出的 CP 全部 ≤1500"
     },
     {
       "name": "排名資料：超級聯盟",
       "ok": true,
-      "detail": "1154 筆，第一名 Melmetal（score 93.9）"
+      "detail": "1156 筆，第一名 Melmetal（score 94.4）"
     },
     {
       "name": "排名資料：高級聯盟",
       "ok": true,
-      "detail": "851 筆，第一名 Tinkaton（score 94.3）"
+      "detail": "853 筆，第一名 Tinkaton（score 94.5）"
     },
     {
       "name": "排名資料：大師聯盟",
       "ok": true,
-      "detail": "409 筆，第一名 Palkia (Origin)（score 98.7）"
+      "detail": "410 筆，第一名 Palkia (Origin)（score 98.7）"
     },
     {
       "name": "型態後綴都有中文",
@@ -103,7 +103,7 @@
     {
       "name": "寶可夢都有中文名",
       "ok": true,
-      "detail": "1619 隻全部有中文名"
+      "detail": "1621 隻全部有中文名"
     },
     {
       "name": "招式都有中文名",
@@ -118,22 +118,22 @@
     {
       "name": "寶可夢中文名沒有撞名",
       "ok": true,
-      "detail": "1619 個名字各自唯一"
+      "detail": "1621 個名字各自唯一"
     },
     {
       "name": "每隻都有圖示",
       "ok": true,
-      "detail": "1619 隻全部對得到"
+      "detail": "1621 隻全部對得到"
     },
     {
       "name": "圖示來源分布",
       "ok": true,
-      "detail": "GO 美術 1584 隻、PokeAPI 補 35 隻；另有 19 隻用本體圖代替（遊戲裡還沒有這個型態的美術）"
+      "detail": "GO 美術 1586 隻、PokeAPI 補 35 隻；另有 19 隻用本體圖代替（遊戲裡還沒有這個型態的美術）"
     },
     {
       "name": "圖示網址抽驗",
       "ok": true,
-      "detail": "抽 60 張全部抓得到"
+      "detail": "抽 58 張全部抓得到"
     }
   ]
 }
