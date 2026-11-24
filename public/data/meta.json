@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-11-21T01:40:22.945Z",
-  "gamemasterTimestamp": "2026-11-20 17:36:49",
+  "fetchedAt": "2026-11-24T04:55:12.401Z",
+  "gamemasterTimestamp": "2026-11-23 20:46:52",
   "source": {
     "url": "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.min.json",
     "repo": "pvpoke/pvpoke",
@@ -16,14 +16,14 @@
     "apiLangEn": "9"
   },
   "lastSourceCommit": {
-    "date": "2026-11-20T16:56:34Z",
-    "message": "Kowtow Cleave Kingambit"
+    "date": "2026-11-23T19:47:46Z",
+    "message": "Fixed Mega Clefable typing, preview banner"
   },
   "counts": {
     "pokemon": 1621,
     "moves": 357
   },
-  "changelogEntries": 44,
+  "changelogEntries": 45,
   "checks": [
     {
       "name": "資料源可達",
@@ -33,7 +33,7 @@
     {
       "name": "有 timestamp",
       "ok": true,
-      "detail": "2026-11-20 17:36:49"
+      "detail": "2026-11-23 20:46:52"
     },
     {
       "name": "資料夠新（≤14 天）",
