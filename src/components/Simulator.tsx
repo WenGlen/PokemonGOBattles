@@ -86,7 +86,11 @@ export default function Simulator({ data, cp }: { data: AppData; cp: LeagueCp })
             </div>
           </div>
 
-          <TimelineView result={result} names={[zhName(la.pokemon), zhName(lb.pokemon)]} />
+          <TimelineView
+            result={result}
+            names={[zhName(la.pokemon), zhName(lb.pokemon)]}
+            mons={[la.pokemon, lb.pokemon]}
+          />
         </>
       )}
     </>

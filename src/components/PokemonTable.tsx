@@ -5,7 +5,7 @@ import { PokemonIcon, TypeIcon } from '@/components/Icon';
 import SortHead, { type Sort } from '@/components/SortHead';
 import TypePicker from '@/components/TypePicker';
 import PokemonDetail from '@/components/PokemonDetail';
-import { buildTagContext, fastRates } from '@/lib/analysis';
+import { buildRadarContext, buildTagContext, radarValues } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
 import type { Box } from '@/lib/collection';
 import { battleStats, suggestedBuild, type LeagueCp } from '@/lib/stats';
@@ -98,24 +98,16 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
   const rowById = useMemo(() => new Map(rows.map((r) => [r.p.id, r])), [rows]);
 
   /**
-   * 標籤門檻跟同聯盟上榜的那一批比，所以每換一個聯盟就要重算一次。
+   * 標籤門檻與雷達圖的百分位都跟同聯盟上榜的那一批比，所以每換一個聯盟要重算。
    * 用整個聯盟當母體（不是全部 1619 隻），因為「肉盾」要比的對象是實戰會遇到的人。
    */
-  const tagCtx = useMemo(() => {
+  const pool = useMemo(() => {
     const ranked = new Set(data.rowsFor(cp).map((r) => r.id));
-    const pool = rows
-      .filter((r) => ranked.has(r.p.id))
-      .map((r) => {
-        const fasts = r.p.fast.map((id) => data.moveById.get(id)).filter(Boolean);
-        const rates = fasts.map((m) => fastRates(m!));
-        return {
-          atk: r.atk, def: r.def, hp: r.hp,
-          ept: Math.max(0, ...rates.map((x) => x.ept)),
-          dpt: Math.max(0, ...rates.map((x) => x.dpt)),
-        };
-      });
-    return buildTagContext(pool);
+    return rows.filter((r) => ranked.has(r.p.id)).map((r) => radarValues(r.p, r, data.moveById));
   }, [rows, data, cp]);
+
+  const tagCtx = useMemo(() => buildTagContext(pool), [pool]);
+  const radarCtx = useMemo(() => buildRadarContext(pool), [pool]);
 
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -172,19 +164,25 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
       {deck.length > 0 && (
         <div ref={deckRef} className="pd-deckwrap">
           <div className={`pd-deck${deck.length > 1 ? ' two' : ''}`}>
-            {deck.map((r) => (
-              <PokemonDetail
-                key={r.p.id}
-                p={r.p}
-                data={data}
-                ctx={tagCtx}
-                st={{
-                  rank: r.rank, score: r.score, cp: r.cp, level: r.level,
-                  atk: r.atk, def: r.def, hp: r.hp, bulk: r.bulk, moveset: r.moveset,
-                }}
-                onClose={() => toggle(r.p.id)}
-              />
-            ))}
+            {deck.map((r, i) => {
+              // 兩張卡同時開著的時候，各自把對方疊成虛線，一眼看出誰的形狀大
+              const other = deck.length === 2 ? deck[1 - i] : null;
+              return (
+                <PokemonDetail
+                  key={r.p.id}
+                  p={r.p}
+                  data={data}
+                  ctx={tagCtx}
+                  radarCtx={radarCtx}
+                  compare={other ? radarValues(other.p, other, data.moveById) : null}
+                  st={{
+                    rank: r.rank, score: r.score, cp: r.cp, level: r.level,
+                    atk: r.atk, def: r.def, hp: r.hp, bulk: r.bulk, moveset: r.moveset,
+                  }}
+                  onClose={() => toggle(r.p.id)}
+                />
+              );
+            })}
           </div>
           <p className="pd-note">
             「打得痛／打不動」算的是對<b>單屬性</b>對手的結果，實戰遇到雙屬性還要再乘一次；

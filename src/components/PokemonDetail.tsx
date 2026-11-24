@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { PokemonIcon, TypeIcon } from '@/components/Icon';
+import Radar from '@/components/Radar';
 import {
-  defenseProfile, dpe, fastRates, offenseProfile, roleTags,
-  type RoleTag, type TagContext,
+  defenseProfile, dpe, fastRates, isFast, offenseProfile, radarValues, roleTags,
+  type RadarContext, type RadarValues, type RoleTag, type TagContext,
 } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
 import { zhName, type MoveData, type PokemonData } from '@/lib/types';
@@ -63,10 +64,13 @@ function TypeRow({ label, note, types, tone }: {
  * 右半是「這隻能做什麼」——招式打得動誰，以及實際帶得出來的招。
  * 防守面與攻擊面分開講，因為它們是兩件事：一隻可以很耐打但打不動人，也可以反過來。
  */
-export default function PokemonDetail({ p, data, ctx, st, onClose }: {
+export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onClose }: {
   p: PokemonData;
   data: AppData;
   ctx: TagContext;
+  radarCtx: RadarContext;
+  /** 同時開兩張卡時，另一隻的六個軸會疊成虛線，直接比形狀 */
+  compare?: RadarValues | null;
   st: DetailStats;
   onClose: () => void;
 }) {
@@ -81,6 +85,11 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
   const fasts = p.fast.map((id) => data.moveById.get(id)).filter(Boolean) as MoveData[];
   const chargeds = p.charged.map((id) => data.moveById.get(id)).filter(Boolean) as MoveData[];
   const rec = new Set(st.moveset ?? []);
+  /** pvpoke 推薦的那一組，照快招、大招 1、大招 2 的順序 */
+  const recMoves = (st.moveset ?? [])
+    .map((id) => data.moveById.get(id))
+    .filter(Boolean) as MoveData[];
+  const radar = radarValues(p, st, data.moveById);
 
   return (
     <div className="pd">
@@ -106,6 +115,7 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
                   onFocus={() => setWhy(t)}
                   onClick={() => setWhy((w) => (w?.label === t.label ? null : t))}
                 >
+                  <span className="tag-ico" aria-hidden>{t.icon}</span>
                   {t.label}
                 </button>
               ))}
@@ -113,13 +123,39 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
             {/* 依據就寫在標籤正下方，不用把視線拉到別的地方找 */}
             <p className="pd-why">
               {why
-                ? <><b>{why.label}</b>：{why.why}</>
+                ? <><b>{why.icon} {why.label}</b>：{why.why}</>
                 : '滑過或點一下標籤，看它是怎麼算出來的'}
             </p>
           </div>
         )}
         <button type="button" className="panel-x" onClick={onClose} aria-label="收起這張卡">×</button>
       </div>
+
+      {recMoves.length > 0 && (
+        <section className="pd-rec-bar">
+          <h4>推薦招式<span>pvpoke 在這個聯盟算出來的組合</span></h4>
+          <div className="pd-rec-set">
+            {recMoves.map((m) => {
+              const fast = isFast(m);
+              const r = fastRates(m);
+              return (
+                <div key={m.id} className={`pd-rec-card${fast ? ' fast' : ''}`}>
+                  <TypeIcon type={m.type} size={22} />
+                  <div>
+                    <b>{zhName(m)}</b>
+                    <span>
+                      {fast
+                        ? `${m.power}力 · ${m.turns}回合 · ⚡+${m.energyGain} · DPT ${r.dpt.toFixed(2)}`
+                        : `${m.power}力 · ⚡${m.energy} · DPE ${dpe(m).toFixed(2)}`}
+                    </span>
+                  </div>
+                  <em>{fast ? '快招' : '大招'}</em>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="pd-cols">
         <div className="pd-col">
@@ -132,18 +168,25 @@ export default function PokemonDetail({ p, data, ctx, st, onClose }: {
           </section>
 
           <section className="pd-sec">
-            <h4>基本數值（{st.level ? `Lv${st.level} · ` : ''}這個聯盟的實戰值）</h4>
-            <dl className="pd-stats">
-              <div>
-                <dt>排名</dt>
-                <dd>{st.rank ?? '—'}{st.score !== null && <small> 分 {st.score.toFixed(1)}</small>}</dd>
-              </div>
-              <div><dt>CP</dt><dd>{st.cp}</dd></div>
-              <div><dt>耐久</dt><dd>{Math.round(st.bulk).toLocaleString()}</dd></div>
-              <div><dt>攻擊</dt><dd>{st.atk.toFixed(1)}</dd></div>
-              <div><dt>防禦</dt><dd>{st.def.toFixed(1)}</dd></div>
-              <div><dt>HP</dt><dd>{st.hp}</dd></div>
-            </dl>
+            <h4>六角能力（{st.level ? `Lv${st.level} · ` : ''}跟同聯盟上榜的比）</h4>
+            <div className="pd-radar">
+              <Radar values={radar} ctx={radarCtx} compare={compare} />
+              <dl className="pd-stats">
+                <div>
+                  <dt>排名</dt>
+                  <dd>{st.rank ?? '—'}{st.score !== null && <small> 分 {st.score.toFixed(1)}</small>}</dd>
+                </div>
+                <div><dt>CP</dt><dd>{st.cp}</dd></div>
+                <div><dt>耐久</dt><dd>{Math.round(st.bulk).toLocaleString()}</dd></div>
+                <div><dt>攻擊</dt><dd>{st.atk.toFixed(1)}</dd></div>
+                <div><dt>防禦</dt><dd>{st.def.toFixed(1)}</dd></div>
+                <div><dt>HP</dt><dd>{st.hp}</dd></div>
+              </dl>
+            </div>
+            <p className="pd-radar-note">
+              軸上是<b>百分位</b>不是原始值——六個軸單位不同，只有「贏過多少人」放得進同一張圖。
+              {compare && ' 虛線是另一張卡那一隻。'}
+            </p>
           </section>
         </div>
 

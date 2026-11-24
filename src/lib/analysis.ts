@@ -342,7 +342,33 @@ export interface RoleTag {
   tone: 'good' | 'bad' | 'plain';
   /** 滑過去看到的依據，數字都寫出來才查得了 */
   why: string;
+  /** 標籤前面的小圖，掃過去先看圖再讀字 */
+  icon: string;
 }
+
+/**
+ * 標籤的配圖。集中放一張表，新增標籤時只要改這裡，
+ * 不用在十幾個 push 點各補一個欄位。
+ */
+const TAG_ICON: Record<string, string> = {
+  肉盾: '🛡️',
+  脆: '🥚',
+  高攻: '⚔️',
+  玻璃炮: '💣',
+  出招快: '⚡',
+  充能快: '🔋',
+  快招就會痛: '👊',
+  大招便宜: '🪙',
+  高爆發: '💥',
+  誘餌好用: '🎣',
+  自帶強化: '📈',
+  能降對手: '📉',
+  丟招有代價: '⚠️',
+  弱點少: '🧱',
+  弱點多: '🎯',
+  抗性廣: '🧿',
+  有雙重弱點: '🩸',
+};
 
 /**
  * 這隻的定位標籤。
@@ -356,7 +382,8 @@ export function roleTags(
   moveById: Map<string, MoveData>,
   ctx: TagContext
 ): RoleTag[] {
-  const tags: RoleTag[] = [];
+  // 配圖統一在最後補，這裡只管判斷
+  const tags: Omit<RoleTag, 'icon'>[] = [];
   const fasts = p.fast.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
   const chargeds = p.charged.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
   const bulk = st.def * st.hp;
@@ -421,7 +448,74 @@ export function roleTags(
     tags.push({ tone: 'bad', label: '有雙重弱點', why: `被 ${d.weak2.map((t) => TYPE_ZH[t]).join('、')} 打到 ×2.56` });
   }
 
-  return tags;
+  return tags.map((t) => ({ ...t, icon: TAG_ICON[t.label] ?? '•' }));
+}
+
+/* ── 雷達圖 ────────────────────────────────────────── */
+
+export type RadarKey = 'atk' | 'def' | 'hp' | 'dpt' | 'ept' | 'dpe';
+
+/** 六個軸的順序就是畫出來的順序：先體質三項、再出手三項 */
+export const RADAR_AXES: { key: RadarKey; label: string; hint: string }[] = [
+  { key: 'atk', label: '攻擊', hint: '實戰攻擊力' },
+  { key: 'def', label: '防禦', hint: '實戰防禦力' },
+  { key: 'hp', label: 'HP', hint: '血量' },
+  { key: 'dpe', label: '爆發', hint: '最佳大招每點能量的傷害（DPE）' },
+  { key: 'ept', label: '充能', hint: '最佳快招每回合能量（EPT）' },
+  { key: 'dpt', label: '快攻', hint: '最佳快招每回合傷害（DPT）' },
+];
+
+export type RadarValues = Record<RadarKey, number>;
+
+/** 算一隻的六個軸原始值 */
+export function radarValues(
+  p: PokemonData,
+  st: { atk: number; def: number; hp: number },
+  moveById: Map<string, MoveData>
+): RadarValues {
+  const fasts = p.fast.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
+  const chargeds = p.charged.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
+  const rates = fasts.map((m) => fastRates(m));
+  return {
+    atk: st.atk,
+    def: st.def,
+    hp: st.hp,
+    dpt: Math.max(0, ...rates.map((x) => x.dpt)),
+    ept: Math.max(0, ...rates.map((x) => x.ept)),
+    dpe: Math.max(0, ...chargeds.map((m) => dpe(m))),
+  };
+}
+
+/** 每個軸的排序值，用來把原始數字換成百分位 */
+export type RadarContext = Record<RadarKey, number[]>;
+
+/**
+ * 以同聯盟上榜的那一批當母體。
+ *
+ * 軸上畫的是百分位不是原始值——六個軸的單位完全不同
+ * （攻擊 120 跟 DPE 2.0 沒得比），只有「贏過多少人」才放得進同一張圖。
+ */
+export function buildRadarContext(pool: RadarValues[]): RadarContext {
+  const out = {} as RadarContext;
+  for (const { key } of RADAR_AXES) out[key] = pool.map((x) => x[key]).sort((a, b) => a - b);
+  return out;
+}
+
+/**
+ * 這個值贏過母體的多少比例（0–100）。
+ * @returns 母體是空的時候回 50，畫出來是一個中規中矩的六邊形，不會誤導成滿分
+ */
+export function radarPercent(ctx: RadarContext, key: RadarKey, v: number): number {
+  const arr = ctx[key];
+  if (!arr || arr.length === 0) return 50;
+  let lo = 0;
+  let hi = arr.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (arr[mid] <= v) lo = mid + 1;
+    else hi = mid;
+  }
+  return (lo / arr.length) * 100;
 }
 
 /** 招式的顯示名，沒有中文就退回英文 */
