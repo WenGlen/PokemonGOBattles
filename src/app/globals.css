@@ -523,11 +523,25 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .pd-stats dd { margin: 0; font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .pd-stats dd small { font-size: 10.5px; font-weight: 400; color: var(--muted); }
 
-.pd-move { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 0; flex-wrap: wrap; }
+/* 招式清單同時是選招的地方：點一下就拿去算屬性對照 */
+.pd-move {
+  display: flex; align-items: center; gap: 7px; width: 100%; flex-wrap: wrap;
+  font: inherit; font-size: 12px; text-align: left; cursor: pointer;
+  padding: 4px 8px; border-radius: 8px; border: 1px solid transparent;
+  background: none; color: var(--text);
+}
+.pd-move:hover { background: var(--surface-2); }
+.pd-move.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.pd-move b { font-weight: 600; }
 .pd-move .dim { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.pd-rec {
-  font-size: 9.5px; font-weight: 600; padding: 0 5px; border-radius: 999px;
-  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+/* 推薦的那幾招直接在清單裡放大，不用另外拉一條出來講同一件事 */
+.pd-move.rec { padding: 8px 9px; margin: 3px 0; background: var(--surface-2); }
+.pd-move.rec b { font-size: 15px; }
+.pd-move.rec .dim { font-size: 11.5px; }
+.pd-move em {
+  margin-left: auto; font-style: normal; font-size: 9.5px; color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px; padding: 1px 7px;
 }
 .pd-empty { font-size: 11.5px; color: var(--muted); }
 
@@ -636,27 +650,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .radar .vb4 { fill: var(--b4); }
 .radar .vb5 { fill: var(--b5); }
 .pd-radar .pd-stats { flex: 1 1 120px; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
-.pd-radar-note { margin: 9px 0 0; font-size: 11px; color: var(--muted); line-height: 1.6; }
-.pd-radar-note b { color: var(--text); }
 
-/* ── 推薦招式 ──────────────────────────────────────── */
-.pd-rec-bar { margin-bottom: 15px; }
-.pd-rec-bar h4 { margin: 0 0 8px; font-size: 11.5px; font-weight: 600; color: var(--muted); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.pd-rec-bar h4 span { font-weight: 400; font-size: 10.5px; opacity: .75; }
-.pd-rec-set { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 9px; }
-.pd-rec-card {
-  display: flex; align-items: center; gap: 10px; min-width: 0;
-  padding: 9px 12px; border-radius: 10px;
-  background: var(--surface-2); border: 1px solid var(--line);
-}
-.pd-rec-card.fast { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
-.pd-rec-card > div { min-width: 0; }
-.pd-rec-card b { display: block; font-size: 15px; font-weight: 600; line-height: 1.35; }
-.pd-rec-card span { display: block; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.pd-rec-card em {
-  margin-left: auto; flex: none; font-style: normal; font-size: 10px; color: var(--muted);
-  border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px;
-}
 
 /* 標籤前面的小圖 */
 .tag-ico { margin-right: 4px; font-size: 11px; line-height: 1; }
@@ -745,7 +739,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 }
 
 /* ── 十八屬性對照 ──────────────────────────────────── */
-.tm { margin-bottom: 15px; }
+.tm { margin-bottom: 16px; }
 .tm-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 .tm-bar h4 { margin: 0; font-size: 11.5px; font-weight: 600; color: var(--muted); }
 .tm-modes { display: flex; gap: 4px; }
@@ -768,31 +762,23 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tm-move i { font-style: normal; font-size: 9.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
 .tm-move em { font-style: normal; font-size: 9.5px; color: var(--warn); }
 
-.tm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(116px, 1fr)); gap: 5px; }
+.tm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 5px; }
 /* 一般倍率的格子刻意平淡，眼睛才會自己跳到有顏色的那幾格 */
+/* 屬性名一律維持灰色，訊號只放在數字上——十八格都上色就等於都沒上色 */
 .tm-cell {
-  display: grid; grid-template-columns: 16px 1fr auto; gap: 2px 6px; align-items: center;
-  padding: 6px 9px; border-radius: 8px; font-size: 11px; color: var(--muted);
-  background: var(--surface-2); border: 1px solid transparent;
+  display: grid; grid-template-columns: 16px 1fr auto; gap: 6px; align-items: center;
+  padding: 6px 9px; border-radius: 8px; font-size: 11.5px; color: var(--muted);
+  background: var(--surface-2);
 }
-.tm-cell b { font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.tm-cell small { grid-column: 2 / -1; font-size: 9.5px; opacity: .8; }
-/* 倍率大的格子字級會變大，屬性名被擠到換行，所以不給它折 */
+.tm-cell b { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
 .tm-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tm-cell.bad { background: color-mix(in srgb, var(--foe) 14%, var(--surface-2)); color: var(--foe); }
-.tm-cell.bad b { font-size: 13px; }
-.tm-cell.bad2 {
-  background: color-mix(in srgb, var(--foe) 30%, var(--surface-2));
-  border-color: color-mix(in srgb, var(--foe) 55%, transparent); color: var(--text);
-}
-.tm-cell.bad2 b { font-size: 15px; }
-.tm-cell.good { background: color-mix(in srgb, var(--good) 13%, var(--surface-2)); color: var(--good); }
-.tm-cell.good b { font-size: 13px; }
-.tm-cell.good2 {
-  background: color-mix(in srgb, var(--good) 26%, var(--surface-2));
-  border-color: color-mix(in srgb, var(--good) 50%, transparent); color: var(--good);
-}
-.tm-cell.good2 b { font-size: 15px; }
+.tm-cell.bad b { color: var(--foe); }
+.tm-cell.good b { color: var(--good); }
+/* 只有雙重那一級才加底色，掃過去會停下來的就這幾格 */
+.tm-cell.bad2 { background: color-mix(in srgb, var(--foe) 20%, var(--surface-2)); }
+.tm-cell.bad2 b { color: var(--foe); font-size: 13.5px; }
+.tm-cell.good2 { background: color-mix(in srgb, var(--good) 18%, var(--surface-2)); }
+.tm-cell.good2 b { color: var(--good); font-size: 13.5px; }
 
 /* ── 列表：給一點層次，不要整片同一個字級 ────────────── */
 .tbl .nm-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }

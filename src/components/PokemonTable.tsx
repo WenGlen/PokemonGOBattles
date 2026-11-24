@@ -184,10 +184,7 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
               );
             })}
           </div>
-          <p className="pd-note">
-            屬性對照的「出手」算的是對<b>單屬性</b>對手的結果，實戰遇到雙屬性還要再乘一次；
-            完整的相剋關係在對戰組合表裡按整隊看。最多同時放兩隻，再點第三隻會換掉先選的那一隻。
-          </p>
+          <p className="pd-note">最多同時放兩隻，再點第三隻會換掉先選的那一隻。</p>
         </div>
       )}
 

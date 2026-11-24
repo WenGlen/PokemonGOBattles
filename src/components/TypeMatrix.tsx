@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { TypeIcon } from '@/components/Icon';
-import { ALL_TYPES, isFast } from '@/lib/analysis';
-import { effBucket, effectiveness, MULT, TYPE_ZH } from '@/lib/typeChart';
+import { ALL_TYPES } from '@/lib/analysis';
+import { effBucket, effectiveness, TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type MoveData, type PokemonData } from '@/lib/types';
 
-type Mode = 'def' | 'atk';
+export type MatrixMode = 'def' | 'atk';
 
 /**
  * 十八屬性對照表。
@@ -15,15 +14,20 @@ type Mode = 'def' | 'atk';
  * 格子的底色與數字大小就是倍率本身，不用先讀完字才知道哪個嚴重。
  *
  * 挨打＝這隻挨每一種屬性的倍率；
- * 出手＝點一招就換成「這一招打每一種屬性」，不點就看所有招裡最好的那一招。
+ * 出手＝點右邊招式清單的某一招就換成「這一招打每一種屬性」，
+ * 不點就看所有招裡最好的那一招。選招用的是本來就在的那份清單，
+ * 不另外長一排按鈕出來把下面的東西往下推。
+ *
+ * @param mode 哪一面，由卡片持有，因為點招式也要能切過來
+ * @param pick 選到的招式 id，null 代表看最好的那一招
  */
-export default function TypeMatrix({ p, moveById }: {
+export default function TypeMatrix({ p, moveById, mode, onMode, pick }: {
   p: PokemonData;
   moveById: Map<string, MoveData>;
+  mode: MatrixMode;
+  onMode: (m: MatrixMode) => void;
+  pick: string | null;
 }) {
-  const [mode, setMode] = useState<Mode>('def');
-  const [pick, setPick] = useState<string | null>(null);
-
   const moves = [...p.fast, ...p.charged]
     .map((id) => moveById.get(id))
     .filter(Boolean) as MoveData[];
@@ -58,39 +62,21 @@ export default function TypeMatrix({ p, moveById }: {
       <div className="tm-bar">
         <h4>屬性對照</h4>
         <div className="tm-modes">
-          {([['def', '挨打'], ['atk', '出手']] as const).map(([k, label]) => (
-            <button key={k} aria-pressed={mode === k} onClick={() => setMode(k)}>{label}</button>
-          ))}
+          <button
+            aria-pressed={mode === 'def'}
+            title="這隻挨每一種屬性的倍率"
+            onClick={() => onMode('def')}
+          >挨打</button>
+          <button
+            aria-pressed={mode === 'atk'}
+            title="牠的招打每一種屬性的倍率。算的是單屬性對手，實戰遇到雙屬性要再乘一次"
+            onClick={() => onMode('atk')}
+          >出手</button>
         </div>
-        <span className="tm-hint">
-          {mode === 'def'
-            ? '這隻挨每一種屬性的倍率'
-            : picked
-              ? `${zhName(picked)} 打每一種屬性的倍率`
-              : '所有招裡最好的那一招（點一招只看那一招）'}
-        </span>
+        {mode === 'atk' && (
+          <span className="tm-hint">{picked ? zhName(picked) : '最好的那一招'}</span>
+        )}
       </div>
-
-      {mode === 'atk' && (
-        <div className="tm-moves">
-          {moves.map((m) => {
-            const stab = p.types.includes(m.type);
-            return (
-              <button
-                key={m.id}
-                className={`tm-move${pick === m.id ? ' on' : ''}`}
-                aria-pressed={pick === m.id}
-                onClick={() => setPick((v) => (v === m.id ? null : m.id))}
-              >
-                <TypeIcon type={m.type} size={13} />
-                {zhName(m)}
-                <i>{isFast(m) ? '快' : '大'}</i>
-                {stab && <em title={`本系加成 ×${MULT.STAB.toFixed(1)}`}>本系</em>}
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       <div className="tm-grid">
         {ALL_TYPES.map((t) => {
@@ -105,7 +91,6 @@ export default function TypeMatrix({ p, moveById }: {
               <TypeIcon type={t} size={16} />
               <span className="tm-name">{TYPE_ZH[t]}</span>
               <b>×{mult.toFixed(2)}</b>
-              {mode === 'atk' && !picked && via && <small>{zhName(via)}</small>}
             </div>
           );
         })}
