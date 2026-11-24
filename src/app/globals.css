@@ -738,40 +738,26 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   .pl-hint { margin-left: 0; flex-basis: 100%; }
 }
 
-/* ── 十八屬性對照 ──────────────────────────────────── */
+/* ── 十八屬性克制 ──────────────────────────────────── */
 .tm { margin-bottom: 16px; }
-.tm-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.tm-bar { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 .tm-bar h4 { margin: 0; font-size: 11.5px; font-weight: 600; color: var(--muted); }
-.tm-modes { display: flex; gap: 4px; }
-.tm-modes button {
-  font: inherit; font-size: 11.5px; padding: 3px 12px; border-radius: 999px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
-}
-.tm-modes button:hover { color: var(--text); border-color: var(--accent); }
-.tm-modes button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #06121f; font-weight: 600; }
 .tm-hint { font-size: 11px; color: var(--muted); }
-
-.tm-moves { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
-.tm-move {
-  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
-  font: inherit; font-size: 12px; padding: 4px 10px 4px 6px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
-}
-.tm-move:hover { border-color: var(--accent); }
-.tm-move.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
-.tm-move i { font-style: normal; font-size: 9.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
-.tm-move em { font-style: normal; font-size: 9.5px; color: var(--warn); }
+.tm-hint b { color: var(--text); font-weight: 600; }
 
 .tm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 5px; }
-/* 一般倍率的格子刻意平淡，眼睛才會自己跳到有顏色的那幾格 */
 /* 屬性名一律維持灰色，訊號只放在數字上——十八格都上色就等於都沒上色 */
 .tm-cell {
   display: grid; grid-template-columns: 16px 1fr auto; gap: 6px; align-items: center;
   padding: 6px 9px; border-radius: 8px; font-size: 11.5px; color: var(--muted);
   background: var(--surface-2);
+  /* outline 不占位置，所以外框粗細變化不會讓十八格位移 */
+  outline: 0 solid transparent; outline-offset: -2px; transition: outline-width .1s, outline-color .1s;
 }
 .tm-cell b { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
 .tm-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 底色與數字＝挨打 */
 .tm-cell.bad b { color: var(--foe); }
 .tm-cell.good b { color: var(--good); }
 /* 只有雙重那一級才加底色，掃過去會停下來的就這幾格 */
@@ -779,6 +765,13 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tm-cell.bad2 b { color: var(--foe); font-size: 13.5px; }
 .tm-cell.good2 { background: color-mix(in srgb, var(--good) 18%, var(--surface-2)); }
 .tm-cell.good2 b { color: var(--good); font-size: 13.5px; }
+
+/* 外框＝那一招打出去的倍率。選取 2px、滑過 3px */
+.tm-cell.o-hit { outline-width: 2px; outline-color: color-mix(in srgb, var(--good) 65%, transparent); }
+.tm-cell.o-hit2 { outline-width: 2px; outline-color: var(--good); }
+.tm-cell.o-miss { outline-width: 2px; outline-color: color-mix(in srgb, var(--foe) 60%, transparent); }
+.tm-cell.o-miss2 { outline-width: 2px; outline-color: var(--foe); }
+.tm-cell.hot[class*='o-'] { outline-width: 3px; }
 
 /* ── 列表：給一點層次，不要整片同一個字級 ────────────── */
 .tbl .nm-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }

@@ -29,12 +29,13 @@ export interface DetailStats {
   moveset: string[] | null;
 }
 
-/** 招式清單裡的一列。推薦的那幾招放大，點一下就拿去算「出手」 */
-function MoveRow({ m, rec, on, onPick }: {
+/** 招式清單裡的一列。推薦的那幾招放大；滑過或點一下就把克制表的外框換成這一招 */
+function MoveRow({ m, rec, on, onPick, onHover }: {
   m: MoveData;
   rec: boolean;
   on: boolean;
   onPick: () => void;
+  onHover: (hovering: boolean) => void;
 }) {
   const fast = isFast(m);
   const r = fastRates(m);
@@ -43,8 +44,12 @@ function MoveRow({ m, rec, on, onPick }: {
       type="button"
       className={`pd-move${rec ? ' rec' : ''}${on ? ' on' : ''}`}
       aria-pressed={on}
-      title={`點一下看 ${zhName(m)} 打每一種屬性的倍率`}
+      title={`滑過或點一下，左邊的克制表外框會換成 ${zhName(m)} 打出去的倍率`}
       onClick={onPick}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+      onFocus={() => onHover(true)}
+      onBlur={() => onHover(false)}
     >
       <TypeIcon type={m.type} size={rec ? 18 : 13} />
       <b>{zhName(m)}</b>
@@ -67,9 +72,9 @@ function MoveRow({ m, rec, on, onPick }: {
 /**
  * 單隻寶可夢的解析卡。
  *
- * 左欄是「跟誰打有利」與「底子多好」，右欄是牠帶得出來的招。
- * 點右欄任何一招，左欄的屬性對照就換成那一招的結果——
- * 招式清單本來就在那裡，不用為了選招再多長一排按鈕出來。
+ * 屬性克制整排撐滿，下面左邊是六角能力、右邊是牠帶得出來的招。
+ * 滑過或點右下任何一招，克制表的外框就換成那一招打出去的倍率——
+ * 底色講防守、外框講攻擊，兩件事同時看得到，不用切換。
  */
 export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onClose }: {
   p: PokemonData;
@@ -84,8 +89,9 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
   // 判斷依據直接顯示在標籤下面。原生 title 要等一秒才跳、手機完全不會跳，
   // 等於把算式藏起來；這裡改成滑過或點一下就寫在旁邊。
   const [why, setWhy] = useState<RoleTag | null>(null);
-  const [mode, setMode] = useState<'def' | 'atk'>('def');
+  /** 選到的招式（留著），以及正在滑過的那一招（暫時蓋過選取的） */
   const [pick, setPick] = useState<string | null>(null);
+  const [hover, setHover] = useState<string | null>(null);
 
   const tags = roleTags(p, st, data.moveById, ctx);
   const fasts = p.fast.map((id) => data.moveById.get(id)).filter(Boolean) as MoveData[];
@@ -93,11 +99,10 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
   const rec = new Set(st.moveset ?? []);
   const radar = radarValues(p, st, data.moveById);
 
-  /** 點招式＝想看這一招打誰，所以順手切到出手；再點一次取消，回到「最好的那一招」 */
-  function choose(id: string) {
-    setPick((v) => (v === id ? null : id));
-    setMode('atk');
-  }
+  /** 滑過的優先，放開就回到選取的那一招；都沒有就是純防守面 */
+  const focusId = hover ?? pick;
+  const focusMove = focusId ? data.moveById.get(focusId) ?? null : null;
+  const atk = focusMove ? { move: focusMove, strong: hover !== null } : null;
 
   return (
     <div className="pd">
@@ -139,16 +144,10 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
         <button type="button" className="panel-x" onClick={onClose} aria-label="收起這張卡">×</button>
       </div>
 
+      <TypeMatrix p={p} atk={atk} />
+
       <div className="pd-cols">
         <div className="pd-col">
-          <TypeMatrix
-            p={p}
-            moveById={data.moveById}
-            mode={mode}
-            onMode={setMode}
-            pick={pick}
-          />
-
           <section className="pd-sec">
             <h4 title={`${st.level ? `Lv${st.level} · ` : ''}軸上是真實數值，顏色是強弱、位置是贏過同聯盟上榜的多少人`}>
               六角能力
@@ -169,18 +168,32 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
 
         <div className="pd-col">
           <section className="pd-sec">
-            <h4 title="點一招，左邊的屬性對照就換成那一招打每一種屬性的結果">快招</h4>
+            <h4 title="滑過或點一招，上面的克制表外框會換成那一招打出去的倍率">快招</h4>
             {fasts.length === 0 && <div className="pd-empty">—</div>}
             {fasts.map((m) => (
-              <MoveRow key={m.id} m={m} rec={rec.has(m.id)} on={pick === m.id} onPick={() => choose(m.id)} />
+              <MoveRow
+                key={m.id}
+                m={m}
+                rec={rec.has(m.id)}
+                on={pick === m.id}
+                onPick={() => setPick((v) => (v === m.id ? null : m.id))}
+                onHover={(h) => setHover(h ? m.id : null)}
+              />
             ))}
           </section>
 
           <section className="pd-sec">
-            <h4 title="點一招，左邊的屬性對照就換成那一招打每一種屬性的結果">大招</h4>
+            <h4 title="滑過或點一招，上面的克制表外框會換成那一招打出去的倍率">大招</h4>
             {chargeds.length === 0 && <div className="pd-empty">—</div>}
             {chargeds.map((m) => (
-              <MoveRow key={m.id} m={m} rec={rec.has(m.id)} on={pick === m.id} onPick={() => choose(m.id)} />
+              <MoveRow
+                key={m.id}
+                m={m}
+                rec={rec.has(m.id)}
+                on={pick === m.id}
+                onPick={() => setPick((v) => (v === m.id ? null : m.id))}
+                onHover={(h) => setHover(h ? m.id : null)}
+              />
             ))}
           </section>
         </div>
