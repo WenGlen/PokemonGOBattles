@@ -11,6 +11,12 @@
   --good: #3ddc84;
   --warn: #ffb020;
   --radius: 10px;
+  /* 強弱五段。雷達圖、列表長條都吃這一組，同一個「強」在哪裡都是同一個顏色 */
+  --b1: #ff6b6b;
+  --b2: #ff8c42;
+  --b3: #ffb020;
+  --b4: #a3d73a;
+  --b5: #3ddc84;
 }
 
 @media (prefers-color-scheme: light) {
@@ -391,11 +397,11 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl .bar { display: block; height: 3px; margin: 2px 0 1px; border-radius: 2px; background: color-mix(in srgb, var(--line) 65%, transparent); }
 .tbl .bar i { display: block; height: 100%; margin-left: auto; border-radius: 2px; }
 /* 每 20% 一段：紅 → 橙 → 黃 → 黃綠 → 綠 */
-.tbl .bar i.b1 { background: var(--foe); }
-.tbl .bar i.b2 { background: #ff8c42; }
-.tbl .bar i.b3 { background: var(--warn); }
-.tbl .bar i.b4 { background: #a3d73a; }
-.tbl .bar i.b5 { background: var(--good); }
+.tbl .bar i.b1 { background: var(--b1); }
+.tbl .bar i.b2 { background: var(--b2); }
+.tbl .bar i.b3 { background: var(--b3); }
+.tbl .bar i.b4 { background: var(--b4); }
+.tbl .bar i.b5 { background: var(--b5); }
 .tbl .mv { display: inline-flex; align-items: center; gap: 3px; margin-right: 8px; white-space: nowrap; }
 .tbl-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12.5px; }
 
@@ -609,7 +615,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 
 /* ── 六角雷達圖 ────────────────────────────────────── */
 .pd-radar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.radar { width: 100%; max-width: 240px; height: auto; flex: 1 1 200px; }
+.radar { width: 100%; max-width: 300px; height: auto; flex: 1 1 240px; }
 .radar .ring { fill: none; stroke: var(--line); stroke-width: 1; }
 .radar .ring.edge { stroke: color-mix(in srgb, var(--muted) 45%, transparent); }
 .radar .spoke { stroke: var(--line); stroke-width: 1; }
@@ -620,9 +626,16 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 另一張卡那一隻：只有輪廓，免得兩塊顏色疊在一起分不出是誰 */
 .radar .shape.other { fill: none; stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 4 3; stroke-linejoin: round; }
 .radar .dot { fill: var(--accent); }
-.radar .lbl { fill: var(--muted); font-size: 12px; }
-.radar .pct { fill: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
-.pd-radar .pd-stats { flex: 1 1 140px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* 軸標籤：名稱（小、灰）＋真實數值（大、照強弱上色）＋百分位（小、灰） */
+.radar .lbl { fill: var(--muted); font-size: 10.5px; }
+.radar .val { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.radar .pct { font-size: 10px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.radar .vb1 { fill: var(--b1); }
+.radar .vb2 { fill: var(--b2); }
+.radar .vb3 { fill: var(--b3); }
+.radar .vb4 { fill: var(--b4); }
+.radar .vb5 { fill: var(--b5); }
+.pd-radar .pd-stats { flex: 1 1 120px; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
 .pd-radar-note { margin: 9px 0 0; font-size: 11px; color: var(--muted); line-height: 1.6; }
 .pd-radar-note b { color: var(--text); }
 
@@ -729,4 +742,65 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   .pl-clock { text-align: left; display: flex; align-items: baseline; gap: 8px; }
   .pl-clock small { margin-top: 0; }
   .pl-hint { margin-left: 0; flex-basis: 100%; }
+}
+
+/* ── 十八屬性對照 ──────────────────────────────────── */
+.tm { margin-bottom: 15px; }
+.tm-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.tm-bar h4 { margin: 0; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.tm-modes { display: flex; gap: 4px; }
+.tm-modes button {
+  font: inherit; font-size: 11.5px; padding: 3px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
+}
+.tm-modes button:hover { color: var(--text); border-color: var(--accent); }
+.tm-modes button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #06121f; font-weight: 600; }
+.tm-hint { font-size: 11px; color: var(--muted); }
+
+.tm-moves { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
+.tm-move {
+  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+  font: inherit; font-size: 12px; padding: 4px 10px 4px 6px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+}
+.tm-move:hover { border-color: var(--accent); }
+.tm-move.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.tm-move i { font-style: normal; font-size: 9.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+.tm-move em { font-style: normal; font-size: 9.5px; color: var(--warn); }
+
+.tm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(116px, 1fr)); gap: 5px; }
+/* 一般倍率的格子刻意平淡，眼睛才會自己跳到有顏色的那幾格 */
+.tm-cell {
+  display: grid; grid-template-columns: 16px 1fr auto; gap: 2px 6px; align-items: center;
+  padding: 6px 9px; border-radius: 8px; font-size: 11px; color: var(--muted);
+  background: var(--surface-2); border: 1px solid transparent;
+}
+.tm-cell b { font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tm-cell small { grid-column: 2 / -1; font-size: 9.5px; opacity: .8; }
+/* 倍率大的格子字級會變大，屬性名被擠到換行，所以不給它折 */
+.tm-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tm-cell.bad { background: color-mix(in srgb, var(--foe) 14%, var(--surface-2)); color: var(--foe); }
+.tm-cell.bad b { font-size: 13px; }
+.tm-cell.bad2 {
+  background: color-mix(in srgb, var(--foe) 30%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--foe) 55%, transparent); color: var(--text);
+}
+.tm-cell.bad2 b { font-size: 15px; }
+.tm-cell.good { background: color-mix(in srgb, var(--good) 13%, var(--surface-2)); color: var(--good); }
+.tm-cell.good b { font-size: 13px; }
+.tm-cell.good2 {
+  background: color-mix(in srgb, var(--good) 26%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--good) 50%, transparent); color: var(--good);
+}
+.tm-cell.good2 b { font-size: 15px; }
+
+/* ── 列表：給一點層次，不要整片同一個字級 ────────────── */
+.tbl .nm-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.tbl .nm-txt b { font-size: 14px; font-weight: 600; }
+.tbl .nm-txt small { font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.tbl td.rk .rk-n { font-size: 14px; font-weight: 600; }
+.tbl td.rk .rk-n.top { color: var(--accent); }
+.tbl .mv {
+  padding: 2px 8px 2px 4px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--line); margin-right: 5px;
 }

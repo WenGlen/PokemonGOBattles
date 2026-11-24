@@ -1,15 +1,15 @@
 'use client';
 
-import { RADAR_AXES, radarPercent, type RadarContext, type RadarValues } from '@/lib/analysis';
+import { band, RADAR_AXES, radarPercent, type RadarContext, type RadarValues } from '@/lib/analysis';
 
 // 畫布比正方形寬，因為左右兩邊的軸標籤比上下的長，擠成正方形會被切掉
-const W = 260;
-const H = 210;
+const W = 300;
+const H = 232;
 const CX = W / 2;
-const CY = 100;
+const CY = 112;
 /** 外圈半徑。剩下的空間留給軸標籤 */
-const R = 60;
-const LABEL_R = 80;
+const R = 62;
+const LABEL_R = 84;
 const RINGS = [0.25, 0.5, 0.75, 1];
 
 /** 第 i 個軸、距中心 d 的座標。從正上方開始、順時針每 60 度一個 */
@@ -62,15 +62,18 @@ export default function Radar({ values, ctx, compare }: {
         return <circle key={i} className="dot" cx={x} cy={y} r={2.6} />;
       })}
 
+      {/* 標籤上寫的是真實數值，顏色是它在同聯盟的強弱段——
+          數字回答「多少」、顏色回答「算強還算弱」，位置回答「贏過多少人」 */}
       {RADAR_AXES.map((a, i) => {
         const [x, y] = point(i, LABEL_R);
         const [cx] = point(i, 1);
         const anchor = Math.abs(cx - CX) < 0.2 ? 'middle' : cx > CX ? 'start' : 'end';
         return (
-          <text key={a.key} className="lbl" x={x} y={y} textAnchor={anchor} dominantBaseline="central">
-            <title>{`${a.label}：${a.hint}　贏過同聯盟 ${Math.round(pcts[i])}%`}</title>
-            {a.label}
-            <tspan className="pct" dx="3">{Math.round(pcts[i])}</tspan>
+          <text key={a.key} className="lbl" x={x} y={y} textAnchor={anchor}>
+            <title>{`${a.label}：${a.hint}　${a.fmt(values[a.key])}，贏過同聯盟 ${Math.round(pcts[i])}%`}</title>
+            <tspan x={x} dy="-4">{a.label}</tspan>
+            <tspan className={`val vb${band(pcts[i])}`} x={x} dy="15">{a.fmt(values[a.key])}</tspan>
+            <tspan className="pct" dx="4">{Math.round(pcts[i])}%</tspan>
           </text>
         );
       })}

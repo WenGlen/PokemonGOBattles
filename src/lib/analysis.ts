@@ -455,15 +455,26 @@ export function roleTags(
 
 export type RadarKey = 'atk' | 'def' | 'hp' | 'dpt' | 'ept' | 'dpe';
 
-/** 六個軸的順序就是畫出來的順序：先體質三項、再出手三項 */
-export const RADAR_AXES: { key: RadarKey; label: string; hint: string }[] = [
-  { key: 'atk', label: '攻擊', hint: '實戰攻擊力' },
-  { key: 'def', label: '防禦', hint: '實戰防禦力' },
-  { key: 'hp', label: 'HP', hint: '血量' },
-  { key: 'dpe', label: '爆發', hint: '最佳大招每點能量的傷害（DPE）' },
-  { key: 'ept', label: '充能', hint: '最佳快招每回合能量（EPT）' },
-  { key: 'dpt', label: '快攻', hint: '最佳快招每回合傷害（DPT）' },
+/**
+ * 六個軸的順序就是畫出來的順序：先體質三項、再出手三項。
+ * fmt 是軸上要寫的真實數值——只給百分位的話看不出「121.0 攻擊」到底是多少。
+ */
+export const RADAR_AXES: { key: RadarKey; label: string; hint: string; fmt: (v: number) => string }[] = [
+  { key: 'atk', label: '攻擊', hint: '實戰攻擊力', fmt: (v) => v.toFixed(1) },
+  { key: 'def', label: '防禦', hint: '實戰防禦力', fmt: (v) => v.toFixed(1) },
+  { key: 'hp', label: 'HP', hint: '血量', fmt: (v) => String(Math.round(v)) },
+  { key: 'dpe', label: '爆發', hint: '最佳大招每點能量的傷害（DPE）', fmt: (v) => v.toFixed(2) },
+  { key: 'ept', label: '充能', hint: '最佳快招每回合能量（EPT）', fmt: (v) => v.toFixed(2) },
+  { key: 'dpt', label: '快攻', hint: '最佳快招每回合傷害（DPT）', fmt: (v) => v.toFixed(2) },
 ];
+
+/**
+ * 百分位落在哪一段（1–5）。跟列表長條用同一把尺，
+ * 同一個「強」在兩個地方要是同一個顏色。
+ */
+export function band(pct: number): 1 | 2 | 3 | 4 | 5 {
+  return Math.min(5, Math.floor(pct / 20) + 1) as 1 | 2 | 3 | 4 | 5;
+}
 
 export type RadarValues = Record<RadarKey, number>;
 

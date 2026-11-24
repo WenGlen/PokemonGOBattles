@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { PokemonIcon, TypeIcon } from '@/components/Icon';
 import Radar from '@/components/Radar';
+import TypeMatrix from '@/components/TypeMatrix';
 import {
-  defenseProfile, dpe, fastRates, isFast, offenseProfile, radarValues, roleTags,
+  dpe, fastRates, isFast, radarValues, roleTags,
   type RadarContext, type RadarValues, type RoleTag, type TagContext,
 } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
@@ -29,40 +30,12 @@ export interface DetailStats {
 }
 
 /**
- * 一排屬性圖示。
- * 倍率本身看不出意思，所以標題下面一律附一行白話，不要求人滑過去才看得到。
- */
-function TypeRow({ label, note, types, tone }: {
-  label: string;
-  note: string;
-  types: string[];
-  tone?: 'bad2' | 'bad' | 'good' | 'good2';
-}) {
-  return (
-    <div className="pd-row">
-      <span className={`pd-label${tone ? ` ${tone}` : ''}`}>
-        {label}
-        <small>{note}</small>
-      </span>
-      <span className="pd-types">
-        {types.length
-          ? types.map((t) => (
-              <span key={t} className={`chip type${tone ? ` ${tone}` : ''}`}>
-                <TypeIcon type={t} size={14} label />
-              </span>
-            ))
-          : <span className="dim">無</span>}
-      </span>
-    </div>
-  );
-}
-
-/**
  * 單隻寶可夢的解析卡。
  *
- * 左半是「這隻本身」——屬性挨打的狀況與三圍；
- * 右半是「這隻能做什麼」——招式打得動誰，以及實際帶得出來的招。
- * 防守面與攻擊面分開講，因為它們是兩件事：一隻可以很耐打但打不動人，也可以反過來。
+ * 由上而下：這是誰（頭像、定位標籤）→ 該帶什麼（推薦招式）→
+ * 跟誰打有利（屬性對照）→ 底子多好（雷達圖）→ 還能帶什麼（招式清單）。
+ * 防守面與攻擊面在屬性對照裡用切換分開，因為它們是兩件事：
+ * 一隻可以很耐打但打不動人，也可以反過來。
  */
 export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onClose }: {
   p: PokemonData;
@@ -78,8 +51,6 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
   // 等於把算式藏起來；這裡改成滑過或點一下就寫在旁邊。
   const [why, setWhy] = useState<RoleTag | null>(null);
 
-  const def = defenseProfile(p.types);
-  const off = offenseProfile(p, data.moveById);
   const tags = roleTags(p, st, data.moveById, ctx);
 
   const fasts = p.fast.map((id) => data.moveById.get(id)).filter(Boolean) as MoveData[];
@@ -157,16 +128,10 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
         </section>
       )}
 
+      <TypeMatrix p={p} moveById={data.moveById} />
+
       <div className="pd-cols">
         <div className="pd-col">
-          <section className="pd-sec">
-            <h4>挨打（這隻的屬性）</h4>
-            <TypeRow label="×2.56" note="雙重被剋" types={def.weak2} tone="bad2" />
-            <TypeRow label="×1.60" note="被剋" types={def.weak} tone="bad" />
-            <TypeRow label="×0.63" note="抵抗" types={def.resist} tone="good" />
-            <TypeRow label="×0.39" note="雙抗或免疫" types={def.resist2} tone="good2" />
-          </section>
-
           <section className="pd-sec">
             <h4>六角能力（{st.level ? `Lv${st.level} · ` : ''}跟同聯盟上榜的比）</h4>
             <div className="pd-radar">
@@ -178,26 +143,17 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
                 </div>
                 <div><dt>CP</dt><dd>{st.cp}</dd></div>
                 <div><dt>耐久</dt><dd>{Math.round(st.bulk).toLocaleString()}</dd></div>
-                <div><dt>攻擊</dt><dd>{st.atk.toFixed(1)}</dd></div>
-                <div><dt>防禦</dt><dd>{st.def.toFixed(1)}</dd></div>
-                <div><dt>HP</dt><dd>{st.hp}</dd></div>
               </dl>
             </div>
             <p className="pd-radar-note">
-              軸上是<b>百分位</b>不是原始值——六個軸單位不同，只有「贏過多少人」放得進同一張圖。
+              軸上寫的是真實數值，<b>顏色是強弱、位置是贏過同聯盟多少人</b>——
+              六個軸單位不同，只有百分位放得進同一張圖。
               {compare && ' 虛線是另一張卡那一隻。'}
             </p>
           </section>
         </div>
 
         <div className="pd-col">
-          <section className="pd-sec">
-            <h4>出手（這隻的招式打得動誰）</h4>
-            <TypeRow label="打得痛" note="≥ 1.6 倍" types={off.strong} tone="good" />
-            <TypeRow label="打不動" note="所有招都被吃" types={off.weak} tone="bad" />
-            <TypeRow label="能帶的屬性" note="招式覆蓋面" types={off.coverage} />
-          </section>
-
           <section className="pd-sec">
             <h4>快招</h4>
             {fasts.length === 0 && <div className="pd-empty">—</div>}

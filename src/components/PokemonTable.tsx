@@ -185,7 +185,7 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
             })}
           </div>
           <p className="pd-note">
-            「打得痛／打不動」算的是對<b>單屬性</b>對手的結果，實戰遇到雙屬性還要再乘一次；
+            屬性對照的「出手」算的是對<b>單屬性</b>對手的結果，實戰遇到雙屬性還要再乘一次；
             完整的相剋關係在對戰組合表裡按整隊看。最多同時放兩隻，再點第三隻會換掉先選的那一隻。
           </p>
         </div>
@@ -236,13 +236,15 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
                     style={{ cursor: 'pointer' }}
                   >
                     <td className="num rk">
-                      <span className="rk-n">{r.rank ?? '—'}</span>
+                      <span className={`rk-n${r.rank !== null && r.rank <= 3 ? ' top' : ''}`}>{r.rank ?? '—'}</span>
                       {r.score !== null && <small className="dim">{r.score.toFixed(1)}</small>}
                     </td>
                     <td className="left nm">
-                      <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={24} shadow={Boolean(r.p.shadow)} />
-                      <span>{zhName(r.p)}</span>
-                      <small className="dim">#{r.p.dex}</small>
+                      <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={36} shadow={Boolean(r.p.shadow)} />
+                      <span className="nm-txt">
+                        <b>{zhName(r.p)}</b>
+                        <small className="dim">#{r.p.dex}</small>
+                      </span>
                       {on && <small className="pick">✓</small>}
                     </td>
                     <td className="left">
