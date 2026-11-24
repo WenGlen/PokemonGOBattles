@@ -115,6 +115,12 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
               <span key={t} className="chip type"><TypeIcon type={t} size={15} label /></span>
             ))}
           </div>
+          {/* 排名是這張表的頭條事實，放在名字旁邊而不是擠進雷達圖旁邊的角落 */}
+          <div className="pd-rank" title="pvpoke 在這個聯盟的總排名與評分">
+            {st.rank === null
+              ? <span className="dim">未上榜</span>
+              : <>第 <b>{st.rank}</b> 名{st.score !== null && <small>· {st.score.toFixed(1)} 分</small>}</>}
+          </div>
         </div>
         {tags.length > 0 && (
           <div className="pd-tagbox">
@@ -154,11 +160,8 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
             </h4>
             <div className="pd-radar">
               <Radar values={radar} ctx={radarCtx} compare={compare} />
+              {/* 雷達圖沒有的兩個數字擺在圖的下緣左右，中間的空間全留給圖 */}
               <dl className="pd-stats">
-                <div>
-                  <dt>排名</dt>
-                  <dd>{st.rank ?? '—'}{st.score !== null && <small> 分 {st.score.toFixed(1)}</small>}</dd>
-                </div>
                 <div><dt>CP</dt><dd>{st.cp}</dd></div>
                 <div><dt>耐久</dt><dd>{Math.round(st.bulk).toLocaleString()}</dd></div>
               </dl>

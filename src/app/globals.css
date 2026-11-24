@@ -476,6 +476,13 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .pd-id h3 small { font-size: 11.5px; font-weight: 400; font-variant-numeric: tabular-nums; }
 .pd-ty { display: flex; gap: 5px; flex-wrap: wrap; }
 .pd-ty .chip { font-size: 11.5px; padding: 2px 9px 2px 5px; }
+.pd-rank {
+  display: inline-flex; align-items: baseline; gap: 4px; margin-top: 8px;
+  padding: 2px 11px; border-radius: 999px; font-size: 11.5px; color: var(--muted);
+  background: var(--surface-2); border: 1px solid var(--line);
+}
+.pd-rank b { font-size: 16px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.pd-rank small { font-size: 11px; }
 
 /* 標籤跟編號之間留寬一點，不然會黏成一團 */
 .pd-tagbox { flex: 1; min-width: 0; margin-left: 10px; padding-top: 2px; }
@@ -628,8 +635,9 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 }
 
 /* ── 六角雷達圖 ────────────────────────────────────── */
-.pd-radar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.radar { width: 100%; max-width: 300px; height: auto; flex: 1 1 240px; }
+/* 數字移到圖的下緣之後，旁邊不用再留位置給它們，圖可以放到整欄寬 */
+.pd-radar { display: block; }
+.radar { display: block; width: 100%; max-width: 380px; height: auto; margin: 0 auto; }
 .radar .ring { fill: none; stroke: var(--line); stroke-width: 1; }
 .radar .ring.edge { stroke: color-mix(in srgb, var(--muted) 45%, transparent); }
 .radar .spoke { stroke: var(--line); stroke-width: 1; }
@@ -649,7 +657,12 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .radar .vb3 { fill: var(--b3); }
 .radar .vb4 { fill: var(--b4); }
 .radar .vb5 { fill: var(--b5); }
-.pd-radar .pd-stats { flex: 1 1 120px; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
+/* CP 與耐久貼著圖的左右兩個下角 */
+.pd-radar .pd-stats {
+  display: flex; justify-content: space-between; gap: 12px;
+  max-width: 380px; margin: 2px auto 0; padding: 0 4px;
+}
+.pd-radar .pd-stats > div:last-child { text-align: right; }
 
 
 /* 標籤前面的小圖 */
