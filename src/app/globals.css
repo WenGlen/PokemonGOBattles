@@ -3,9 +3,10 @@
      克制表那四個顏色要在固定的底色上才站得住 */
   color-scheme: light;
   --bg: #f6f2e8;
-  --surface: #fffdf7;
-  --surface-2: #f1ece0;
-  --line: #e3dccc;
+  /* surface 系列都比 --bg 亮，卡片與控制項才會浮在背景上面 */
+  --surface: #fffefb;
+  --surface-2: #faf7ef;
+  --line: #e5ded0;
   --text: #2b2720;
   --muted: #6e6659;
   --accent: #2f6fd0;
@@ -20,12 +21,13 @@
      雙重被剋紅、被剋橘黃、抵抗綠、雙重抵抗藍。
      這四個講的是「倍率大小」，不是「對你好不好」；
      對你好不好是 --foe／--good 那一組（勝負、威脅數）的事，兩套不要混用。 */
-  --ef-w2: #c62a20;
-  /* 橘黃在米白上拉不到 4.5 的對比，這是還看得出橘黃的最深值（約 3.9）。
+  --ef-w2: #d1281b;
+  /* 橘黃在米白上拉不到 4.5 的對比，再深就變土色、再亮就看不見，
+     所以這一段改用底色補強度（見 .tg-cells 的 ef-w1）。
      倍率本身就印在格子裡、欄標題也寫了桶名，顏色是重複編碼不是唯一資訊 */
-  --ef-w1: #a9660a;
-  --ef-r1: #227a47;
-  --ef-r2: #2457b8;
+  --ef-w1: #c47106;
+  --ef-r1: #16854a;
+  --ef-r2: #1d55cc;
   /* 強弱五段。雷達圖、列表長條都吃這一組，同一個「強」在哪裡都是同一個顏色 */
   --b1: #d4453b;
   --b2: #d97b22;
@@ -423,8 +425,8 @@ header.top .meta b { color: var(--good); font-weight: 600; }
    下面的 .bad／.good 是另一回事——那是勝負與「剋你幾隻」，講的是對你好不好 */
 .tbl td.ef-w1 { color: var(--ef-w1); font-weight: 600; }
 .tbl td.ef-r1 { color: var(--ef-r1); font-weight: 600; }
-.tbl td.ef-w2 { color: var(--ef-w2); background: color-mix(in srgb, var(--ef-w2) 15%, transparent); font-weight: 700; }
-.tbl td.ef-r2 { color: var(--ef-r2); background: color-mix(in srgb, var(--ef-r2) 13%, transparent); font-weight: 700; }
+.tbl td.ef-w2 { color: var(--ef-w2); background: color-mix(in srgb, var(--ef-w2) 17%, transparent); font-weight: 700; }
+.tbl td.ef-r2 { color: var(--ef-r2); background: color-mix(in srgb, var(--ef-r2) 15%, transparent); font-weight: 700; }
 
 .tbl td.bad { color: var(--foe); }
 .tbl td.bad2 { color: var(--foe); background: color-mix(in srgb, var(--foe) 18%, transparent); font-weight: 700; }
@@ -788,9 +790,9 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tm-cell.ef-w1 b { color: var(--ef-w1); }
 .tm-cell.ef-r1 b { color: var(--ef-r1); }
 /* 只有雙重那一級才加底色，掃過去會停下來的就這幾格 */
-.tm-cell.ef-w2 { background: color-mix(in srgb, var(--ef-w2) 16%, var(--surface-2)); }
+.tm-cell.ef-w2 { background: color-mix(in srgb, var(--ef-w2) 24%, var(--surface-2)); }
 .tm-cell.ef-w2 b { color: var(--ef-w2); font-size: 13.5px; }
-.tm-cell.ef-r2 { background: color-mix(in srgb, var(--ef-r2) 15%, var(--surface-2)); }
+.tm-cell.ef-r2 { background: color-mix(in srgb, var(--ef-r2) 22%, var(--surface-2)); }
 .tm-cell.ef-r2 b { color: var(--ef-r2); font-size: 13.5px; }
 
 /* 外框＝那一招打出去的倍率，跟底色同一套顏色。選取 2px、滑過 3px */
@@ -836,10 +838,10 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tg-col[data-b='0'] .tg-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 /* 倍率搬到欄標題之後格子就沒有顏色線索了。解析卡那張表不敢整片上色是因為
    十八格混在一起，這裡欄位本身就是分組，整欄同一個淡色反而是一道五階的梯度 */
-.tg-cells .tm-cell.ef-w1 { background: color-mix(in srgb, var(--ef-w1) 13%, var(--surface-2)); }
-.tg-cells .tm-cell.ef-w1 .tm-name { color: color-mix(in srgb, var(--ef-w1) 75%, var(--text)); }
-.tg-cells .tm-cell.ef-r1 { background: color-mix(in srgb, var(--ef-r1) 12%, var(--surface-2)); }
-.tg-cells .tm-cell.ef-r1 .tm-name { color: color-mix(in srgb, var(--ef-r1) 75%, var(--text)); }
+.tg-cells .tm-cell.ef-w1 { background: color-mix(in srgb, var(--ef-w1) 17%, var(--surface-2)); }
+.tg-cells .tm-cell.ef-w1 .tm-name { color: color-mix(in srgb, var(--ef-w1) 85%, var(--text)); }
+.tg-cells .tm-cell.ef-r1 { background: color-mix(in srgb, var(--ef-r1) 15%, var(--surface-2)); }
+.tg-cells .tm-cell.ef-r1 .tm-name { color: color-mix(in srgb, var(--ef-r1) 80%, var(--text)); }
 
 /* 圖示放大，雙重的那兩欄又更大一圈——強弱本來就該長得不一樣大 */
 .tg-cells .tm-cell { display: flex; justify-content: center; gap: 7px; padding: 7px 8px; font-size: 12.5px; }
