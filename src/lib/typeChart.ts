@@ -81,5 +81,24 @@ export function effBucket(mult: number): -2 | -1 | 0 | 1 | 2 {
   return 0;
 }
 
+/**
+ * 桶 → CSS 樣式字尾。四段各自一個顏色，整個平台同一套：
+ * `w2` 雙重被剋（紅）、`w1` 被剋（橘黃）、`r1` 抵抗（綠）、`r2` 雙重抵抗（藍）。
+ *
+ * 顏色講的是**倍率大小**，不是「對你好不好」——挨打與出手共用同一套，
+ * 所以外框紅色就是「這一招打過去倍率高」，不會因為換個方向就換個意思。
+ * 勝負、威脅數那種「對你好不好」用的是另一組（--foe／--good），兩套不要混。
+ *
+ * @param bucket effBucket() 的輸出
+ * @returns 樣式字尾，普通回空字串
+ */
+export function effClass(bucket: -2 | -1 | 0 | 1 | 2): '' | 'w2' | 'w1' | 'r1' | 'r2' {
+  if (bucket === 2) return 'w2';
+  if (bucket === 1) return 'w1';
+  if (bucket === -1) return 'r1';
+  if (bucket === -2) return 'r2';
+  return '';
+}
+
 /** 18 屬性的中文名。唯一來源是 data/type-zh.json，抓資料腳本也讀同一份。 */
 export const TYPE_ZH: Record<string, string> = typeZh;

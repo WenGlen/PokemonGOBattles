@@ -1,33 +1,37 @@
 :root {
-  --bg: #0f1115;
-  --surface: #171a21;
-  --surface-2: #1e222b;
-  --line: #2a2f3a;
-  --text: #e8eaf0;
-  --muted: #949cb0;
-  --accent: #4da3ff;
-  --you: #4da3ff;
-  --foe: #ff6b6b;
-  --good: #3ddc84;
-  --warn: #ffb020;
+  /* 米白底。只有一套配色，不跟著系統的深淺色切換——
+     克制表那四個顏色要在固定的底色上才站得住 */
+  color-scheme: light;
+  --bg: #f6f2e8;
+  --surface: #fffdf7;
+  --surface-2: #f1ece0;
+  --line: #e3dccc;
+  --text: #2b2720;
+  --muted: #6e6659;
+  --accent: #2f6fd0;
+  /* 鋪在 accent 上的字色 */
+  --on-accent: #ffffff;
+  --you: #2f6fd0;
+  --foe: #c0302b;
+  --good: #227a47;
+  --warn: #a66a05;
   --radius: 10px;
+  /* 克制倍率的四段，整個平台同一套：
+     雙重被剋紅、被剋橘黃、抵抗綠、雙重抵抗藍。
+     這四個講的是「倍率大小」，不是「對你好不好」；
+     對你好不好是 --foe／--good 那一組（勝負、威脅數）的事，兩套不要混用。 */
+  --ef-w2: #c62a20;
+  /* 橘黃在米白上拉不到 4.5 的對比，這是還看得出橘黃的最深值（約 3.9）。
+     倍率本身就印在格子裡、欄標題也寫了桶名，顏色是重複編碼不是唯一資訊 */
+  --ef-w1: #a9660a;
+  --ef-r1: #227a47;
+  --ef-r2: #2457b8;
   /* 強弱五段。雷達圖、列表長條都吃這一組，同一個「強」在哪裡都是同一個顏色 */
-  --b1: #ff6b6b;
-  --b2: #ff8c42;
-  --b3: #ffb020;
-  --b4: #a3d73a;
-  --b5: #3ddc84;
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) {
-    --bg: #f6f7f9;
-    --surface: #ffffff;
-    --surface-2: #f0f2f6;
-    --line: #dfe3ea;
-    --text: #1a1d24;
-    --muted: #666e80;
-  }
+  --b1: #d4453b;
+  --b2: #d97b22;
+  --b3: #bd900a;
+  --b4: #74a324;
+  --b5: #227a47;
 }
 
 * { box-sizing: border-box; }
@@ -72,7 +76,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   padding: 6px 13px; border-radius: 999px; cursor: pointer; transition: .12s;
 }
 .leagues button:hover { border-color: var(--accent); color: var(--text); }
-.leagues button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #06121f; font-weight: 600; }
+.leagues button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
 .sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 760px) { .sides { grid-template-columns: 1fr; } }
@@ -97,7 +101,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; right: 0;
   max-height: 260px; overflow: auto; margin: 0; padding: 4px; list-style: none;
   background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px;
-  box-shadow: 0 12px 32px rgba(0,0,0,.4);
+  box-shadow: 0 12px 32px rgba(90, 76, 48, .18);
 }
 /* 選單自己要長得一樣，不能靠外面剛好有 .field 或 .tbl-bar 的規則幫它上色——
    反制查詢那個不在任何一個裡面，就變成瀏覽器預設的白底 */
@@ -109,9 +113,9 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .combo input::placeholder { color: var(--muted); }
 .combo input:focus { border-color: var(--accent); }
 .combo li { padding: 6px 9px; border-radius: 6px; cursor: pointer; display: flex; gap: 8px; align-items: center; }
-.combo li:hover, .combo li[data-active='true'] { background: var(--accent); color: #06121f; }
+.combo li:hover, .combo li[data-active='true'] { background: var(--accent); color: var(--on-accent); }
 .combo li .dex { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.combo li:hover .dex, .combo li[data-active='true'] .dex { color: #06121f; opacity: .7; }
+.combo li:hover .dex, .combo li[data-active='true'] .dex { color: var(--on-accent); opacity: .7; }
 
 .chips { display: flex; gap: 5px; flex-wrap: wrap; }
 .chip {
@@ -124,7 +128,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   flex: 1; background: var(--surface-2); border: 1px solid var(--line);
   border-radius: 7px; padding: 5px; cursor: pointer; color: var(--muted);
 }
-.shields button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #06121f; font-weight: 600; }
+.shields button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
 .statline { display: flex; gap: 10px; font-size: 11.5px; color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; }
 .statline b { color: var(--text); font-weight: 600; }
@@ -233,7 +237,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   font: inherit; font-size: 11.5px; padding: 3px 10px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); cursor: pointer;
 }
-.cg-filter button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.cg-filter button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .cg-filter .cg-muted { font-size: 11px; }
 
 .cg-list { max-height: 460px; overflow: auto; }
@@ -312,7 +316,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0;
   margin: 0; padding: 4px; list-style: none; max-height: 260px; overflow: auto;
   background: var(--surface); border: 1px solid var(--accent); border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  box-shadow: 0 8px 24px rgba(90, 76, 48, .16);
 }
 .mp li {
   display: flex; align-items: center; gap: 7px;
@@ -348,7 +352,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   font: inherit; font-size: 12px; padding: 5px 12px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); cursor: pointer;
 }
-.tbl-bar button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.tbl-bar button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .tbl-bar input { flex: 1; min-width: 160px; font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); }
 .tbl-bar select { font: inherit; font-size: 12.5px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); }
 .tbl-bar .hint { margin-left: auto; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
@@ -415,8 +419,15 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12.5px; }
 
 /* 相剋格子：紅＝被剋、綠＝抵抗 */
+/* 倍率格子：四段四個顏色，跟克制表同一套（見 typeChart 的 effClass）。
+   下面的 .bad／.good 是另一回事——那是勝負與「剋你幾隻」，講的是對你好不好 */
+.tbl td.ef-w1 { color: var(--ef-w1); font-weight: 600; }
+.tbl td.ef-r1 { color: var(--ef-r1); font-weight: 600; }
+.tbl td.ef-w2 { color: var(--ef-w2); background: color-mix(in srgb, var(--ef-w2) 15%, transparent); font-weight: 700; }
+.tbl td.ef-r2 { color: var(--ef-r2); background: color-mix(in srgb, var(--ef-r2) 13%, transparent); font-weight: 700; }
+
 .tbl td.bad { color: var(--foe); }
-.tbl td.bad2 { color: #fff; background: color-mix(in srgb, var(--foe) 32%, transparent); font-weight: 600; }
+.tbl td.bad2 { color: var(--foe); background: color-mix(in srgb, var(--foe) 18%, transparent); font-weight: 700; }
 .tbl td.good { color: var(--good); }
 .tbl td.good2 { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); font-weight: 600; }
 .tbl.grid td { white-space: nowrap; }
@@ -523,14 +534,8 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   color: var(--muted); line-height: 1.3; padding-top: 1px;
 }
 .pd-label small { display: block; font-size: 10px; font-weight: 400; opacity: .75; }
-.pd-label.bad, .pd-label.bad2 { color: var(--foe); }
-.pd-label.good, .pd-label.good2 { color: var(--good); }
 .pd-types { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .pd-types .chip { font-size: 11px; padding: 1px 7px 1px 4px; }
-.pd-types .chip.bad2 { border-color: color-mix(in srgb, var(--foe) 60%, transparent); }
-.pd-types .chip.bad { border-color: color-mix(in srgb, var(--foe) 35%, transparent); }
-.pd-types .chip.good { border-color: color-mix(in srgb, var(--good) 35%, transparent); }
-.pd-types .chip.good2 { border-color: color-mix(in srgb, var(--good) 60%, transparent); }
 .pd-types .dim { font-size: 11px; color: var(--muted); }
 
 .pd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 10px; margin: 0; }
@@ -598,7 +603,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .bx-cp { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 60px; }
 .bx-go {
   font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 8px;
-  border: 1px solid var(--accent); background: var(--accent); color: #06121f; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); cursor: pointer;
 }
 .bx-go:disabled { opacity: .4; cursor: not-allowed; }
 
@@ -743,7 +748,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .pl-bar button.play { min-width: 86px; font-weight: 600; color: var(--text); border-color: var(--accent); }
 .pl-speed { display: flex; gap: 4px; margin-left: 6px; }
 .pl-speed button { padding: 5px 8px; }
-.pl-speed button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: #06121f; font-weight: 600; }
+.pl-speed button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .pl-hint { margin-left: auto; font-size: 11px; color: var(--muted); }
 
 /* 明細改成可收合，標題列整條是按鈕 */
@@ -779,20 +784,20 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tm-cell b { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
 .tm-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 底色與數字＝挨打 */
-.tm-cell.bad b { color: var(--foe); }
-.tm-cell.good b { color: var(--good); }
+/* 底色與數字＝挨打。四段四個顏色，見 typeChart 的 effClass */
+.tm-cell.ef-w1 b { color: var(--ef-w1); }
+.tm-cell.ef-r1 b { color: var(--ef-r1); }
 /* 只有雙重那一級才加底色，掃過去會停下來的就這幾格 */
-.tm-cell.bad2 { background: color-mix(in srgb, var(--foe) 20%, var(--surface-2)); }
-.tm-cell.bad2 b { color: var(--foe); font-size: 13.5px; }
-.tm-cell.good2 { background: color-mix(in srgb, var(--good) 18%, var(--surface-2)); }
-.tm-cell.good2 b { color: var(--good); font-size: 13.5px; }
+.tm-cell.ef-w2 { background: color-mix(in srgb, var(--ef-w2) 16%, var(--surface-2)); }
+.tm-cell.ef-w2 b { color: var(--ef-w2); font-size: 13.5px; }
+.tm-cell.ef-r2 { background: color-mix(in srgb, var(--ef-r2) 15%, var(--surface-2)); }
+.tm-cell.ef-r2 b { color: var(--ef-r2); font-size: 13.5px; }
 
-/* 外框＝那一招打出去的倍率。選取 2px、滑過 3px */
-.tm-cell.o-hit { outline-width: 2px; outline-color: color-mix(in srgb, var(--good) 65%, transparent); }
-.tm-cell.o-hit2 { outline-width: 2px; outline-color: var(--good); }
-.tm-cell.o-miss { outline-width: 2px; outline-color: color-mix(in srgb, var(--foe) 60%, transparent); }
-.tm-cell.o-miss2 { outline-width: 2px; outline-color: var(--foe); }
+/* 外框＝那一招打出去的倍率，跟底色同一套顏色。選取 2px、滑過 3px */
+.tm-cell.o-w2 { outline-width: 2px; outline-color: var(--ef-w2); }
+.tm-cell.o-w1 { outline-width: 2px; outline-color: color-mix(in srgb, var(--ef-w1) 80%, transparent); }
+.tm-cell.o-r1 { outline-width: 2px; outline-color: color-mix(in srgb, var(--ef-r1) 75%, transparent); }
+.tm-cell.o-r2 { outline-width: 2px; outline-color: var(--ef-r2); }
 .tm-cell.hot[class*='o-'] { outline-width: 3px; }
 
 /* ── 列表：給一點層次，不要整片同一個字級 ────────────── */
@@ -831,19 +836,21 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tg-col[data-b='0'] .tg-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 /* 倍率搬到欄標題之後格子就沒有顏色線索了。解析卡那張表不敢整片上色是因為
    十八格混在一起，這裡欄位本身就是分組，整欄同一個淡色反而是一道五階的梯度 */
-.tg-cells .tm-cell.bad { background: color-mix(in srgb, var(--foe) 9%, var(--surface-2)); }
-.tg-cells .tm-cell.good { background: color-mix(in srgb, var(--good) 9%, var(--surface-2)); }
+.tg-cells .tm-cell.ef-w1 { background: color-mix(in srgb, var(--ef-w1) 13%, var(--surface-2)); }
+.tg-cells .tm-cell.ef-w1 .tm-name { color: color-mix(in srgb, var(--ef-w1) 75%, var(--text)); }
+.tg-cells .tm-cell.ef-r1 { background: color-mix(in srgb, var(--ef-r1) 12%, var(--surface-2)); }
+.tg-cells .tm-cell.ef-r1 .tm-name { color: color-mix(in srgb, var(--ef-r1) 75%, var(--text)); }
 
 /* 圖示放大，雙重的那兩欄又更大一圈——強弱本來就該長得不一樣大 */
 .tg-cells .tm-cell { display: flex; justify-content: center; gap: 7px; padding: 7px 8px; font-size: 12.5px; }
 .tg-cells .tm-name { flex: 0 1 auto; }
-.tg-cells .tm-cell.bad2, .tg-cells .tm-cell.good2 { gap: 2px 9px; padding: 8px; font-size: 14px; font-weight: 600; }
+.tg-cells .tm-cell.ef-w2, .tg-cells .tm-cell.ef-r2 { gap: 2px 9px; padding: 8px; font-size: 14px; font-weight: 600; }
 /* 雙重抵抗是唯一倍率會變的一桶，數字只好留在格子裡；放大之後一行塞不下，
    讓它自己換到第二行置中，順便讓這幾格又高一點 */
-.tg-cells .tm-cell.good2 { flex-wrap: wrap; }
-.tg-cells .tm-cell.good2 b { flex: 0 0 100%; text-align: center; font-size: 12px; }
-.tg-cells .tm-cell.bad2 .tm-name { color: var(--foe); }
-.tg-cells .tm-cell.good2 .tm-name { color: var(--good); }
+.tg-cells .tm-cell.ef-r2 { flex-wrap: wrap; }
+.tg-cells .tm-cell.ef-r2 b { flex: 0 0 100%; text-align: center; font-size: 12px; }
+.tg-cells .tm-cell.ef-w2 .tm-name { color: var(--ef-w2); }
+.tg-cells .tm-cell.ef-r2 .tm-name { color: var(--ef-r2); }
 .tg-col h4 {
   display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
   margin: 0 0 1px; padding: 0 2px; font-size: 11px; font-weight: 600;
@@ -852,8 +859,10 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 訊號放在數字上，標題本身維持灰色——跟解析卡那張克制表同一個規矩 */
 .tg-col h4 em { font-style: normal; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .tg-col h4 span { margin-left: auto; font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-.tg-col[data-b='2'] h4 span, .tg-col[data-b='1'] h4 span { color: var(--foe); }
-.tg-col[data-b='-1'] h4 span, .tg-col[data-b='-2'] h4 span { color: var(--good); }
+.tg-col[data-b='2'] h4 span { color: var(--ef-w2); }
+.tg-col[data-b='1'] h4 span { color: var(--ef-w1); }
+.tg-col[data-b='-1'] h4 span { color: var(--ef-r1); }
+.tg-col[data-b='-2'] h4 span { color: var(--ef-r2); }
 .tg-col.empty { opacity: .4; }
 
 /* 五欄 × 112 加上 26 的間距要 837 的視窗才放得下，再窄就縮一級；

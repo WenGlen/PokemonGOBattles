@@ -11,7 +11,7 @@ import type { AppData } from '@/lib/app-data';
 import type { Box } from '@/lib/collection';
 import { buildContexts, buildRows } from '@/lib/rows';
 import { suggestedBuild, type LeagueCp } from '@/lib/stats';
-import { effBucket, effectiveness, TYPE_ZH } from '@/lib/typeChart';
+import { effBucket, effClass, effectiveness, TYPE_ZH } from '@/lib/typeChart';
 import { zhName } from '@/lib/types';
 
 type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
@@ -24,13 +24,13 @@ type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
  * 底色沿用解析卡那一套 .tm-cell，兩邊看起來才是同一個系統。
  */
 const BUCKETS = [
-  { b: 2, label: '雙重被剋', cls: 'bad2', mult: '×2.56' },
-  { b: 1, label: '被剋', cls: 'bad', mult: '×1.60' },
-  { b: 0, label: '普通', cls: '', mult: '×1.00' },
-  { b: -1, label: '抵抗', cls: 'good', mult: '×0.63' },
+  { b: 2, label: '雙重被剋', cls: effClass(2), mult: '×2.56' },
+  { b: 1, label: '被剋', cls: effClass(1), mult: '×1.60' },
+  { b: 0, label: '普通', cls: effClass(0), mult: '×1.00' },
+  { b: -1, label: '抵抗', cls: effClass(-1), mult: '×0.63' },
   // 雙重抵抗是唯一倍率會變的一桶：抵抗兩次 ×0.39、原作免疫再抵抗 ×0.24、免疫兩次 ×0.15，
   // 所以只有這一欄的數字留在格子裡，其他四欄的倍率整欄只寫一次。
-  { b: -2, label: '雙重抵抗', cls: 'good2', mult: null },
+  { b: -2, label: '雙重抵抗', cls: effClass(-2), mult: null },
 ] as const;
 
 /**
@@ -127,7 +127,7 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
                 </h4>
                 <div className="tg-cells">
                   {bk.hits.map(({ t, mult }) => (
-                    <div key={t} className={`tm-cell${bk.cls ? ' ' + bk.cls : ''}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
+                    <div key={t} className={`tm-cell${bk.cls ? ' ef-' + bk.cls : ''}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
                       {/* 雙重的那兩欄圖示再大一圈，掃過去會先停在這裡 */}
                       <TypeIcon type={t} size={Math.abs(bk.b) >= 2 ? 28 : 20} />
                       <span className="tm-name">{TYPE_ZH[t]}</span>

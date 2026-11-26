@@ -9,7 +9,7 @@ import {
 } from '@/lib/analysis';
 import type { AppData, SideConfig } from '@/lib/app-data';
 import type { LeagueCp } from '@/lib/stats';
-import { effBucket, TYPE_ZH } from '@/lib/typeChart';
+import { effBucket, effClass, TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type Loadout, type PokemonData } from '@/lib/types';
 
 /** 放進去的是誰的隊伍。同一份計算，但好壞相反。 */
@@ -28,7 +28,7 @@ const COPY = {
     toggle: '我方隊伍',
     slot: (i: number) => `我方第 ${i} 隻`,
     gridTitle: '被哪些屬性剋制',
-    gridNote: <>數字是你挨那個屬性攻擊時的傷害倍率，紅色代表被剋。「遇到率」是主流對手之中有多少比例帶著該屬性的招式——<b>又被剋、又常遇到的那幾列才是真問題</b>。</>,
+    gridNote: <>數字是你挨那個屬性攻擊時的傷害倍率，紅橘是被剋、綠藍是抵抗。「遇到率」是主流對手之中有多少比例帶著該屬性的招式——<b>又被剋、又常遇到的那幾列才是真問題</b>。</>,
     gridCol: '對手屬性',
     gridCount: '剋你幾隻',
     moveTitle: '對手可能帶哪些招',
@@ -52,7 +52,7 @@ const COPY = {
     toggle: '對手隊伍',
     slot: (i: number) => `對手第 ${i} 隻`,
     gridTitle: '用哪些屬性打得動',
-    gridNote: <>數字是你拿那個屬性的招打過去的傷害倍率，綠色代表打得動。「遇到率」是主流裡有多少比例帶著該屬性的招式，也就是<b>你有多容易找到帶這個屬性的寶可夢</b>。</>,
+    gridNote: <>數字是你拿那個屬性的招打過去的傷害倍率，紅橘是打得動、綠藍是被擋住。「遇到率」是主流裡有多少比例帶著該屬性的招式，也就是<b>你有多容易找到帶這個屬性的寶可夢</b>。</>,
     gridCol: '我方屬性',
     gridCount: '剋幾隻',
     moveTitle: '帶哪些招打得動他們',
@@ -76,18 +76,16 @@ const COPY = {
 
 /**
  * 倍率對應的格子樣式。
+ *
+ * 顏色只講倍率大小（紅橘高、綠藍低），不跟著我方／對手翻面——
+ * 同一個 ×0.39 在哪一張表都該是同一個顏色，不然要靠記憶才讀得懂。
+ * 「對你好不好」交給欄位標題與勝負欄（那邊才是紅綠）。
+ *
  * @param mult 傷害倍率
- * @param side 我方模式下高倍率是壞事，對手模式下是好事
  */
-function cellClass(mult: number, side: Side): string {
-  const strong = side === 'mine' ? 'bad' : 'good';
-  const weakC = side === 'mine' ? 'good' : 'bad';
-  const b = effBucket(mult);
-  if (b >= 2) return `${strong}2`;
-  if (b === 1) return strong;
-  if (b <= -2) return `${weakC}2`;
-  if (b === -1) return weakC;
-  return '';
+function cellClass(mult: number): string {
+  const c = effClass(effBucket(mult));
+  return c ? `ef-${c}` : '';
 }
 
 /** 屬性盤點 */
@@ -118,7 +116,7 @@ function TypeGrid({ team, rows, side }: {
             <tr key={r.type} className={r.weak >= 2 ? 'hot' : ''}>
               <td className="left nm"><TypeIcon type={r.type} size={15} label /></td>
               {r.each.map((m, i) => (
-                <td key={i} className={`num ${cellClass(m, side)}`} title={effLabel(m)}>×{m.toFixed(2)}</td>
+                <td key={i} className={`num ${cellClass(m)}`} title={effLabel(m)}>×{m.toFixed(2)}</td>
               ))}
               <td className="num dim">{r.encounter > 0 ? pct(r.encounter) : '—'}</td>
             </tr>

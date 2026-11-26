@@ -2,7 +2,7 @@
 
 import { TypeIcon } from '@/components/Icon';
 import { ALL_TYPES } from '@/lib/analysis';
-import { effBucket, effectiveness, TYPE_ZH } from '@/lib/typeChart';
+import { effBucket, effClass, effectiveness, TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type MoveData } from '@/lib/types';
 
 /** 外框要照哪一招畫；strong 是滑過（比選取更粗） */
@@ -17,6 +17,8 @@ export interface AtkFocus {
  * 一格同時講兩件事，用兩種編碼分開：
  *   **底色與數字**＝這隻挨那個屬性的倍率（防守面，永遠在）
  *   **外框**＝滑過／選到的那一招打那個屬性的倍率（攻擊面，跟著招式走）
+ *
+ * 兩面共用同一套顏色（見 effClass）：紅橘＝倍率高、綠藍＝倍率低。
  *
  * 兩面本來就是獨立的兩件事，用切換會看不到關係；
  * 一個填色一個描邊就能同時看，而且外框用 outline 不是 border——
@@ -42,17 +44,15 @@ export default function TypeMatrix({ types, atk }: { types: string[]; atk: AtkFo
       <div className="tm-grid">
         {ALL_TYPES.map((t) => {
           const def = effectiveness(t, types);
-          const db = effBucket(def);
-          const fill = db === 0 ? '' : `${db > 0 ? 'bad' : 'good'}${Math.abs(db) >= 2 ? '2' : ''}`;
+          const fill = effClass(effBucket(def));
 
           const hit = atk ? effectiveness(atk.move.type, [t]) : null;
-          const hb = hit === null ? 0 : effBucket(hit);
-          const line = hb === 0 ? '' : `o-${hb > 0 ? 'hit' : 'miss'}${Math.abs(hb) >= 2 ? '2' : ''}`;
+          const line = hit === null ? '' : effClass(effBucket(hit));
 
           return (
             <div
               key={t}
-              className={`tm-cell${fill ? ' ' + fill : ''}${line ? ' ' + line : ''}${atk?.strong ? ' hot' : ''}`}
+              className={`tm-cell${fill ? ' ef-' + fill : ''}${line ? ' o-' + line : ''}${atk?.strong ? ' hot' : ''}`}
               title={
                 hit === null
                   ? `挨 ${TYPE_ZH[t]} ×${def.toFixed(2)}`
