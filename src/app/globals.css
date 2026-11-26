@@ -415,14 +415,15 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl .nm > span { font-weight: 500; }
 .tbl .sm { font-size: 11.5px; }
 .tbl .dim { color: var(--muted); font-weight: 400; }
-/* 屬性欄：單屬性置中，雙屬性左上右下微微疊著 */
-.tbl td.tp { text-align: center; }
+/* 屬性欄：單屬性置中，雙屬性左下右上微微疊著，第一屬性壓在上面。
+   欄標題預設靠右，不跟著置中的話整欄看起來就是歪的 */
+.tbl th.tp, .tbl td.tp { text-align: center; }
 .tbl .trow { display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
 .tbl .trow.two { gap: 0; }
-.tbl .trow.two .tic:first-child { transform: translateY(-5px); }
-.tbl .trow.two .tic:last-child { margin-left: -7px; transform: translateY(5px); }
+.tbl .trow.two .tic:first-child { position: relative; z-index: 1; transform: translateY(5px); }
+.tbl .trow.two .tic:last-child { margin-left: -7px; transform: translateY(-5px); }
 /* 疊在上面的那一個要有一圈底色，不然兩個圖示的邊會糊在一起 */
-.tbl .trow.two .tic:last-child .tic-dot { box-shadow: 0 0 0 2px var(--surface); }
+.tbl .trow.two .tic:first-child .tic-dot { box-shadow: 0 0 0 2px var(--surface); }
 /* 數值下面的比例長條：底是整欄寬，填色靠右跟數字對齊 */
 .tbl .bar { display: block; height: 3px; margin: 2px 0 1px; border-radius: 2px; background: color-mix(in srgb, var(--line) 65%, transparent); }
 .tbl .bar i { display: block; height: 100%; margin-left: auto; border-radius: 2px; }
@@ -606,16 +607,18 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl tbody tr.on:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); }
 .tbl .pick { color: var(--accent); font-weight: 700; }
 
-/* 卡片擠到一半寬度（兩隻並排）或手機時，左右欄改成上下疊 */
-@container (max-width: 470px) {
-  .pd-cols { grid-template-columns: 1fr; gap: 13px; }
-}
-/* 卡片擠到一半寬度或手機：上半兩欄併回一欄，克制表回到整排撐滿 */
+/* 卡片擠到一半寬度（兩隻並排）或手機：所有區塊都整排撐滿，由上到下是
+   寶可夢 → 屬性 → 招式 → 能力數值。窄畫面擺不下兩欄，硬排只會兩邊都半殘 */
 @container (max-width: 620px) {
   .pd-top { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   /* 疊成一欄時克制表不用讓位，改成名字自己閃開 × */
   .pd-top > .tm { margin-top: 0; }
   .pd-id { padding-right: 26px; }
+
+  .pd-cols { grid-template-columns: minmax(0, 1fr); gap: 13px; }
+  /* 招式排在能力數值前面：先看牠打得出什麼，數值是接著才想知道的 */
+  .pd-cols > .pd-col:first-child { order: 2; }
+  .pd-cols > .pd-col:last-child { order: 1; }
 }
 @media (max-width: 720px) {
   .pd-cols { grid-template-columns: 1fr; gap: 13px; }

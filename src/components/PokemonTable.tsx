@@ -109,7 +109,7 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
               <tr>
                 <SortHead k="rank" sort={sort} setSort={setSort} defaultDir={1} title="pvpoke 在這個聯盟的總排名">排名</SortHead>
                 <SortHead k="zh" sort={sort} setSort={setSort} defaultDir={1} align="left">寶可夢</SortHead>
-                <th>屬性</th>
+                <th className="tp">屬性</th>
                 <SortHead k="atk" sort={sort} setSort={setSort}>攻擊</SortHead>
                 {/* 防禦與 HP 不單獨列——在對戰裡它們從來不是分開用的，
                     拆成兩欄只會讓人去比兩個沒辦法單獨解讀的數字。拆開的值在解析卡的耐久軸上 */}
