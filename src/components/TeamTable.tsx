@@ -78,7 +78,8 @@ const COPY = {
  */
 function cellClass(mult: number): string {
   const c = effClass(mult);
-  return c ? `ef-${c}` : '';
+  // 普通那一格也給個 class：×1.00 是「這裡沒事」，要比有顏色的那幾格淡
+  return c ? `ef-${c}` : 'quiet';
 }
 
 /** 屬性盤點 */
@@ -91,7 +92,8 @@ function TypeGrid({ team, rows, side }: {
   // 先看倍率打到幾隻，同樣多的再看遇到率
   const sorted = [...rows].sort((a, b) => b.weak - a.weak || b.encounter - a.encounter);
   return (
-    <div className="tbl-scroll">
+    // 十八列是固定的，不該再有一層內捲
+    <div className="tbl-scroll full">
       <table className="tbl grid">
         <thead>
           <tr>

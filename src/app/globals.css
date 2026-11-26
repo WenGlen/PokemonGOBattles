@@ -89,7 +89,8 @@ header.top .meta b.bad { color: var(--foe); }
 .leagues button:hover { border-color: var(--accent); color: var(--text); }
 .leagues button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
-.sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+/* 設定面板跟下面那一區是兩件事，中間要看得出斷點 */
+.sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 40px; }
 @media (max-width: 760px) { .sides { grid-template-columns: 1fr; } }
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
@@ -394,6 +395,8 @@ header.top .meta b.bad { color: var(--foe); }
 .tbl-bar select[data-on='true'] { border-color: var(--accent); color: var(--accent); }
 
 .tbl-scroll { max-height: 560px; overflow: auto; }
+/* 十八列是固定的，上限砍在中間只會逼人在表格裡再捲一次 */
+.tbl-scroll.full { max-height: none; }
 .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tbl thead th {
   position: sticky; top: 0; z-index: 1;
@@ -457,6 +460,8 @@ header.top .meta b.bad { color: var(--foe); }
 .tbl td.good { color: var(--good); }
 .tbl td.good2 { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); font-weight: 600; }
 .tbl.grid td { white-space: nowrap; }
+/* ×1.00 是「這裡沒事」，不該跟有顏色的那幾格搶注意力 */
+.tbl.grid td.quiet { color: color-mix(in srgb, var(--muted) 62%, transparent); }
 
 .more-btn {
   display: block; width: 100%; padding: 8px; font: inherit; font-size: 12px;
