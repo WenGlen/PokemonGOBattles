@@ -107,3 +107,27 @@ export function BoltIcon({ size = 12 }: { size?: number }) {
     </svg>
   );
 }
+
+/**
+ * 展開／收合的三角箭頭。
+ *
+ * 用 SVG 不用 ▸ 這種字元：三角形字元只佔 em 框的一小塊，
+ * 字級調到跟旁邊的字一樣大，看起來還是小一號。
+ *
+ * @param open true 時轉成朝下
+ * @param size 邊長 px
+ */
+export function CaretIcon({ open = false, size = 12 }: { open?: boolean; size?: number }) {
+  return (
+    <svg
+      className="mk caret-ico"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={open ? { transform: 'rotate(90deg)' } : undefined}
+    >
+      <path d="M8.5 3.8 19 12 8.5 20.2Z" fill="currentColor" />
+    </svg>
+  );
+}

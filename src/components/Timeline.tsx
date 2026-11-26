@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
-import { BoltIcon, BurstIcon, PokemonIcon, ShieldIcon, TypeIcon } from '@/components/Icon';
+import { BoltIcon, BurstIcon, CaretIcon, PokemonIcon, ShieldIcon, TypeIcon } from '@/components/Icon';
 import type { BattleResult, SideKey, Snapshot, TurnRecord } from '@/lib/battle';
 import { zhName, type PokemonData } from '@/lib/types';
 
@@ -261,8 +261,10 @@ export default function Timeline({ result, names, mons }: {
       <div className="tl">
         <button className="head" onClick={() => setOpenLog((v) => !v)} aria-expanded={openLog}>
           <h3>逐回合明細</h3>
+          {/* 收起來的時候那段說明沒有東西可以對照，只留箭頭 */}
           <span className="hint">
-            1 回合 = 0.5 秒 · <BurstIcon size={11} /> 為大招發動回合 · {openLog ? '收合' : '展開'}
+            {openLog && <>1 回合 = 0.5 秒 · <BurstIcon size={11} /> 為大招發動回合</>}
+            <CaretIcon open={openLog} size={13} />
           </span>
         </button>
         {openLog && (
@@ -288,7 +290,8 @@ export default function Timeline({ result, names, mons }: {
                           </span>
                         </td>
                         <td className="lg-act"><Act turn={t} side="a" /></td>
-                        <td className="lg-act"><Act turn={t} side="b" /></td>
+                        {/* 對手那半靠右，跟牠的血量能量貼在一起，中間的空白才是兩邊的分界 */}
+                        <td className="lg-act foe"><Act turn={t} side="b" /></td>
                         <td className="lg-hp foe">
                           <span className="lg-cell">
                             <Bar pct={(t.b.hp / t.b.maxHp) * 100} color="var(--foe)" />{t.b.hp}

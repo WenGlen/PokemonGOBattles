@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import SidePanel from '@/components/SidePanel';
-import { PokemonIcon, TypeIcon } from '@/components/Icon';
+import { CaretIcon, PokemonIcon, TypeIcon } from '@/components/Icon';
 import MoveNums from '@/components/MoveNums';
 import {
   effLabel, encounterByType, moveExposure, scanThreats, teamTypePressure,
@@ -244,7 +244,7 @@ function ThreatList({ threats, team, side }: { threats: Threat[]; team: PokemonD
                 <td className="left nm">
                   <PokemonIcon key={t.icon} icon={t.icon} alt="" size={24} shadow={t.shadow} />
                   <span>{t.zh}</span>
-                  <span className="caret" aria-hidden>{open === t.id ? '▾' : '▸'}</span>
+                  <span className="caret"><CaretIcon open={open === t.id} size={12} /></span>
                 </td>
                 <td className={`num ${beatsClass(t.beats)}`}>{t.beats}／3</td>
                 {t.vs.map((v, i) => {
