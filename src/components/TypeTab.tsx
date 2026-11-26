@@ -110,8 +110,8 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
       <section className="tg-wrap">
         <div className="tg-bar">
           {/* 選到什麼選單上就看得到，旁邊不用再重複一次 */}
-          <TypePicker value={t1} onChange={setT1} anyLabel="第一屬性" wide big title="要看的屬性組合" />
-          <TypePicker value={t2} onChange={setT2} anyLabel="第二屬性（可不選）" wide big title="只有一種屬性就留空" />
+          <TypePicker value={t1} onChange={setT1} anyLabel="第一屬性" big title="要看的屬性組合" />
+          <TypePicker value={t2} onChange={setT2} anyLabel="第二屬性" big title="可以不選，只有一種屬性就留空" />
         </div>
 
         {/* 還沒選屬性時十八格都是 ×1.00，那是一整片沒有資訊的格子，不如不畫。

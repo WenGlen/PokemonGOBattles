@@ -357,13 +357,15 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tp { flex: none; width: 112px; }
 .tp.wide { width: 136px; }
 .tp .mp-btn { padding: 6px 9px; font-size: 12.5px; gap: 6px; }
-/* 屬性表上的那兩個不是篩選器而是畫面主角，整個選單放大一級 */
-.tp.big { width: 180px; }
-.tp.big.wide { width: 210px; }
-.tp.big .mp-btn { padding: 10px 14px; font-size: 15.5px; gap: 10px; border-radius: 10px; }
-.tp.big .mp-chev { font-size: 12px; }
+/* 屬性表上的那兩個不是篩選器而是畫面主角，字放大一級但框放窄——
+   屬性名最多三個字，靠左排會整個偏一邊，所以圖示與文字一起置中 */
+.tp.big, .tp.big.wide { width: 148px; }
+.tp.big .mp-btn { justify-content: center; padding: 10px 12px; font-size: 15.5px; gap: 9px; border-radius: 10px; }
+.tp.big .mp-name { flex: 0 1 auto; }
+.tp.big .mp-chev { margin-left: 0; padding-left: 2px; font-size: 12px; }
 .tp.big ul { padding: 5px; max-height: 340px; }
-.tp.big li { padding: 8px 12px; font-size: 15px; gap: 10px; border-radius: 8px; }
+.tp.big li { justify-content: center; padding: 8px 10px; font-size: 15px; gap: 9px; border-radius: 8px; }
+.tp.big li .mp-name { flex: 0 1 auto; }
 .tp .mp-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .tp[data-on='true'] .mp-btn { border-color: var(--accent); color: var(--accent); }
 .tp ul { min-width: 100%; width: max-content; }
@@ -815,7 +817,15 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 
 /* 「普通」通常裝了一半以上的屬性，給它兩倍寬、內部再排兩列，
    不然整區的高度被最無聊的那一欄撐開，旁邊四欄全是空白 */
-.tg-grid { display: grid; grid-template-columns: 1fr 1fr 2fr 1fr 1fr; gap: 8px; align-items: start; }
+.tg-grid {
+  /* 一欄的寬度；「普通」佔兩欄所以自己算，其餘四欄一樣寬。
+     下限是「雙重被剋 ×2.56 0」這個最長的欄標題，再窄它就換行 */
+  --tgw: 112px;
+  display: grid; justify-content: center; align-items: start;
+  grid-template-columns: var(--tgw) var(--tgw) calc(var(--tgw) * 2 + 5px) var(--tgw) var(--tgw);
+  /* 「普通」裡面就有兩行，欄與欄之間要比行與行之間明顯寬，才分得出哪一條是分界 */
+  column-gap: 26px;
+}
 .tg-col { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .tg-cells { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; align-content: start; }
 .tg-col[data-b='0'] .tg-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -825,28 +835,36 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tg-cells .tm-cell.good { background: color-mix(in srgb, var(--good) 9%, var(--surface-2)); }
 
 /* 圖示放大，雙重的那兩欄又更大一圈——強弱本來就該長得不一樣大 */
-.tg-cells .tm-cell { grid-template-columns: 20px 1fr auto; gap: 8px; padding: 7px 10px; font-size: 12.5px; }
-.tg-cells .tm-cell.bad2, .tg-cells .tm-cell.good2 { grid-template-columns: 28px 1fr; gap: 2px 10px; padding: 8px 11px; font-size: 14px; font-weight: 600; }
+.tg-cells .tm-cell { display: flex; justify-content: center; gap: 7px; padding: 7px 8px; font-size: 12.5px; }
+.tg-cells .tm-name { flex: 0 1 auto; }
+.tg-cells .tm-cell.bad2, .tg-cells .tm-cell.good2 { gap: 2px 9px; padding: 8px; font-size: 14px; font-weight: 600; }
 /* 雙重抵抗是唯一倍率會變的一桶，數字只好留在格子裡；放大之後一行塞不下，
-   改成圖示佔兩列、名字在上數字在下，順便讓這幾格又高一點 */
-.tg-cells .tm-cell.good2 { grid-template-rows: auto auto; }
-.tg-cells .tm-cell.good2 > .tic { grid-row: 1 / span 2; }
-.tg-cells .tm-cell.good2 b { grid-column: 2; font-size: 12px; }
+   讓它自己換到第二行置中，順便讓這幾格又高一點 */
+.tg-cells .tm-cell.good2 { flex-wrap: wrap; }
+.tg-cells .tm-cell.good2 b { flex: 0 0 100%; text-align: center; font-size: 12px; }
 .tg-cells .tm-cell.bad2 .tm-name { color: var(--foe); }
 .tg-cells .tm-cell.good2 .tm-name { color: var(--good); }
 .tg-col h4 {
   display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
-  margin: 0 0 1px; padding: 0 3px; font-size: 11px; font-weight: 600;
-  color: var(--muted); letter-spacing: .04em;
+  margin: 0 0 1px; padding: 0 2px; font-size: 11px; font-weight: 600;
+  color: var(--muted); white-space: nowrap;
 }
 /* 訊號放在數字上，標題本身維持灰色——跟解析卡那張克制表同一個規矩 */
-.tg-col h4 em { font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tg-col h4 em { font-style: normal; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .tg-col h4 span { margin-left: auto; font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
 .tg-col[data-b='2'] h4 span, .tg-col[data-b='1'] h4 span { color: var(--foe); }
 .tg-col[data-b='-1'] h4 span, .tg-col[data-b='-2'] h4 span { color: var(--good); }
 .tg-col.empty { opacity: .4; }
 
+/* 五欄 × 112 加上 26 的間距要 837 的視窗才放得下，再窄就縮一級；
+   欄標題是寬度下限，所以字級要跟著縮，不然「雙重被剋 ×2.56」會換行 */
+@media (max-width: 900px) {
+  .tg-grid { --tgw: 96px; column-gap: 18px; }
+  .tg-col h4 { font-size: 10.5px; }
+  .tg-col h4 em { font-size: 10px; }
+  .tg-col h4 span { font-size: 14px; }
+}
 @media (max-width: 760px) {
-  .tg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tg-grid { grid-template-columns: repeat(2, var(--tgw)); column-gap: 20px; }
   .tg-col[data-b='0'] .tg-cells { grid-template-columns: minmax(0, 1fr); }
 }
