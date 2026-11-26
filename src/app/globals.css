@@ -89,7 +89,7 @@ header.top .meta b.bad { color: var(--foe); }
 .leagues button:hover { border-color: var(--accent); color: var(--text); }
 .leagues button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
-.sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
 @media (max-width: 760px) { .sides { grid-template-columns: 1fr; } }
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
@@ -303,13 +303,15 @@ header.top .meta b.bad { color: var(--foe); }
 .combo:has(.combo-pic) input { padding-left: 44px; }
 .combo li { display: flex; align-items: center; gap: 7px; }
 
-/* 圖片在左、名字那一欄在右：標題 → 選單 → 屬性 */
-.panel-id { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 11px; }
-.panel-id > .pic { flex: none; background: var(--surface-2); border-radius: 14px; }
+/* 圖片在左、名字那一欄在右：標題 → 選單 → 屬性。
+   屬性用 margin-top:auto 頂到底，所以它的下緣剛好對齊圖片的下緣 */
+.panel-id { display: flex; align-items: stretch; gap: 10px; margin-bottom: 16px; }
+.panel-id > .pic { flex: none; background: var(--surface-2); border-radius: 16px; }
 .panel-id > .pic.shadow { border-radius: 50%; }
 .panel-idtxt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
 .panel-idtxt h2 { display: flex; align-items: center; gap: 10px; margin: 0; }
-.panel-idtxt .chips { margin: 0; }
+/* 屬性頂到底，下緣就剛好對齊圖片的下緣 */
+.panel-idtxt .chips { margin: auto 0 0; }
 
 /* ── 招式選單 ──────────────────────────────────────── */
 .mp { position: relative; }
@@ -486,8 +488,7 @@ header.top .meta b.bad { color: var(--foe); }
 
 /* ── 三隻一排的隊伍面板 ────────────────────────────── */
 .sides.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-/* 三隻的設定面板跟下面「主流範圍」那排是兩件事，不要黏在一起 */
-.sides.three { margin-bottom: 20px; }
+
 .panel.compact { padding: 11px; }
 .panel.compact h2 { font-size: 12px; }
 .panel.compact .field { margin-bottom: 7px; }

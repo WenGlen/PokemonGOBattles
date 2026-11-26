@@ -28,8 +28,9 @@ const BUCKETS = [
   { b: 1, label: '被剋', mult: '×1.60' },
   { b: 0, label: '普通', mult: '×1.00' },
   { b: -1, label: '抵抗', mult: '×0.63' },
-  // 雙重抵抗是唯一倍率會變的一桶：抵抗兩次 ×0.39、原作免疫再抵抗 ×0.24、免疫兩次 ×0.15，
-  // 所以只有這一欄的數字留在格子裡，其他四欄的倍率整欄只寫一次。
+  // 雙重抵抗是唯一倍率會變的一桶：抵抗兩次 ×0.39、原作免疫再抵抗 ×0.24、免疫兩次 ×0.15。
+  // 常態的 ×0.39 跟其他四欄一樣寫在欄標題上（mult 由下面即時算），
+  // 只有真的跑出 ×0.24、×0.15 那幾格才把數字留在格子裡。
   { b: -2, label: '雙重抵抗', mult: null },
 ] as const;
 
@@ -61,11 +62,14 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
   /** 每一桶裝了哪些攻擊屬性。沒選屬性時十八格都是 ×1.00，全落在「普通」 */
   const buckets = useMemo(
     () =>
-      BUCKETS.map((bk) => ({
-        ...bk,
-        hits: ALL_TYPES.map((t) => ({ t, mult: effectiveness(t, types) }))
-          .filter((x) => effBucket(x.mult) === bk.b),
-      })),
+      BUCKETS.map((bk) => {
+        const hits = ALL_TYPES.map((t) => ({ t, mult: effectiveness(t, types) }))
+          .filter((x) => effBucket(x.mult) === bk.b);
+        // 雙重抵抗欄：有常態的 ×0.39 就寫在標題上，那些格子跟著不用寫數字；
+        // 整欄都是 ×0.24 之類的特例時標題留白，由每一格自己報數
+        const base = bk.b === -2 ? hits.find((h) => effClass(h.mult) === 'r2')?.mult ?? null : null;
+        return { ...bk, hits, mult: bk.mult ?? (base === null ? null : `×${base.toFixed(2)}`), base };
+      }),
     [types]
   );
 
@@ -129,7 +133,9 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
                       {/* 雙重的那兩欄圖示再大一圈，掃過去會先停在這裡 */}
                       <TypeIcon type={t} size={Math.abs(bk.b) >= 2 ? 28 : 20} />
                       <span className="tm-name">{TYPE_ZH[t]}</span>
-                      {bk.mult === null && <b>×{mult.toFixed(2)}</b>}
+                      {/* 跟欄標題寫的不一樣才需要自己報數 */}
+                      {bk.base !== null && mult !== bk.base && <b>×{mult.toFixed(2)}</b>}
+                      {bk.base === null && bk.b === -2 && <b>×{mult.toFixed(2)}</b>}
                     </div>
                   ))}
                 </div>

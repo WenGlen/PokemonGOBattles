@@ -37,7 +37,7 @@ export default function SidePanel({
       {/* 圖片在左、名字那一欄在右：標題 → 選單 → 屬性。
           選單旁邊就是大圖，所以選完只留名字，不再放一次小圖 */}
       <div className="panel-id">
-        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={compact ? 66 : 84} shadow={Boolean(p.shadow)} />
+        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={compact ? 92 : 104} shadow={Boolean(p.shadow)} />
         <div className="panel-idtxt">
           <h2>
             {title}
