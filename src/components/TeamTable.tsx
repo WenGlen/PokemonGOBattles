@@ -217,7 +217,8 @@ function ThreatList({ threats, team, side }: { threats: Threat[]; team: PokemonD
   };
 
   return (
-    <div className="tbl-scroll">
+    // fill：兩欄並排時高度跟左邊的屬性克制表對齊，多的自己捲
+    <div className="tbl-scroll fill">
       <table className="tbl">
         <thead>
           <tr>
