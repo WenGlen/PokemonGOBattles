@@ -864,7 +864,16 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   .tg-col h4 em { font-size: 10px; }
   .tg-col h4 span { font-size: 14px; }
 }
+/* 手機上五欄並排會剩兩個字的寬度，改成三排：
+   最上面一排是兩個極端（雙重被剋／雙重抵抗），中間是被剋／抵抗，
+   「普通」整排放最下面——先看最痛跟最安全的，普通本來就是掃過去的那一群。
+   三排之間的留白要比排內的行距明顯寬，不然三塊會糊成一片 */
 @media (max-width: 760px) {
-  .tg-grid { grid-template-columns: repeat(2, var(--tgw)); column-gap: 20px; }
-  .tg-col[data-b='0'] .tg-cells { grid-template-columns: minmax(0, 1fr); }
+  .tg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; row-gap: 24px; }
+  .tg-col[data-b='2'] { grid-area: 1 / 1; }
+  .tg-col[data-b='-2'] { grid-area: 1 / 2; }
+  .tg-col[data-b='1'] { grid-area: 2 / 1; }
+  .tg-col[data-b='-1'] { grid-area: 2 / 2; }
+  .tg-col[data-b='0'] { grid-area: 3 / 1 / 4 / 3; }
+  .tg-col[data-b='0'] .tg-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 14px; }
 }
