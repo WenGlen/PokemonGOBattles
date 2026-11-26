@@ -426,6 +426,8 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tbl .nm { display: flex; align-items: center; gap: 6px; }
 .tbl .nm > span { font-weight: 500; }
 .tbl .sm { font-size: 11.5px; }
+/* 這一格折行會把招式名跟它的數值拆到兩行，欄寬改由內容決定 */
+.tbl td.nowrap, .tbl .dim.nowrap { white-space: nowrap; }
 .tbl .dim { color: var(--muted); font-weight: 400; }
 /* 屬性欄：單屬性置中，雙屬性左下右上微微疊著，第一屬性壓在上面。
    欄標題預設靠右，不跟著置中的話整欄看起來就是歪的 */

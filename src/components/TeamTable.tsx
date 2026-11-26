@@ -162,7 +162,8 @@ function ExposureList({ list, side, title }: { list: MoveExposure[]; side: Side;
           <tbody>
             {shown.map((e) => (
               <tr key={e.move.id} className={e.hits >= 2 ? 'hot' : ''}>
-                <td className="left nm">
+                {/* 不折行：折了之後招式名跟它的數值會被拆到兩行，整張表就亂了 */}
+                <td className="left nm nowrap">
                   <TypeIcon type={e.move.type} size={14} />
                   <span>{zhName(e.move)}</span>
                   <MoveNums m={e.move} ratios={false} />
@@ -171,13 +172,14 @@ function ExposureList({ list, side, title }: { list: MoveExposure[]; side: Side;
                 <td className="num dim">{e.users.length}</td>
                 <td className={`num ${hitClass(e.hits)}`}>{e.hits || '—'}</td>
                 <td className="left sm">
-                  {e.users.slice(0, 4).map((u) => (
+                  {/* 列到三隻就好：四隻會把這一欄撐成兩行，每一列高度都不一樣 */}
+                  {e.users.slice(0, 3).map((u) => (
                     <span key={u.id} className="mv">
                       <PokemonIcon key={u.icon} icon={u.icon} alt="" size={16} />
                       {u.zh}<small className="dim">{u.pct}%</small>
                     </span>
                   ))}
-                  {e.users.length > 4 && <small className="dim">…另外 {e.users.length - 4} 隻</small>}
+                  {e.users.length > 3 && <small className="dim nowrap">…另外 {e.users.length - 3} 隻</small>}
                 </td>
               </tr>
             ))}
