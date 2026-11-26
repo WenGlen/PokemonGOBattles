@@ -400,7 +400,8 @@ export default function TeamTable({ data, cp }: { data: AppData; cp: LeagueCp })
         </section>
       </div>
 
-      <section className="blk">
+      {/* 這一塊自己會上下捲，收窄一點，兩邊才有地方捲整頁 */}
+      <section className="blk narrow">
         <ExposureList list={exposure} side={side} title={c.moveTitle} />
       </section>
     </>

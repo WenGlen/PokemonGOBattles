@@ -30,7 +30,8 @@ export default function Simulator({ data, cp }: { data: AppData; cp: LeagueCp })
   if (!a || !b) return null;
 
   return (
-    <>
+    // 收窄並置中：下面的逐回合明細自己會捲，整排撐滿的話整頁就捲不動
+    <div className="narrow">
       <div className="leagues sub center">
         {([['optimal', '最佳出招'], ['energy', '能量一滿就丟']] as const).map(([k, label]) => (
           <button key={k} aria-pressed={strategy === k} onClick={() => setStrategy(k)}>{label}</button>
@@ -93,6 +94,6 @@ export default function Simulator({ data, cp }: { data: AppData; cp: LeagueCp })
           />
         </>
       )}
-    </>
+    </div>
   );
 }
