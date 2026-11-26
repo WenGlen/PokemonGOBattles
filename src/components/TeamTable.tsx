@@ -9,7 +9,7 @@ import {
 } from '@/lib/analysis';
 import type { AppData, SideConfig } from '@/lib/app-data';
 import type { LeagueCp } from '@/lib/stats';
-import { effBucket, effClass, TYPE_ZH } from '@/lib/typeChart';
+import { effClass, TYPE_ZH } from '@/lib/typeChart';
 import { zhName, type Loadout, type PokemonData } from '@/lib/types';
 
 /** 放進去的是誰的隊伍。同一份計算，但好壞相反。 */
@@ -84,7 +84,7 @@ const COPY = {
  * @param mult 傷害倍率
  */
 function cellClass(mult: number): string {
-  const c = effClass(effBucket(mult));
+  const c = effClass(mult);
   return c ? `ef-${c}` : '';
 }
 

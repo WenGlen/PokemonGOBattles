@@ -453,16 +453,31 @@ export function roleTags(
 
 /* ── 雷達圖 ────────────────────────────────────────── */
 
-export type RadarKey = 'atk' | 'def' | 'hp' | 'dpt' | 'ept' | 'dpe';
+export type RadarKey = 'atk' | 'bulk' | 'dpt' | 'ept' | 'dpe';
 
 /**
- * 六個軸的順序就是畫出來的順序：先體質三項、再出手三項。
+ * 五個軸的順序就是畫出來的順序：體質兩項、出手三項。
+ *
+ * 防禦與 HP 合成「耐久」（相乘）而不是各站一軸：
+ * 這兩個在對戰裡從來不是分開用的——防高血薄跟防薄血高是同一件事，
+ * 兩軸分開只會讓偏科的形狀看起來比實際誇張。拆開的數字放在 sub 裡。
+ *
  * fmt 是軸上要寫的真實數值——只給百分位的話看不出「121.0 攻擊」到底是多少。
+ * sub 是軸標籤下面那一行小字，沒有就不畫。
  */
-export const RADAR_AXES: { key: RadarKey; label: string; hint: string; fmt: (v: number) => string }[] = [
+export const RADAR_AXES: {
+  key: RadarKey;
+  label: string;
+  hint: string;
+  fmt: (v: number) => string;
+  sub?: (v: RadarValues) => string;
+}[] = [
   { key: 'atk', label: '攻擊', hint: '實戰攻擊力', fmt: (v) => v.toFixed(1) },
-  { key: 'def', label: '防禦', hint: '實戰防禦力', fmt: (v) => v.toFixed(1) },
-  { key: 'hp', label: 'HP', hint: '血量', fmt: (v) => String(Math.round(v)) },
+  {
+    key: 'bulk', label: '耐久', hint: '防禦 × HP，越大越耐打',
+    fmt: (v) => Math.round(v).toLocaleString(),
+    sub: (v) => `防 ${v.def.toFixed(1)} × HP ${Math.round(v.hp)}`,
+  },
   { key: 'dpe', label: '爆發', hint: '最佳大招每點能量的傷害（DPE）', fmt: (v) => v.toFixed(2) },
   { key: 'ept', label: '充能', hint: '最佳快招每回合能量（EPT）', fmt: (v) => v.toFixed(2) },
   { key: 'dpt', label: '快攻', hint: '最佳快招每回合傷害（DPT）', fmt: (v) => v.toFixed(2) },
@@ -476,9 +491,10 @@ export function band(pct: number): 1 | 2 | 3 | 4 | 5 {
   return Math.min(5, Math.floor(pct / 20) + 1) as 1 | 2 | 3 | 4 | 5;
 }
 
-export type RadarValues = Record<RadarKey, number>;
+/** 五個軸的原始值，外加耐久拆開來的那兩個（只寫在標籤上，不佔軸） */
+export type RadarValues = Record<RadarKey, number> & { def: number; hp: number };
 
-/** 算一隻的六個軸原始值 */
+/** 算一隻的軸值 */
 export function radarValues(
   p: PokemonData,
   st: { atk: number; def: number; hp: number },
@@ -489,6 +505,7 @@ export function radarValues(
   const rates = fasts.map((m) => fastRates(m));
   return {
     atk: st.atk,
+    bulk: st.def * st.hp,
     def: st.def,
     hp: st.hp,
     dpt: Math.max(0, ...rates.map((x) => x.dpt)),
@@ -503,7 +520,7 @@ export type RadarContext = Record<RadarKey, number[]>;
 /**
  * 以同聯盟上榜的那一批當母體。
  *
- * 軸上畫的是百分位不是原始值——六個軸的單位完全不同
+ * 軸上畫的是百分位不是原始值——五個軸的單位完全不同
  * （攻擊 120 跟 DPE 2.0 沒得比），只有「贏過多少人」才放得進同一張圖。
  */
 export function buildRadarContext(pool: RadarValues[]): RadarContext {

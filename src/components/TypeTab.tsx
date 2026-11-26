@@ -14,7 +14,7 @@ import { suggestedBuild, type LeagueCp } from '@/lib/stats';
 import { effBucket, effClass, effectiveness, TYPE_ZH } from '@/lib/typeChart';
 import { zhName } from '@/lib/types';
 
-type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
+type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'bulk';
 
 /**
  * 五個桶，從最痛排到最安全。
@@ -24,13 +24,13 @@ type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
  * 底色沿用解析卡那一套 .tm-cell，兩邊看起來才是同一個系統。
  */
 const BUCKETS = [
-  { b: 2, label: '雙重被剋', cls: effClass(2), mult: '×2.56' },
-  { b: 1, label: '被剋', cls: effClass(1), mult: '×1.60' },
-  { b: 0, label: '普通', cls: effClass(0), mult: '×1.00' },
-  { b: -1, label: '抵抗', cls: effClass(-1), mult: '×0.63' },
+  { b: 2, label: '雙重被剋', mult: '×2.56' },
+  { b: 1, label: '被剋', mult: '×1.60' },
+  { b: 0, label: '普通', mult: '×1.00' },
+  { b: -1, label: '抵抗', mult: '×0.63' },
   // 雙重抵抗是唯一倍率會變的一桶：抵抗兩次 ×0.39、原作免疫再抵抗 ×0.24、免疫兩次 ×0.15，
   // 所以只有這一欄的數字留在格子裡，其他四欄的倍率整欄只寫一次。
-  { b: -2, label: '雙重抵抗', cls: effClass(-2), mult: null },
+  { b: -2, label: '雙重抵抗', mult: null },
 ] as const;
 
 /**
@@ -95,8 +95,6 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
   /** 長條圖的基準：拿目前這張表看得到的那一批比 */
   const max = useMemo(() => ({
     atk: Math.max(1, ...shown.map((r) => r.atk)),
-    def: Math.max(1, ...shown.map((r) => r.def)),
-    hp: Math.max(1, ...shown.map((r) => r.hp)),
     bulk: Math.max(1, ...shown.map((r) => r.bulk)),
   }), [shown]);
 
@@ -127,7 +125,7 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
                 </h4>
                 <div className="tg-cells">
                   {bk.hits.map(({ t, mult }) => (
-                    <div key={t} className={`tm-cell${bk.cls ? ' ef-' + bk.cls : ''}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
+                    <div key={t} className={`tm-cell ef-${effClass(mult)}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
                       {/* 雙重的那兩欄圖示再大一圈，掃過去會先停在這裡 */}
                       <TypeIcon type={t} size={Math.abs(bk.b) >= 2 ? 28 : 20} />
                       <span className="tm-name">{TYPE_ZH[t]}</span>
@@ -163,10 +161,10 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
               <tr>
                 <SortHead k="rank" sort={sort} setSort={setSort} defaultDir={1} title="pvpoke 在這個聯盟的總排名">排名</SortHead>
                 <SortHead k="zh" sort={sort} setSort={setSort} defaultDir={1} align="left">寶可夢</SortHead>
-                <th className="left">屬性</th>
+                <th>屬性</th>
                 <SortHead k="atk" sort={sort} setSort={setSort}>攻擊</SortHead>
-                <SortHead k="def" sort={sort} setSort={setSort}>防禦</SortHead>
-                <SortHead k="hp" sort={sort} setSort={setSort}>HP</SortHead>
+                {/* 防禦與 HP 不單獨列——在對戰裡它們從來不是分開用的，
+                    拆成兩欄只會讓人去比兩個沒辦法單獨解讀的數字。拆開的值在解析卡的耐久軸上 */}
                 <SortHead k="bulk" sort={sort} setSort={setSort} title="防禦 × HP，越大越耐打">耐久</SortHead>
                 <th className="left">推薦招式</th>
                 <th title="加進我的箱子" />
@@ -188,19 +186,21 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
                       {r.score !== null && <small className="dim">{r.score.toFixed(1)}</small>}
                     </td>
                     <td className="left nm">
-                      <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={36} shadow={Boolean(r.p.shadow)} />
+                      <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={48} shadow={Boolean(r.p.shadow)} />
                       <span className="nm-txt">
                         <b>{zhName(r.p)}</b>
                         <small className="dim">#{r.p.dex}</small>
                       </span>
                       {on && <small className="pick">✓</small>}
                     </td>
-                    <td className="left">
-                      <span className="trow">{r.p.types.map((t) => <TypeIcon key={t} type={t} size={14} />)}</span>
+                    <td className="tp">
+                      {/* 單屬性置中，雙屬性左上右下微微疊著——兩個圖示排排站會讀成兩件事，
+                          疊起來才像是同一隻的一組屬性 */}
+                      <span className={`trow${r.p.types.length > 1 ? ' two' : ''}`}>
+                        {r.p.types.map((t) => <TypeIcon key={t} type={t} size={22} />)}
+                      </span>
                     </td>
                     <td className="num">{r.atk.toFixed(1)}<Bar v={r.atk} max={max.atk} /></td>
-                    <td className="num">{r.def.toFixed(1)}<Bar v={r.def} max={max.def} /></td>
-                    <td className="num">{r.hp}<Bar v={r.hp} max={max.hp} /></td>
                     <td className="num">{Math.round(r.bulk).toLocaleString()}<Bar v={r.bulk} max={max.bulk} /></td>
                     <td className="left sm">
                       {r.moveset

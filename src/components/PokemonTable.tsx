@@ -13,7 +13,7 @@ import { suggestedBuild, type LeagueCp } from '@/lib/stats';
 import { effBucket, effectiveness } from '@/lib/typeChart';
 import { zhName } from '@/lib/types';
 
-type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
+type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'bulk';
 
 /**
  * 寶可夢表。
@@ -65,8 +65,6 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
   /** 長條圖的基準：拿目前這張表看得到的那一批比，換聯盟或篩選就跟著重算 */
   const max = useMemo(() => ({
     atk: Math.max(1, ...shown.map((r) => r.atk)),
-    def: Math.max(1, ...shown.map((r) => r.def)),
-    hp: Math.max(1, ...shown.map((r) => r.hp)),
     bulk: Math.max(1, ...shown.map((r) => r.bulk)),
   }), [shown]);
 
@@ -111,10 +109,10 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
               <tr>
                 <SortHead k="rank" sort={sort} setSort={setSort} defaultDir={1} title="pvpoke 在這個聯盟的總排名">排名</SortHead>
                 <SortHead k="zh" sort={sort} setSort={setSort} defaultDir={1} align="left">寶可夢</SortHead>
-                <th className="left">屬性</th>
+                <th>屬性</th>
                 <SortHead k="atk" sort={sort} setSort={setSort}>攻擊</SortHead>
-                <SortHead k="def" sort={sort} setSort={setSort}>防禦</SortHead>
-                <SortHead k="hp" sort={sort} setSort={setSort}>HP</SortHead>
+                {/* 防禦與 HP 不單獨列——在對戰裡它們從來不是分開用的，
+                    拆成兩欄只會讓人去比兩個沒辦法單獨解讀的數字。拆開的值在解析卡的耐久軸上 */}
                 <SortHead k="bulk" sort={sort} setSort={setSort} title="防禦 × HP，越大越耐打">耐久</SortHead>
                 <th className="left">推薦招式</th>
                 <th title="加進我的箱子" />
@@ -136,19 +134,21 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
                       {r.score !== null && <small className="dim">{r.score.toFixed(1)}</small>}
                     </td>
                     <td className="left nm">
-                      <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={36} shadow={Boolean(r.p.shadow)} />
+                      <PokemonIcon key={r.p.icon} icon={r.p.icon} alt="" size={48} shadow={Boolean(r.p.shadow)} />
                       <span className="nm-txt">
                         <b>{zhName(r.p)}</b>
                         <small className="dim">#{r.p.dex}</small>
                       </span>
                       {on && <small className="pick">✓</small>}
                     </td>
-                    <td className="left">
-                      <span className="trow">{r.p.types.map((t) => <TypeIcon key={t} type={t} size={14} />)}</span>
+                    <td className="tp">
+                      {/* 單屬性置中，雙屬性左上右下微微疊著——兩個圖示排排站會讀成兩件事，
+                          疊起來才像是同一隻的一組屬性 */}
+                      <span className={`trow${r.p.types.length > 1 ? ' two' : ''}`}>
+                        {r.p.types.map((t) => <TypeIcon key={t} type={t} size={22} />)}
+                      </span>
                     </td>
                     <td className="num">{r.atk.toFixed(1)}<Bar v={r.atk} max={max.atk} /></td>
-                    <td className="num">{r.def.toFixed(1)}<Bar v={r.def} max={max.def} /></td>
-                    <td className="num">{r.hp}<Bar v={r.hp} max={max.hp} /></td>
                     <td className="num">{Math.round(r.bulk).toLocaleString()}<Bar v={r.bulk} max={max.bulk} /></td>
                     <td className="left sm">
                       {r.moveset

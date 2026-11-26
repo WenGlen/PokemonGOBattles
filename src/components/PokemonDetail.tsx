@@ -156,15 +156,12 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
         <div className="pd-col">
           <section className="pd-sec">
             <h4 title={`${st.level ? `Lv${st.level} · ` : ''}軸上是真實數值，顏色是強弱、位置是贏過同聯盟上榜的多少人`}>
-              六角能力
+              能力數值
+              {/* CP 不是能力的一部分（它是等級與 IV 的結果），所以掛在標題旁邊不佔軸 */}
+              <span className="pd-cp">CP {st.cp}</span>
             </h4>
             <div className="pd-radar">
               <Radar values={radar} ctx={radarCtx} compare={compare} />
-              {/* 雷達圖沒有的兩個數字擺在圖的下緣左右，中間的空間全留給圖 */}
-              <dl className="pd-stats">
-                <div><dt>CP</dt><dd>{st.cp}</dd></div>
-                <div><dt>耐久</dt><dd>{Math.round(st.bulk).toLocaleString()}</dd></div>
-              </dl>
             </div>
           </section>
         </div>

@@ -1,18 +1,20 @@
 'use client';
 
+import { useId } from 'react';
 import { band, RADAR_AXES, radarPercent, type RadarContext, type RadarValues } from '@/lib/analysis';
 
-// 畫布比正方形寬，因為左右兩邊的軸標籤比上下的長，擠成正方形會被切掉
-const W = 300;
-const H = 232;
+// 畫布比正方形寬，因為左右兩邊的軸標籤比上下的長，擠成正方形會被切掉；
+// 右邊那一軸（耐久）底下還多一行「防 × HP」，所以留得更寬
+const W = 360;
+const H = 236;
 const CX = W / 2;
-const CY = 112;
+const CY = 116;
 /** 外圈半徑。剩下的空間留給軸標籤 */
-const R = 62;
-const LABEL_R = 84;
+const R = 76;
+const LABEL_R = 100;
 const RINGS = [0.25, 0.5, 0.75, 1];
 
-/** 第 i 個軸、距中心 d 的座標。從正上方開始、順時針每 60 度一個 */
+/** 第 i 個軸、距中心 d 的座標。從正上方開始、順時針平分一圈 */
 function point(i: number, d: number): [number, number] {
   const a = (-90 + i * (360 / RADAR_AXES.length)) * (Math.PI / 180);
   return [CX + Math.cos(a) * d, CY + Math.sin(a) * d];
@@ -22,20 +24,25 @@ const path = (ds: number[]) =>
   ds.map((d, i) => `${i ? 'L' : 'M'}${point(i, d).map((n) => n.toFixed(1)).join(' ')}`).join(' ') + ' Z';
 
 /**
- * 六角雷達圖：體質三項（攻／防／HP）＋ 出手三項（爆發／充能／快攻）。
+ * 能力雷達圖：攻擊／耐久 ＋ 出手三項（爆發／充能／快攻）。
  *
- * 畫的是**百分位**不是原始值——六個軸的單位不同，攻擊 120 跟 DPE 2.0 沒得比，
+ * 畫的是**百分位**不是原始值——五個軸的單位不同，攻擊 120 跟 DPE 2.0 沒得比，
  * 只有「贏過同聯盟多少人」放得進同一張圖。
  *
- * @param values 這一隻的六個軸原始值
+ * 配色：底色是灰的（形狀本身不帶訊息），訊息在頂點與數字上——
+ * 每個頂點塗它自己那一段的顏色，跟軸上的數字同色；連線走漸層把它們串起來。
+ *
+ * @param values 這一隻的軸值
  * @param ctx 同聯盟上榜那一批的分布，用來換算百分位
- * @param compare 另一隻的原始值，有的話疊一層虛線上去比形狀
+ * @param compare 另一隻的軸值，有的話疊一層虛線上去比形狀
  */
 export default function Radar({ values, ctx, compare }: {
   values: RadarValues;
   ctx: RadarContext;
   compare?: RadarValues | null;
 }) {
+  // 同一頁可能有兩張卡，漸層的 id 不能撞
+  const gid = `rg${useId().replace(/:/g, '')}`;
   const pcts = RADAR_AXES.map((a) => radarPercent(ctx, a.key, values[a.key]));
   const mine = pcts.map((p) => (p / 100) * R);
   const theirs = compare
@@ -43,7 +50,18 @@ export default function Radar({ values, ctx, compare }: {
     : null;
 
   return (
-    <svg className="radar" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="六項能力的百分位雷達圖">
+    <svg className="radar" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="五項能力的百分位雷達圖">
+      <defs>
+        {/* 左下到右上，照強弱五段的顏色走，跟頂點與數字是同一組色 */}
+        <linearGradient id={gid} x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stopColor="var(--b1)" />
+          <stop offset="30%" stopColor="var(--b2)" />
+          <stop offset="55%" stopColor="var(--b3)" />
+          <stop offset="78%" stopColor="var(--b4)" />
+          <stop offset="100%" stopColor="var(--b5)" />
+        </linearGradient>
+      </defs>
+
       {RINGS.map((f) => (
         <polygon
           key={f}
@@ -56,10 +74,10 @@ export default function Radar({ values, ctx, compare }: {
       ))}
 
       {theirs && <path className="shape other" d={path(theirs)} />}
-      <path className="shape mine" d={path(mine)} />
+      <path className="shape mine" style={{ stroke: `url(#${gid})` }} d={path(mine)} />
       {mine.map((d, i) => {
         const [x, y] = point(i, d);
-        return <circle key={i} className="dot" cx={x} cy={y} r={2.6} />;
+        return <circle key={i} className={`dot vb${band(pcts[i])}`} cx={x} cy={y} r={3.2} />;
       })}
 
       {/* 標籤上寫的是真實數值，顏色是它在同聯盟的強弱段——
@@ -74,6 +92,7 @@ export default function Radar({ values, ctx, compare }: {
             <tspan x={x} dy="-4">{a.label}</tspan>
             <tspan className={`val vb${band(pcts[i])}`} x={x} dy="15">{a.fmt(values[a.key])}</tspan>
             <tspan className="pct" dx="4">{Math.round(pcts[i])}%</tspan>
+            {a.sub && <tspan className="sub" x={x} dy="12">{a.sub(values)}</tspan>}
           </text>
         );
       })}

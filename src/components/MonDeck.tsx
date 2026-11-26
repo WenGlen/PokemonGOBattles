@@ -61,7 +61,6 @@ export default function MonDeck({ deck, data, tagCtx, radarCtx, onClose }: {
           );
         })}
       </div>
-      <p className="pd-note">最多同時放兩隻，再點第三隻會換掉先選的那一隻。</p>
     </div>
   );
 }

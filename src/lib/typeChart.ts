@@ -82,22 +82,43 @@ export function effBucket(mult: number): -2 | -1 | 0 | 1 | 2 {
 }
 
 /**
- * 桶 → CSS 樣式字尾。四段各自一個顏色，整個平台同一套：
- * `w2` 雙重被剋（紅）、`w1` 被剋（橘黃）、`r1` 抵抗（綠）、`r2` 雙重抵抗（藍）。
+ * 倍率 → CSS 樣式字尾。整個平台同一套：
+ * `w2` 雙重被剋（紅）、`w1` 被剋（橘黃）、`r1` 抵抗（綠）、
+ * `r2` 雙重抵抗（藍）、`r3` 再往下的特殊倍率（藍紫）。
  *
  * 顏色講的是**倍率大小**，不是「對你好不好」——挨打與出手共用同一套，
  * 所以外框紅色就是「這一招打過去倍率高」，不會因為換個方向就換個意思。
  * 勝負、威脅數那種「對你好不好」用的是另一組（--foe／--good），兩套不要混。
  *
- * @param bucket effBucket() 的輸出
+ * r3 是從 r2 裡再切出來的一層。effBucket 把它們都歸在 −2，但實際值差很多：
+ * 抵抗兩次 ×0.39、原作免疫再抵抗 ×0.24、免疫兩次 ×0.15。
+ * 門檻取 0.3，夾在 0.39 與 0.24 中間，浮點尾數跨不過去。
+ *
+ * @param mult effectiveness() 的輸出，不含本系加成
  * @returns 樣式字尾，普通回空字串
  */
-export function effClass(bucket: -2 | -1 | 0 | 1 | 2): '' | 'w2' | 'w1' | 'r1' | 'r2' {
-  if (bucket === 2) return 'w2';
-  if (bucket === 1) return 'w1';
-  if (bucket === -1) return 'r1';
-  if (bucket === -2) return 'r2';
+export function effClass(mult: number): '' | 'w2' | 'w1' | 'r1' | 'r2' | 'r3' {
+  const b = effBucket(mult);
+  if (b === 2) return 'w2';
+  if (b === 1) return 'w1';
+  if (b === -1) return 'r1';
+  if (b === -2) return mult < 0.3 ? 'r3' : 'r2';
   return '';
+}
+
+/**
+ * 倍率 → 要畫幾個什麼記號。被剋畫爆炸、抵抗畫盾牌，一級一個、兩級兩個。
+ *
+ * 數字排在十八格裡太吵，改成記號；實際倍率寫在表頭的圖例上，
+ * 滑過格子的 tooltip 也還留著精確值。
+ *
+ * @param mult effectiveness() 的輸出
+ */
+export function effMarks(mult: number): { kind: 'burst' | 'shield' | null; count: 0 | 1 | 2 } {
+  const b = effBucket(mult);
+  if (b > 0) return { kind: 'burst', count: b as 1 | 2 };
+  if (b < 0) return { kind: 'shield', count: -b as 1 | 2 };
+  return { kind: null, count: 0 };
 }
 
 /** 18 屬性的中文名。唯一來源是 data/type-zh.json，抓資料腳本也讀同一份。 */

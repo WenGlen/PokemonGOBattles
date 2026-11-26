@@ -60,3 +60,38 @@ export function TypeIcon({ type, size = 16, label = false }: { type: string; siz
     </span>
   );
 }
+
+/**
+ * 盾牌（抵抗）與爆炸（被剋）。
+ *
+ * 用 currentColor，所以顏色跟著格子的克制色走，不用每一段各畫一份。
+ * 畫成 path 而不是抓外部圖檔：這是純靜態站，十八格一次要畫幾十個記號，
+ * 多幾十個 request 不划算，而且外部圖檔沒辦法跟著 CSS 變數換色。
+ *
+ * @param size 邊長 px
+ */
+export function ShieldIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg className="mk" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 2.2 20.2 5.4v6.1c0 4.9-3.4 8.9-8.2 10.3C7.2 20.4 3.8 16.4 3.8 11.5V5.4L12 2.2Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/**
+ * 爆炸。
+ * @param size 邊長 px
+ */
+export function BurstIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg className="mk" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 1.6 14.5 7 20 4.6 18.2 10.3 24 11.4 18.9 14.4 22.6 19 16.7 18.6 16.9 24.4 12.4 20.6 8.4 24.4 8 18.6 2.2 19 5.6 14.4 0.4 11.4 6.2 10.3 4.4 4.6 9.9 7 12 1.6Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
