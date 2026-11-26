@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { PokemonIcon, TypeIcon } from '@/components/Icon';
+import { Fragment, useEffect, useState } from 'react';
+import { BoltIcon, BurstIcon, PokemonIcon, ShieldIcon, TypeIcon } from '@/components/Icon';
 import type { BattleResult, SideKey, Snapshot, TurnRecord } from '@/lib/battle';
 import { zhName, type PokemonData } from '@/lib/types';
 
@@ -14,9 +14,11 @@ function Bar({ pct, color }: { pct: number; color: string }) {
   );
 }
 
-/** 單側在某回合做了什麼 */
+/**
+ * 單側在某回合做了什麼。
+ * 只放「做了什麼」——血量與能量在表格裡各自有欄，塞進來只會讓招式左右跑。
+ */
 function Act({ turn, side }: { turn: TurnRecord; side: SideKey }) {
-  const cls = side === 'a' ? 'act' : 'act foe';
   const color = side === 'a' ? 'you' : 'foe';
   const evs = turn.events.filter((e) => 'side' in e && e.side === side);
   const snap = side === 'a' ? turn.a : turn.b;
@@ -28,7 +30,7 @@ function Act({ turn, side }: { turn: TurnRecord; side: SideKey }) {
           {e.moveType && <TypeIcon type={e.moveType} size={13} />}
           <span className="nm">{e.move}</span>
           <span className={`dmg ${color}`}>−{e.damage}</span>
-          <span className="prog">⚡+{e.energyGain}</span>
+          <span className="prog"><BoltIcon size={10} />+{e.energyGain}</span>
         </span>
       );
     }
@@ -43,7 +45,7 @@ function Act({ turn, side }: { turn: TurnRecord; side: SideKey }) {
       return (
         <span key={i} style={{ display: 'contents' }}>
           {e.moveType && <TypeIcon type={e.moveType} size={13} />}
-          <span className="nm">💥 {e.move}</span>
+          <span className="nm"><BurstIcon size={11} /> {e.move}</span>
           {e.shielded ? <span className="tag shield">被擋</span> : <span className={`dmg ${color}`}>−{e.damage}</span>}
           {e.cmpWin && <span className="tag cmp">CMP 搶先</span>}
           {e.buffText && <span className="tag">{e.buffText}</span>}
@@ -55,32 +57,21 @@ function Act({ turn, side }: { turn: TurnRecord; side: SideKey }) {
   });
 
   return (
-    <div className={cls}>
-      {side === 'b' && (
-        <span className="mini">
-          <span className="en">⚡{snap.energy}</span>
-          <Bar pct={(snap.hp / snap.maxHp) * 100} color="var(--foe)" />
-          {snap.hp}
-        </span>
-      )}
+    <div className="act">
       {parts.length === 0 && snap.fastProgress && (
         <span className="prog">蓄招 {snap.fastProgress[0]}/{snap.fastProgress[1]}</span>
       )}
       {parts}
-      {side === 'a' && (
-        <span className="mini">
-          {snap.hp}
-          <Bar pct={(snap.hp / snap.maxHp) * 100} color="var(--you)" />
-          <span className="en">⚡{snap.energy}</span>
-        </span>
-      )}
     </div>
   );
 }
 
 
-/** 這一回合某一側做了什麼，寫成一行字 */
-function lineFor(turn: TurnRecord, side: SideKey): { text: string; type?: string; kind: string } | null {
+/** 這一回合某一側做了什麼，寫成一行字。gain 另外給，因為能量要用圖示不是字 */
+function lineFor(
+  turn: TurnRecord,
+  side: SideKey
+): { text: string; type?: string; kind: string; gain?: number } | null {
   for (const e of turn.events) {
     if (!('side' in e) || e.side !== side) continue;
     if (e.kind === 'charged') {
@@ -90,7 +81,7 @@ function lineFor(turn: TurnRecord, side: SideKey): { text: string; type?: string
         text: e.shielded ? `${e.move} 被擋下` : `${e.move} −${e.damage}`,
       };
     }
-    if (e.kind === 'fast') return { kind: 'fast', type: e.moveType, text: `${e.move} −${e.damage} ⚡+${e.energyGain}` };
+    if (e.kind === 'fast') return { kind: 'fast', type: e.moveType, text: `${e.move} −${e.damage}`, gain: e.energyGain };
     if (e.kind === 'trigger') return { kind: 'trigger', type: e.moveType, text: `按下 ${e.move}` };
     if (e.kind === 'faint') return { kind: 'faint', text: '倒下' };
   }
@@ -115,7 +106,7 @@ function Fighter({ p, snap, side, line }: {
           <b>{zhName(p)}</b>
           <span className="pl-shields" aria-label={`護盾 ${snap.shields}`}>
             {[0, 1].map((n) => (
-              <i key={n} className={n < snap.shields ? 'on' : undefined} aria-hidden>🛡</i>
+              <i key={n} className={n < snap.shields ? 'on' : undefined} aria-hidden><ShieldIcon size={12} /></i>
             ))}
             {(snap.atkStage !== 0 || snap.defStage !== 0) && (
               <em>
@@ -133,13 +124,14 @@ function Fighter({ p, snap, side, line }: {
         <span className="bar hp"><i style={{ width: `${(snap.hp / snap.maxHp) * 100}%`, background: color }} /></span>
       </div>
       <div className="pl-gauge">
-        <span className="pl-num en">⚡{snap.energy}</span>
+        <span className="pl-num en"><BoltIcon size={11} />{snap.energy}</span>
         <span className="bar en"><i style={{ width: `${Math.min(100, snap.energy)}%`, background: 'var(--warn)' }} /></span>
       </div>
 
       <div className={`pl-line${line ? ` ${line.kind}` : ''}`}>
         {line?.type && <TypeIcon type={line.type} size={14} />}
         <span>{line?.text ?? '—'}</span>
+        {line?.gain !== undefined && <span className="pl-gain"><BoltIcon size={10} />+{line.gain}</span>}
       </div>
     </div>
   );
@@ -269,24 +261,55 @@ export default function Timeline({ result, names, mons }: {
       <div className="tl">
         <button className="head" onClick={() => setOpenLog((v) => !v)} aria-expanded={openLog}>
           <h3>逐回合明細</h3>
-          <span className="hint">1 回合 = 0.5 秒 · 💥 為大招發動回合 · {openLog ? '收合' : '展開'}</span>
+          <span className="hint">
+            1 回合 = 0.5 秒 · <BurstIcon size={11} /> 為大招發動回合 · {openLog ? '收合' : '展開'}
+          </span>
         </button>
-        {openLog && <div className="rows">
-        {rows.map((t) => {
-          const note = noteFor(t.turn);
-          const isKey = t.events.some((e) => e.kind === 'charged');
-          return (
-            <div key={t.turn} className={`row${isKey ? ' key' : ''}`}>
-              <span className="t">
-                <b>T{t.turn}</b> {t.seconds.toFixed(1)}s
-              </span>
-              <Act turn={t} side="a" />
-              <Act turn={t} side="b" />
-              {note && <div className="note">↑ {note}</div>}
-            </div>
-          );
-        })}
-        </div>}
+        {openLog && (
+          <div className="rows">
+            {/* 表格而不是自由排版：時間、能量、血量各自占一欄，
+                數字位數變了也只撐開那一欄，招式永遠從同一個位置開始。
+                能量擺在最外側，兩邊對稱，中間留給真正要讀的「做了什麼」 */}
+            <table className="log">
+              <tbody>
+                {rows.map((t) => {
+                  const note = noteFor(t.turn);
+                  const isKey = t.events.some((e) => e.kind === 'charged');
+                  return (
+                    <Fragment key={t.turn}>
+                      <tr className={isKey ? 'key' : undefined}>
+                        <td className="lg-t"><b>T{t.turn}</b> {t.seconds.toFixed(1)}s</td>
+                        <td className="lg-en">
+                          <span className="lg-cell"><BoltIcon size={10} />{t.a.energy}</span>
+                        </td>
+                        <td className="lg-hp">
+                          <span className="lg-cell">
+                            {t.a.hp}<Bar pct={(t.a.hp / t.a.maxHp) * 100} color="var(--you)" />
+                          </span>
+                        </td>
+                        <td className="lg-act"><Act turn={t} side="a" /></td>
+                        <td className="lg-act"><Act turn={t} side="b" /></td>
+                        <td className="lg-hp foe">
+                          <span className="lg-cell">
+                            <Bar pct={(t.b.hp / t.b.maxHp) * 100} color="var(--foe)" />{t.b.hp}
+                          </span>
+                        </td>
+                        <td className="lg-en foe">
+                          <span className="lg-cell"><BoltIcon size={10} />{t.b.energy}</span>
+                        </td>
+                      </tr>
+                      {note && (
+                        <tr className="lg-note">
+                          <td colSpan={7}>↑ {note}</td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </>
   );
