@@ -423,7 +423,12 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
    這裡不能用 display: flex——td 一旦不是 table-cell，整列會被拆成另一列 */
 .tbl td.rk .rk-n { display: inline-block; min-width: 2.2em; text-align: right; }
 .tbl td.rk small { margin-left: 6px; }
-.tbl .nm { display: flex; align-items: center; gap: 6px; }
+/* td 不可以設 display:flex——那樣它就不再是 table-cell，瀏覽器會另外生一個
+   匿名格子把它包起來，這一格於是不跟著整列的高度走：旁邊的格子一變高
+   （招式那張表的「誰會帶」會折行），整列的橫線就錯開。
+   改成讓裡面的東西行內排列，td 維持 table-cell */
+.tbl .nm > * { vertical-align: middle; }
+.tbl .nm > * + * { margin-left: 6px; }
 .tbl .nm > span { font-weight: 500; }
 .tbl .sm { font-size: 11.5px; }
 /* 這一格折行會把招式名跟它的數值拆到兩行，欄寬改由內容決定 */
@@ -915,7 +920,7 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tm-cell.hot[class*='o-'] { outline-width: 3px; }
 
 /* ── 列表：給一點層次，不要整片同一個字級 ────────────── */
-.tbl .nm-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.tbl .nm-txt { display: inline-flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .tbl .nm-txt b { font-size: 14px; font-weight: 600; }
 .tbl .nm-txt small { font-size: 10.5px; font-variant-numeric: tabular-nums; }
 .tbl td.rk .rk-n { font-size: 14px; font-weight: 600; }
