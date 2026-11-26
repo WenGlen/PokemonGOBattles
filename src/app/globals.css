@@ -550,6 +550,10 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
 .tbl tr.detail td { background: var(--surface-2); padding-top: 7px; padding-bottom: 8px; text-align: left; }
 .tbl tr.detail .mv { margin-right: 10px; }
+/* 展開的那一列：快招一行、大招一行，標籤對齊 */
+.mv-line { display: flex; align-items: center; flex-wrap: wrap; row-gap: 5px; }
+.mv-line + .mv-line { margin-top: 6px; }
+.mv-label { flex: none; width: 3.4em; color: var(--muted); }
 .blk .tbl-bar { border-bottom: 1px solid var(--line); }
 
 /* ── 單隻寶可夢的解析卡 ────────────────────────────── */

@@ -5,7 +5,7 @@ import SidePanel from '@/components/SidePanel';
 import { CaretIcon, PokemonIcon, TypeIcon } from '@/components/Icon';
 import MoveNums from '@/components/MoveNums';
 import {
-  effLabel, encounterByType, moveExposure, scanThreats, teamTypePressure,
+  effLabel, encounterByType, isFast, moveExposure, scanThreats, teamTypePressure,
   type MoveExposure, type Threat,
 } from '@/lib/analysis';
 import type { AppData, SideConfig } from '@/lib/app-data';
@@ -261,15 +261,24 @@ function ThreatList({ threats, team, side }: { threats: Threat[]; team: PokemonD
               {open === t.id && (
                 <tr className="detail">
                   <td />
+                  {/* 快招與大招分兩行：牠們是兩件事，混在一行要自己從數值反推哪個是哪個 */}
                   <td className="left sm" colSpan={2 + team.length}>
-                    招式：
-                    {t.moves.map((m) => (
-                      <span key={m.id} className="mv">
-                        <TypeIcon type={m.type} size={12} />
-                        {zhName(m)}
-                        <MoveNums m={m} ratios={false} />
-                      </span>
-                    ))}
+                    {([['快招', t.moves.filter(isFast)], ['大招', t.moves.filter((m) => !isFast(m))]] as const).map(
+                      ([label, ms]) => (
+                        <div key={label} className="mv-line">
+                          <span className="mv-label">{label}</span>
+                          {ms.length === 0
+                            ? <span className="dim">—</span>
+                            : ms.map((m) => (
+                                <span key={m.id} className="mv">
+                                  <TypeIcon type={m.type} size={12} />
+                                  {zhName(m)}
+                                  <MoveNums m={m} ratios={false} />
+                                </span>
+                              ))}
+                        </div>
+                      )
+                    )}
                   </td>
                 </tr>
               )}
