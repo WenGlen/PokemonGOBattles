@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { BoltIcon, BurstIcon, PokemonIcon, TypeIcon } from '@/components/Icon';
+import { PokemonIcon, TypeIcon } from '@/components/Icon';
+import MoveNums from '@/components/MoveNums';
 import Radar from '@/components/Radar';
 import TypeMatrix from '@/components/TypeMatrix';
 import {
-  dpe, fastRates, isFast, radarValues, roleTags,
+  radarValues, roleTags,
   type RadarContext, type RadarValues, type RoleTag, type TagContext,
 } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
@@ -27,38 +28,6 @@ export interface DetailStats {
   bulk: number;
   /** pvpoke 推薦的招式組合，用來在招式清單上標記 */
   moveset: string[] | null;
-}
-
-/**
- * 一招的數值。
- *
- * 順序固定成「威力 → 能量 → 時間 → 比值」：先看打多痛、再看多貴、
- * 再看要等多久，最後才是算出來的比值。
- * 威力與能量用圖示不寫字（「力」「⚡」各佔一格字寬卻只是標籤），
- * 回合數直接換成秒——遊戲裡感覺得到的是時間，不是回合。
- */
-function MoveNums({ m }: { m: MoveData }) {
-  const fast = isFast(m);
-  const r = fastRates(m);
-  const buff = !fast && m.buffs && (m.buffs[0] || m.buffs[1])
-    ? `${m.buffTarget === 'self' ? '自' : '敵'} ${[
-        m.buffs[0] ? `攻${m.buffs[0] > 0 ? '+' : ''}${m.buffs[0]}` : '',
-        m.buffs[1] ? `防${m.buffs[1] > 0 ? '+' : ''}${m.buffs[1]}` : '',
-      ].filter(Boolean).join('、')}`
-    : '';
-  return (
-    <span className="dim mv-nums">
-      <BurstIcon size={11} />{m.power}
-      <i>·</i>
-      <BoltIcon size={11} />{fast ? `+${m.energyGain}` : m.energy}
-      {fast && <><i>·</i>{(m.turns * 0.5).toFixed(1)} s</>}
-      <i>·</i>
-      {fast
-        ? `Dpt ${r.dpt.toFixed(2)} · Ept ${r.ept.toFixed(2)}`
-        : `Dpe ${dpe(m).toFixed(2)}`}
-      {buff && <><i>·</i>{buff}</>}
-    </span>
-  );
 }
 
 /** 招式清單裡的一列。推薦的那幾招放大；滑過或點一下就把克制表的外框換成這一招 */

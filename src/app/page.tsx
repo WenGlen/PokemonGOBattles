@@ -67,9 +67,12 @@ export default function Page() {
     <div className="wrap">
       <header className="top">
         <h1>Pokémon GO 對戰表</h1>
-        <span className="chip">2026-06-23 新版系統</span>
-        <span className="meta">
-          資料 {meta.gamemasterTimestamp.slice(0, 10)} · {meta.source.repo} · 驗證 <b>{okCount}/{meta.checks.length} 通過</b>
+        {/* 全過就一句「驗證通過」，沒全過才把數字攤出來——平常沒有人要讀 22/22 */}
+        <span className="meta" title={`資料來自 ${meta.source.repo}，${meta.checks.length} 項檢查`}>
+          {meta.gamemasterTimestamp.slice(0, 10)} 更新 ·{' '}
+          {okCount === meta.checks.length
+            ? <b>驗證通過</b>
+            : <b className="bad">驗證 {okCount}/{meta.checks.length}</b>}
         </span>
       </header>
 
@@ -107,7 +110,6 @@ export default function Page() {
       <div className="foot">
         資料源 <a href="https://github.com/pvpoke/pvpoke" target="_blank" rel="noreferrer">pvpoke/pvpoke</a>（MIT）
         · 對戰規則照 <a href="https://pokemongo.com/news/pvp-updates2026" target="_blank" rel="noreferrer">官方 2026-06-23 公告</a>
-        · 更新資料跑 <code>npm run data</code>，驗證跑 <code>npm run verify</code>
         <br />
         出招決策是 pvpoke 搜尋演算法的簡化版，勝負方向與 pvpoke 官方對位結果一致率約 80%；傷害、能量、回合時序則為精確計算。
       </div>

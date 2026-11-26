@@ -69,6 +69,7 @@ header.top {
 header.top h1 { font-size: 19px; margin: 0; letter-spacing: .3px; }
 header.top .meta { color: var(--muted); font-size: 12.5px; margin-left: auto; }
 header.top .meta b { color: var(--good); font-weight: 600; }
+header.top .meta b.bad { color: var(--foe); }
 
 /* 分頁與聯盟同一排。align-items: stretch 讓兩組按鈕自動等高，不用去對 padding */
 .navbar { display: flex; align-items: stretch; gap: 10px 14px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -302,9 +303,13 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .combo:has(.combo-pic) input { padding-left: 44px; }
 .combo li { display: flex; align-items: center; gap: 7px; }
 
-.panel h2 { display: flex; align-items: center; gap: 10px; }
-.panel h2 .pic { background: var(--surface-2); border-radius: 14px; }
-.panel h2 .pic.shadow { border-radius: 50%; }
+/* 圖片在左、名字那一欄在右：標題 → 選單 → 屬性 */
+.panel-id { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 11px; }
+.panel-id > .pic { flex: none; background: var(--surface-2); border-radius: 14px; }
+.panel-id > .pic.shadow { border-radius: 50%; }
+.panel-idtxt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.panel-idtxt h2 { display: flex; align-items: center; gap: 10px; margin: 0; }
+.panel-idtxt .chips { margin: 0; }
 
 /* ── 招式選單 ──────────────────────────────────────── */
 .mp { position: relative; }
@@ -462,13 +467,27 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 屬性盤點與對位掃描放一起看：一個講「誰打得動我」、一個講「誰贏得了我」 */
 .blk-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 @media (max-width: 900px) { .blk-row { grid-template-columns: 1fr; } }
-.blk h3 { margin: 0 0 4px; font-size: 14px; }
+.blk h3 { margin: 0 0 8px; font-size: 14px; }
+/* 隊伍那幾塊的說明都拿掉了，箱子的反制查詢還留著一段 */
 .blk-note { margin: 0 0 9px; font-size: 11.5px; color: var(--muted); line-height: 1.65; }
 .blk-note b { color: var(--text); }
+/* 標題與那張表的開關同一排，而且不換行——開關掉到下一排就看不出它管誰 */
+.blk-head { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; margin-bottom: 8px; }
+.blk-head h3 { margin: 0; white-space: nowrap; }
+.blk-tools { display: flex; gap: 6px; margin-left: auto; flex-wrap: nowrap; }
+.blk-tools button {
+  font: inherit; font-size: 12px; padding: 5px 12px; border-radius: 8px; white-space: nowrap;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); cursor: pointer;
+}
+.blk-tools button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+/* 展開箭頭要跟旁邊的字一樣看得見，不然沒人知道這一列點得開 */
+.tbl .caret { color: var(--accent); font-size: 13px; line-height: 1; }
 .blk .tbl-scroll { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
 
 /* ── 三隻一排的隊伍面板 ────────────────────────────── */
 .sides.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* 三隻的設定面板跟下面「主流範圍」那排是兩件事，不要黏在一起 */
+.sides.three { margin-bottom: 20px; }
 .panel.compact { padding: 11px; }
 .panel.compact h2 { font-size: 12px; }
 .panel.compact .field { margin-bottom: 7px; }
@@ -482,8 +501,14 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .panel-x:hover { border-color: var(--line); background: var(--surface-2); color: var(--text); }
 
 @media (max-width: 720px) {
-  .tabs button { flex: 0 1 auto; padding: 7px 11px; font-size: 12.5px; white-space: nowrap; }
-  .navbar .leagues { margin-left: 0; }
+  /* 手機：聯盟自己一排放在分頁上面靠右，分頁整排撐滿左右 */
+  .navbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .navbar .leagues { order: 1; margin-left: auto; margin-bottom: 0; }
+  .navbar .tabs { order: 2; }
+  /* 六個分頁排成三欄兩列，每一顆一樣寬、整排撐滿。
+     用 flex: 1 會讓最後一排落單的那一顆自己撐滿一整排，看起來像另一種東西 */
+  .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tabs button { padding: 7px 8px; font-size: 12.5px; white-space: nowrap; }
   /* 手機上一列只放得下排名、名字、屬性與兩個數字，招式讓位 */
   .tbl .mv-col { display: none; }
   .sides.three { grid-template-columns: 1fr; }

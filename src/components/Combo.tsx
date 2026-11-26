@@ -9,15 +9,19 @@ import { zhName, type PokemonData } from '@/lib/types';
  * @param list 候選清單（呼叫端已按排名排序）
  * @param value 目前選到的 id
  * @param onChange 選擇後的回呼
+ * @param showPic 選到之後在輸入框裡放一張小圖。
+ *   旁邊本來就有大圖的地方（設定面板）要關掉，同一隻擺兩次只是佔位置
  */
 export default function Combo({
   list,
   value,
   onChange,
+  showPic = true,
 }: {
   list: PokemonData[];
   value: string;
   onChange: (id: string) => void;
+  showPic?: boolean;
 }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -57,7 +61,7 @@ export default function Combo({
 
   return (
     <div className="combo" ref={boxRef}>
-      {selected && !open && (
+      {showPic && selected && !open && (
         <span className="combo-pic">
           <PokemonIcon key={selected.icon} icon={selected.icon} alt={zhName(selected)} size={30} shadow={Boolean(selected.shadow)} />
         </span>

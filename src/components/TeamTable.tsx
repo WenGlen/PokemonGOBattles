@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import SidePanel from '@/components/SidePanel';
 import { PokemonIcon, TypeIcon } from '@/components/Icon';
+import MoveNums from '@/components/MoveNums';
 import {
   effLabel, encounterByType, moveExposure, scanThreats, teamTypePressure,
   type MoveExposure, type Threat,
@@ -27,22 +28,18 @@ const COPY = {
   mine: {
     toggle: '我方隊伍',
     slot: (i: number) => `我方第 ${i} 隻`,
-    gridTitle: '被哪些屬性剋制',
-    gridNote: <>數字是你挨那個屬性攻擊時的傷害倍率，紅橘是被剋、綠藍是抵抗。「遇到率」是主流對手之中有多少比例帶著該屬性的招式——<b>又被剋、又常遇到的那幾列才是真問題</b>。</>,
+    gridTitle: '屬性克制',
     gridCol: '對手屬性',
     gridCount: '剋你幾隻',
-    moveTitle: '對手可能帶哪些招',
-    moveNote: <>來自 pvpoke 統計的實際使用率，不是「牠學得會什麼」——學得會但沒人帶的招列出來只會洗版。</>,
+    moveTitle: '留意招式',
     moveHits: '剋你幾隻',
     moveHitsTip: '這一招打在你隊上，幾隻被剋',
     moveUsers: '誰會帶',
-    threatTitle: '最怕這幾隻',
+    threatTitle: '較難應對',
     threatBeats: '贏你幾隻',
     threatBeatsTip: '你隊上有幾隻打不贏牠',
     threatCol: '對手',
     threatEmpty: '這個範圍內沒有主流對手能贏你隊上任何一隻',
-    threatNote: (n: number) => <>用模擬器拿前 {n} 名主流逐一對過你這三隻，照你實際選的招式與護盾。點一列可以展開。出招決策是簡化版演算法，所以這份當「優先注意」用，不是判決。</>,
-    detailHint: '格子裡的數字是你那一隻的對位評分，低於 500 就是打不贏',
     verdict: (all: number, two: number) =>
       all ? `${all} 隻打穿你整隊` : two ? `${two} 隻贏你兩隻` : '沒有通殺你的對手',
     verdictTone: (all: number, two: number) => (all ? 'lose' : two ? '' : 'win'),
@@ -51,22 +48,18 @@ const COPY = {
   foe: {
     toggle: '對手隊伍',
     slot: (i: number) => `對手第 ${i} 隻`,
-    gridTitle: '用哪些屬性打得動',
-    gridNote: <>數字是你拿那個屬性的招打過去的傷害倍率，紅橘是打得動、綠藍是被擋住。「遇到率」是主流裡有多少比例帶著該屬性的招式，也就是<b>你有多容易找到帶這個屬性的寶可夢</b>。</>,
+    gridTitle: '屬性克制',
     gridCol: '我方屬性',
     gridCount: '剋幾隻',
-    moveTitle: '帶哪些招打得動他們',
-    moveNote: <>一樣來自 pvpoke 的實際使用率，所以列出來的都是真的有人在用的招，不是理論上學得會的。</>,
+    moveTitle: '建議招式',
     moveHits: '剋他們幾隻',
     moveHitsTip: '這一招打在對手隊上，幾隻被剋',
     moveUsers: '誰帶著這招',
-    threatTitle: '派這幾隻上',
+    threatTitle: '建議使用',
     threatBeats: '贏他們幾隻',
     threatBeatsTip: '這一隻打得贏對手隊上幾隻',
     threatCol: '可以派的',
     threatEmpty: '這個範圍內沒有主流寶可夢能贏他們任何一隻',
-    threatNote: (n: number) => <>用模擬器拿前 {n} 名主流逐一對過對手這三隻，對手用的是你在上面設定的招式與護盾。點一列可以展開。出招決策是簡化版演算法，所以這份當「優先考慮」用，不是判決。</>,
-    detailHint: '格子裡的數字是你派上去那一隻的對位評分，高於 500 就是贏得下來',
     verdict: (all: number, two: number) =>
       all ? `${all} 隻打得穿他們整隊` : two ? `${two} 隻能贏他們兩隻` : '沒有能通殺他們的選擇',
     verdictTone: (all: number, two: number) => (all ? 'win' : two ? '' : 'lose'),
@@ -127,8 +120,8 @@ function TypeGrid({ team, rows, side }: {
   );
 }
 
-/** 招式清單 */
-function ExposureList({ list, side }: { list: MoveExposure[]; side: Side }) {
+/** 招式清單。標題跟排序鈕同一排，排序鈕是這張表的開關，不該掉到別的地方 */
+function ExposureList({ list, side, title }: { list: MoveExposure[]; side: Side; title: string }) {
   const c = COPY[side];
   const [all, setAll] = useState(false);
   const [by, setBy] = useState<'threat' | 'rate'>('threat');
@@ -145,10 +138,13 @@ function ExposureList({ list, side }: { list: MoveExposure[]; side: Side }) {
 
   return (
     <>
-      <div className="tbl-bar">
-        {([['threat', '照威脅排'], ['rate', '照遇到率排']] as const).map(([k, label]) => (
-          <button key={k} aria-pressed={by === k} onClick={() => setBy(k)}>{label}</button>
-        ))}
+      <div className="blk-head">
+        <h3>{title}</h3>
+        <div className="blk-tools">
+          {([['threat', '照威脅排'], ['rate', '照遇到率排']] as const).map(([k, label]) => (
+            <button key={k} aria-pressed={by === k} onClick={() => setBy(k)}>{label}</button>
+          ))}
+        </div>
       </div>
       <div className="tbl-scroll">
         <table className="tbl">
@@ -167,11 +163,7 @@ function ExposureList({ list, side }: { list: MoveExposure[]; side: Side }) {
                 <td className="left nm">
                   <TypeIcon type={e.move.type} size={14} />
                   <span>{zhName(e.move)}</span>
-                  <small className="dim">
-                    {e.move.energyGain > 0
-                      ? `${e.move.power}力 ${e.move.turns}回合 ⚡+${e.move.energyGain}`
-                      : `${e.move.power}力 ⚡${e.move.energy}`}
-                  </small>
+                  <MoveNums m={e.move} ratios={false} />
                 </td>
                 <td className="num">{pct(e.rate)}</td>
                 <td className="num dim">{e.users.length}</td>
@@ -249,7 +241,7 @@ function ThreatList({ threats, team, side }: { threats: Threat[]; team: PokemonD
                 <td className="left nm">
                   <PokemonIcon key={t.icon} icon={t.icon} alt="" size={24} shadow={t.shadow} />
                   <span>{t.zh}</span>
-                  <small className="dim">{open === t.id ? '▾' : '▸'}</small>
+                  <span className="caret" aria-hidden>{open === t.id ? '▾' : '▸'}</span>
                 </td>
                 <td className={`num ${beatsClass(t.beats)}`}>{t.beats}／3</td>
                 {t.vs.map((v, i) => {
@@ -265,17 +257,14 @@ function ThreatList({ threats, team, side }: { threats: Threat[]; team: PokemonD
                 <tr className="detail">
                   <td />
                   <td className="left sm" colSpan={2 + team.length}>
-                    牠帶的招：
+                    招式：
                     {t.moves.map((m) => (
                       <span key={m.id} className="mv">
                         <TypeIcon type={m.type} size={12} />
                         {zhName(m)}
-                        <small className="dim">
-                          {m.energyGain > 0 ? `${m.power}力 ${m.turns}回合` : `${m.power}力 ⚡${m.energy}`}
-                        </small>
+                        <MoveNums m={m} ratios={false} />
                       </span>
                     ))}
-                    <span className="dim">· {c.detailHint}</span>
                   </td>
                 </tr>
               )}
@@ -391,7 +380,7 @@ export default function TeamTable({ data, cp }: { data: AppData; cp: LeagueCp })
       <div className="verdict">
         <span className={`big ${c.verdictTone(all3, two)}`}>{c.verdict(all3, two)}</span>
         <span className="sub">
-          掃過前 {metaN} 名主流 · {c.pressureLead} {worstType ? TYPE_ZH[worstType.type] : '—'}
+          {c.pressureLead} {worstType ? TYPE_ZH[worstType.type] : '—'}
         </span>
       </div>
 
@@ -399,21 +388,17 @@ export default function TeamTable({ data, cp }: { data: AppData; cp: LeagueCp })
       <div className="blk-row">
         <section className="blk">
           <h3>{c.gridTitle}</h3>
-          <p className="blk-note">{c.gridNote}</p>
           <TypeGrid team={mons} rows={pressure} side={side} />
         </section>
 
         <section className="blk">
           <h3>{c.threatTitle}</h3>
-          <p className="blk-note">{c.threatNote(metaN)}</p>
           <ThreatList threats={threats} team={mons} side={side} />
         </section>
       </div>
 
       <section className="blk">
-        <h3>{c.moveTitle}</h3>
-        <p className="blk-note">{c.moveNote}</p>
-        <ExposureList list={exposure} side={side} />
+        <ExposureList list={exposure} side={side} title={c.moveTitle} />
       </section>
     </>
   );

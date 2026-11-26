@@ -34,17 +34,21 @@ export default function SidePanel({
 
   return (
     <div className={`panel${cls ? ' ' + cls : ''}${compact ? ' compact' : ''}`}>
-      <h2>
+      {/* 圖片在左、名字那一欄在右：標題 → 選單 → 屬性。
+          選單旁邊就是大圖，所以選完只留名字，不再放一次小圖 */}
+      <div className="panel-id">
         <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={compact ? 66 : 84} shadow={Boolean(p.shadow)} />
-        {title}
-        {onRemove && <button className="panel-x" onClick={onRemove} title="移除">×</button>}
-      </h2>
-      <div className="field">
-        <Combo list={data.listFor(cp)} value={cfg.id} onChange={(id) => set(data.defaultsFor(id, cp))} />
-      </div>
-      <div className="chips" style={{ marginBottom: 9 }}>
-        {p.types.map((t) => <span key={t} className="chip type"><TypeIcon type={t} size={15} label /></span>)}
-        {p.shadow && <span className="chip">暗影</span>}
+        <div className="panel-idtxt">
+          <h2>
+            {title}
+            {onRemove && <button className="panel-x" onClick={onRemove} title="移除">×</button>}
+          </h2>
+          <Combo list={data.listFor(cp)} value={cfg.id} onChange={(id) => set(data.defaultsFor(id, cp))} showPic={false} />
+          <div className="chips">
+            {p.types.map((t) => <span key={t} className="chip type"><TypeIcon type={t} size={15} label /></span>)}
+            {p.shadow && <span className="chip">暗影</span>}
+          </div>
+        </div>
       </div>
 
       <div className="field">
