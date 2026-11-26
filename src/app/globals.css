@@ -505,6 +505,10 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 
 .pd {
   position: relative;
+  /* 永遠是直排的 flex：寬版只是上下兩塊疊著，窄版才靠 order 把四塊重排。
+     @container 的規則只能套在容器的子孫、套不到容器自己，
+     所以 display 與 gap 得寫在這裡，不能寫進下面那段 query */
+  display: flex; flex-direction: column; gap: 14px;
   /* 卡片自己當量測基準：一隻獨佔整列、兩隻各半，左右欄要不要併都看卡片實際寬度 */
   container-type: inline-size;
   background: var(--surface); border: 1px solid var(--line);
@@ -514,7 +518,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 上半左右兩欄：左邊是「牠是誰」（頭像、名字、屬性、名次、標籤），右邊是克制表 */
 .pd-top {
   display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
-  gap: 18px; align-items: start; margin-bottom: 14px;
+  gap: 18px; align-items: start;
 }
 /* 克制表往下讓一段，右上角那塊留給 × */
 .pd-top > .tm { margin-top: 24px; }
@@ -608,17 +612,19 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl .pick { color: var(--accent); font-weight: 700; }
 
 /* 卡片擠到一半寬度（兩隻並排）或手機：所有區塊都整排撐滿，由上到下是
-   寶可夢 → 屬性 → 招式 → 能力數值。窄畫面擺不下兩欄，硬排只會兩邊都半殘 */
-@container (max-width: 620px) {
-  .pd-top { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  /* 疊成一欄時克制表不用讓位，改成名字自己閃開 × */
-  .pd-top > .tm { margin-top: 0; }
-  .pd-id { padding-right: 26px; }
+   寶可夢 → 能力數值 → 屬性 → 招式。窄畫面擺不下兩欄，硬排只會兩邊都半殘。
 
-  .pd-cols { grid-template-columns: minmax(0, 1fr); gap: 13px; }
-  /* 招式排在能力數值前面：先看牠打得出什麼，數值是接著才想知道的 */
+   四塊分屬 .pd-top 與 .pd-cols 兩個容器，order 排不過容器的邊界，
+   所以這兩層用 display:contents 整個讓開，四塊直接變成 .pd 的 flex 子項再排序。
+   讓開之後它們的 gap 也跟著沒了，間距由 .pd 自己的 flex gap 接手。 */
+@container (max-width: 620px) {
+  .pd-top, .pd-cols { display: contents; }
+  .pd-who { order: 1; }
   .pd-cols > .pd-col:first-child { order: 2; }
-  .pd-cols > .pd-col:last-child { order: 1; }
+  .pd-top > .tm { order: 3; margin-top: 0; }
+  .pd-cols > .pd-col:last-child { order: 4; }
+  /* 疊成一欄時 × 旁邊沒有克制表讓位，改成名字自己閃開 */
+  .pd-id { padding-right: 26px; }
 }
 @media (max-width: 720px) {
   .pd-cols { grid-template-columns: 1fr; gap: 13px; }
