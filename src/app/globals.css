@@ -357,6 +357,13 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tp { flex: none; width: 112px; }
 .tp.wide { width: 136px; }
 .tp .mp-btn { padding: 6px 9px; font-size: 12.5px; gap: 6px; }
+/* 屬性表上的那兩個不是篩選器而是畫面主角，整個選單放大一級 */
+.tp.big { width: 180px; }
+.tp.big.wide { width: 210px; }
+.tp.big .mp-btn { padding: 10px 14px; font-size: 15.5px; gap: 10px; border-radius: 10px; }
+.tp.big .mp-chev { font-size: 12px; }
+.tp.big ul { padding: 5px; max-height: 340px; }
+.tp.big li { padding: 8px 12px; font-size: 15px; gap: 10px; border-radius: 8px; }
 .tp .mp-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .tp[data-on='true'] .mp-btn { border-color: var(--accent); color: var(--accent); }
 .tp ul { min-width: 100%; width: max-content; }
@@ -804,9 +811,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 12px; margin-bottom: 12px;
 }
-.tg-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.tg-combo { display: inline-flex; align-items: center; gap: 6px; margin-left: 2px; }
-.tg-combo .dim { color: var(--muted); font-size: 11.5px; }
+.tg-bar { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 
 /* 「普通」通常裝了一半以上的屬性，給它兩倍寬、內部再排兩列，
    不然整區的高度被最無聊的那一欄撐開，旁邊四欄全是空白 */
@@ -818,6 +823,17 @@ header.top .meta b { color: var(--good); font-weight: 600; }
    十八格混在一起，這裡欄位本身就是分組，整欄同一個淡色反而是一道五階的梯度 */
 .tg-cells .tm-cell.bad { background: color-mix(in srgb, var(--foe) 9%, var(--surface-2)); }
 .tg-cells .tm-cell.good { background: color-mix(in srgb, var(--good) 9%, var(--surface-2)); }
+
+/* 圖示放大，雙重的那兩欄又更大一圈——強弱本來就該長得不一樣大 */
+.tg-cells .tm-cell { grid-template-columns: 20px 1fr auto; gap: 8px; padding: 7px 10px; font-size: 12.5px; }
+.tg-cells .tm-cell.bad2, .tg-cells .tm-cell.good2 { grid-template-columns: 28px 1fr; gap: 2px 10px; padding: 8px 11px; font-size: 14px; font-weight: 600; }
+/* 雙重抵抗是唯一倍率會變的一桶，數字只好留在格子裡；放大之後一行塞不下，
+   改成圖示佔兩列、名字在上數字在下，順便讓這幾格又高一點 */
+.tg-cells .tm-cell.good2 { grid-template-rows: auto auto; }
+.tg-cells .tm-cell.good2 > .tic { grid-row: 1 / span 2; }
+.tg-cells .tm-cell.good2 b { grid-column: 2; font-size: 12px; }
+.tg-cells .tm-cell.bad2 .tm-name { color: var(--foe); }
+.tg-cells .tm-cell.good2 .tm-name { color: var(--good); }
 .tg-col h4 {
   display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
   margin: 0 0 1px; padding: 0 3px; font-size: 11px; font-weight: 600;

@@ -109,34 +109,36 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
     <>
       <section className="tg-wrap">
         <div className="tg-bar">
-          <TypePicker value={t1} onChange={setT1} anyLabel="第一屬性" wide title="要看的屬性組合" />
-          <TypePicker value={t2} onChange={setT2} anyLabel="第二屬性（可不選）" wide title="只有一種屬性就留空" />
-          <span className="tg-combo">
-            {types.length ? types.map((t) => <TypeIcon key={t} type={t} size={22} />) : <span className="dim">十八格都是 ×1.00</span>}
-          </span>
+          {/* 選到什麼選單上就看得到，旁邊不用再重複一次 */}
+          <TypePicker value={t1} onChange={setT1} anyLabel="第一屬性" wide big title="要看的屬性組合" />
+          <TypePicker value={t2} onChange={setT2} anyLabel="第二屬性（可不選）" wide big title="只有一種屬性就留空" />
         </div>
 
-        {/* GO 沒有免疫，原作的免疫在這裡一律折成 ×0.39，所以只有五桶 */}
-        <div className="tg-grid">
-          {buckets.map((bk) => (
-            <div key={bk.b} data-b={bk.b} className={`tg-col${bk.hits.length ? '' : ' empty'}`}>
-              <h4>
-                {bk.label}
-                {bk.mult && <em>{bk.mult}</em>}
-                <span>{bk.hits.length}</span>
-              </h4>
-              <div className="tg-cells">
-                {bk.hits.map(({ t, mult }) => (
-                  <div key={t} className={`tm-cell${bk.cls ? ' ' + bk.cls : ''}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
-                    <TypeIcon type={t} size={16} />
-                    <span className="tm-name">{TYPE_ZH[t]}</span>
-                    {bk.mult === null && <b>×{mult.toFixed(2)}</b>}
-                  </div>
-                ))}
+        {/* 還沒選屬性時十八格都是 ×1.00，那是一整片沒有資訊的格子，不如不畫。
+            GO 沒有免疫，原作的免疫在這裡一律折成 ×0.39，所以只有五桶 */}
+        {types.length > 0 && (
+          <div className="tg-grid">
+            {buckets.map((bk) => (
+              <div key={bk.b} data-b={bk.b} className={`tg-col${bk.hits.length ? '' : ' empty'}`}>
+                <h4>
+                  {bk.label}
+                  {bk.mult && <em>{bk.mult}</em>}
+                  <span>{bk.hits.length}</span>
+                </h4>
+                <div className="tg-cells">
+                  {bk.hits.map(({ t, mult }) => (
+                    <div key={t} className={`tm-cell${bk.cls ? ' ' + bk.cls : ''}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
+                      {/* 雙重的那兩欄圖示再大一圈，掃過去會先停在這裡 */}
+                      <TypeIcon type={t} size={Math.abs(bk.b) >= 2 ? 28 : 20} />
+                      <span className="tm-name">{TYPE_ZH[t]}</span>
+                      {bk.mult === null && <b>×{mult.toFixed(2)}</b>}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <MonDeck deck={deck} data={data} tagCtx={tagCtx} radarCtx={radarCtx} onClose={toggle} />

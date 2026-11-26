@@ -16,15 +16,17 @@ import { TYPE_ZH } from '@/lib/typeChart';
  * @param anyLabel 「不限」那一列要寫什麼
  * @param label 選到某個屬性時整列怎麼寫，預設只寫屬性名
  * @param wide 選項文字比較長時放寬一點，避免切字
+ * @param big 當成畫面主角用：整個選單放大，圖示跟著放大
  */
 export default function TypePicker({
-  value, onChange, anyLabel, label = (zh) => zh, wide = false, title,
+  value, onChange, anyLabel, label = (zh) => zh, wide = false, big = false, title,
 }: {
   value: string;
   onChange: (t: string) => void;
   anyLabel: string;
   label?: (zh: string) => string;
   wide?: boolean;
+  big?: boolean;
   title?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -54,11 +56,11 @@ export default function TypePicker({
 
   const row = (t: string) =>
     t
-      ? <><TypeIcon type={t} size={15} /><span className="mp-name">{label(TYPE_ZH[t] ?? t)}</span></>
+      ? <><TypeIcon type={t} size={big ? 24 : 15} /><span className="mp-name">{label(TYPE_ZH[t] ?? t)}</span></>
       : <span className="mp-name mp-empty">{anyLabel}</span>;
 
   return (
-    <div className={`mp tp${wide ? ' wide' : ''}`} data-on={value ? 'true' : undefined} ref={boxRef}>
+    <div className={`mp tp${wide ? ' wide' : ''}${big ? ' big' : ''}`} data-on={value ? 'true' : undefined} ref={boxRef}>
       <button
         type="button"
         className="mp-btn"
