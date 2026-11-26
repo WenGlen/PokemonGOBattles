@@ -54,10 +54,14 @@ export default function TypeMatrix({ types, atk }: { types: string[]; atk: AtkFo
     hit: atk ? effectiveness(atk.move.type, [t]) : null,
   }));
 
-  // 圖例由重到輕，而且只列這張表真的出現的倍率——沒有雙重弱點就不用解釋兩個爆炸
-  const legend = [...new Set(cells.map((c) => c.def))]
-    .filter((m) => effClass(m) !== '')
-    .sort((a, b) => b - a);
+  // 圖例由重到輕，而且只列這張表真的出現的倍率——沒有雙重弱點就不用解釋兩個爆炸。
+  // 去重要照「印出來的樣子」：0.625 與 1.6×0.390625 是兩個不同的浮點數，
+  // 但都印成 ×0.63，直接拿數值去重會讓同一段出現兩次（例如巨鍛匠的鋼／妖精）
+  const legend = [...new Map(
+    cells
+      .filter((c) => effClass(c.def) !== '')
+      .map((c) => [`${effClass(c.def)}|${c.def.toFixed(2)}`, c.def] as const)
+  ).values()].sort((a, b) => b - a);
 
   return (
     <section className="tm">

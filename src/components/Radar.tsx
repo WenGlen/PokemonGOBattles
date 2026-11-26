@@ -30,7 +30,9 @@ const path = (ds: number[]) =>
  * 只有「贏過同聯盟多少人」放得進同一張圖。
  *
  * 配色：底色是灰的（形狀本身不帶訊息），訊息在頂點與數字上——
- * 每個頂點塗它自己那一段的顏色，跟軸上的數字同色；連線走漸層把它們串起來。
+ * 每個頂點塗它自己那一段的顏色，跟軸上的數字同色；
+ * 每一段連線是「從這個頂點的顏色漸層到下一個頂點的顏色」，
+ * 所以線本身也在講兩端的強弱，而不是一條裝飾用的固定漸層。
  *
  * @param values 這一隻的軸值
  * @param ctx 同聯盟上榜那一批的分布，用來換算百分位
@@ -48,18 +50,28 @@ export default function Radar({ values, ctx, compare }: {
   const theirs = compare
     ? RADAR_AXES.map((a) => (radarPercent(ctx, a.key, compare[a.key]) / 100) * R)
     : null;
+  const pts = mine.map((d, i) => point(i, d));
+  /** 每一段連線的兩端與它們各自的顏色 */
+  const segs = pts.map((a, i) => {
+    const j = (i + 1) % pts.length;
+    return { id: `${gid}s${i}`, a, b: pts[j], from: band(pcts[i]), to: band(pcts[j]) };
+  });
 
   return (
     <svg className="radar" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="五項能力的百分位雷達圖">
       <defs>
-        {/* 左下到右上，照強弱五段的顏色走，跟頂點與數字是同一組色 */}
-        <linearGradient id={gid} x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" stopColor="var(--b1)" />
-          <stop offset="30%" stopColor="var(--b2)" />
-          <stop offset="55%" stopColor="var(--b3)" />
-          <stop offset="78%" stopColor="var(--b4)" />
-          <stop offset="100%" stopColor="var(--b5)" />
-        </linearGradient>
+        {/* 一段一個漸層，座標直接用畫布座標，兩端就是那兩個頂點的顏色 */}
+        {segs.map((sg) => (
+          <linearGradient
+            key={sg.id}
+            id={sg.id}
+            gradientUnits="userSpaceOnUse"
+            x1={sg.a[0]} y1={sg.a[1]} x2={sg.b[0]} y2={sg.b[1]}
+          >
+            <stop offset="0%" stopColor={`var(--b${sg.from})`} />
+            <stop offset="100%" stopColor={`var(--b${sg.to})`} />
+          </linearGradient>
+        ))}
       </defs>
 
       {RINGS.map((f) => (
@@ -74,11 +86,18 @@ export default function Radar({ values, ctx, compare }: {
       ))}
 
       {theirs && <path className="shape other" d={path(theirs)} />}
-      <path className="shape mine" style={{ stroke: `url(#${gid})` }} d={path(mine)} />
-      {mine.map((d, i) => {
-        const [x, y] = point(i, d);
-        return <circle key={i} className={`dot vb${band(pcts[i])}`} cx={x} cy={y} r={3.2} />;
-      })}
+      <path className="shape mine" d={path(mine)} />
+      {segs.map((sg) => (
+        <line
+          key={sg.id}
+          className="seg"
+          x1={sg.a[0]} y1={sg.a[1]} x2={sg.b[0]} y2={sg.b[1]}
+          stroke={`url(#${sg.id})`}
+        />
+      ))}
+      {pts.map(([x, y], i) => (
+        <circle key={i} className={`dot vb${band(pcts[i])}`} cx={x} cy={y} r={3.2} />
+      ))}
 
       {/* 標籤上寫的是真實數值，顏色是它在同聯盟的強弱段——
           數字回答「多少」、顏色回答「算強還算弱」，位置回答「贏過多少人」 */}

@@ -85,11 +85,11 @@ export default function Page() {
             <button
               key={lg.cp}
               disabled={!showLeague}
-              title={showLeague ? undefined : '招式表不分聯盟'}
+              title={showLeague ? lg.name : '招式表不分聯盟'}
               aria-pressed={cp === lg.cp}
               onClick={() => setCp(lg.cp)}
             >
-              {lg.name}
+              {lg.short}
             </button>
           ))}
         </div>

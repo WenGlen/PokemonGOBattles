@@ -44,10 +44,11 @@ export function battleStats(
 }
 
 /** 各聯盟的 CP 上限與在 gamemaster 裡對應的建議 IV 欄位 */
+/** short 是按鈕上的字——三顆並排時「聯盟」兩個字重複三次，佔位置又沒有資訊 */
 export const LEAGUES = [
-  { cp: 1500, name: '超級聯盟', ivKey: 'cp1500' },
-  { cp: 2500, name: '高級聯盟', ivKey: 'cp2500' },
-  { cp: 10000, name: '大師聯盟', ivKey: '' },
+  { cp: 1500, name: '超級聯盟', short: '超級', ivKey: 'cp1500' },
+  { cp: 2500, name: '高級聯盟', short: '高級', ivKey: 'cp2500' },
+  { cp: 10000, name: '大師聯盟', short: '大師', ivKey: '' },
 ] as const;
 
 export type LeagueCp = (typeof LEAGUES)[number]['cp'];

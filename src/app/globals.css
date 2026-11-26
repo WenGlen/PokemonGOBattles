@@ -2,11 +2,13 @@
   /* 米白底。只有一套配色，不跟著系統的深淺色切換——
      克制表那四個顏色要在固定的底色上才站得住 */
   color-scheme: light;
-  --bg: #f6f2e8;
-  /* surface 系列都比 --bg 亮，卡片與控制項才會浮在背景上面 */
-  --surface: #fffefb;
-  --surface-2: #faf7ef;
-  --line: #e5ded0;
+  /* 三層由深到淺：最底的頁面背景、卡片、控制項。
+     按鈕、輸入框、標籤、格子是最亮的那一層——它們是要被讀的東西，
+     擺在最亮的底上文字對比最好；卡片只是把它們圈在一起的容器 */
+  --bg: #efe9db;
+  --surface: #faf7ef;
+  --surface-2: #fffefb;
+  --line: #e3dbcb;
   --text: #2b2720;
   --muted: #6e6659;
   --accent: #2f6fd0;
@@ -25,7 +27,7 @@
   /* 橘黃在米白上拉不到 4.5 的對比，再深就變土色、再亮就看不見，
      所以這一段改用底色補強度（見 .tg-cells 的 ef-w1）。
      倍率本身就印在格子裡、欄標題也寫了桶名，顏色是重複編碼不是唯一資訊 */
-  --ef-w1: #c47106;
+  --ef-w1: #d87702;
   --ef-r1: #16854a;
   --ef-r2: #1d55cc;
   /* ×0.24、×0.15 這種再往下的特殊倍率，跟 ×0.39 分開看得出來 */
@@ -660,11 +662,10 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .radar .ring { fill: none; stroke: var(--line); stroke-width: 1; }
 .radar .ring.edge { stroke: color-mix(in srgb, var(--muted) 45%, transparent); }
 .radar .spoke { stroke: var(--line); stroke-width: 1; }
-/* 形狀本身不帶訊息，所以底色是灰的；顏色留給頂點、數字與連線的漸層 */
-.radar .shape.mine {
-  fill: color-mix(in srgb, var(--muted) 17%, transparent);
-  stroke-width: 2.2; stroke-linejoin: round;
-}
+/* 形狀本身不帶訊息，所以底色是灰的；顏色留給頂點、數字與連線 */
+.radar .shape.mine { fill: color-mix(in srgb, var(--muted) 17%, transparent); stroke: none; }
+/* 連線一段一段畫，每一段從這個頂點的顏色漸層到下一個頂點的顏色 */
+.radar .seg { stroke-width: 2.2; stroke-linecap: round; }
 /* 另一張卡那一隻：只有輪廓，免得兩塊顏色疊在一起分不出是誰 */
 .radar .shape.other { fill: none; stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 4 3; stroke-linejoin: round; }
 /* 頂點跟軸上的數字同色（.vb1–5 在下面，後蓋前） */
@@ -801,11 +802,11 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 
 /* 底色與記號＝挨打。五段五個顏色，見 typeChart 的 effClass。
    每一段都上底色——只有雙重上色的時候，一倍那兩段在米白上幾乎看不出來 */
-.tm-cell.ef-w1 { background: color-mix(in srgb, var(--ef-w1) 15%, var(--surface-2)); }
-.tm-cell.ef-r1 { background: color-mix(in srgb, var(--ef-r1) 13%, var(--surface-2)); }
-.tm-cell.ef-w2 { background: color-mix(in srgb, var(--ef-w2) 24%, var(--surface-2)); }
-.tm-cell.ef-r2 { background: color-mix(in srgb, var(--ef-r2) 22%, var(--surface-2)); }
-.tm-cell.ef-r3 { background: color-mix(in srgb, var(--ef-r3) 22%, var(--surface-2)); }
+.tm-cell.ef-w1 { background: color-mix(in srgb, var(--ef-w1) 17%, var(--surface-2)); }
+.tm-cell.ef-r1 { background: color-mix(in srgb, var(--ef-r1) 16%, var(--surface-2)); }
+.tm-cell.ef-w2 { background: color-mix(in srgb, var(--ef-w2) 27%, var(--surface-2)); }
+.tm-cell.ef-r2 { background: color-mix(in srgb, var(--ef-r2) 25%, var(--surface-2)); }
+.tm-cell.ef-r3 { background: color-mix(in srgb, var(--ef-r3) 25%, var(--surface-2)); }
 
 /* 記號與圖例的顏色跟著那一段走（SVG 吃 currentColor） */
 .ef-w2 > .tm-mk, .tm-lg.ef-w2 { color: var(--ef-w2); }
@@ -858,9 +859,9 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tg-col[data-b='0'] .tg-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 /* 倍率搬到欄標題之後格子就沒有顏色線索了。解析卡那張表不敢整片上色是因為
    十八格混在一起，這裡欄位本身就是分組，整欄同一個淡色反而是一道五階的梯度 */
-.tg-cells .tm-cell.ef-w1 { background: color-mix(in srgb, var(--ef-w1) 17%, var(--surface-2)); }
+.tg-cells .tm-cell.ef-w1 { background: color-mix(in srgb, var(--ef-w1) 19%, var(--surface-2)); }
 .tg-cells .tm-cell.ef-w1 .tm-name { color: color-mix(in srgb, var(--ef-w1) 85%, var(--text)); }
-.tg-cells .tm-cell.ef-r1 { background: color-mix(in srgb, var(--ef-r1) 15%, var(--surface-2)); }
+.tg-cells .tm-cell.ef-r1 { background: color-mix(in srgb, var(--ef-r1) 18%, var(--surface-2)); }
 .tg-cells .tm-cell.ef-r1 .tm-name { color: color-mix(in srgb, var(--ef-r1) 80%, var(--text)); }
 
 /* 圖示放大，雙重的那兩欄又更大一圈——強弱本來就該長得不一樣大 */

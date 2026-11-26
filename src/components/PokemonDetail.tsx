@@ -88,7 +88,16 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
 }) {
   // 判斷依據直接顯示在標籤下面。原生 title 要等一秒才跳、手機完全不會跳，
   // 等於把算式藏起來；這裡改成滑過或點一下就寫在旁邊。
-  const [why, setWhy] = useState<RoleTag | null>(null);
+  /**
+   * 標籤的依據要顯示哪一個。
+   *
+   * 滑過是暫時的、點一下是釘住的，兩個分開存——
+   * 合成一個的話，滑過已經填進去之後再點同一個，toggle 會把它清掉，
+   * 看起來就像「點了反而不見」。
+   */
+  const [pinned, setPinned] = useState<RoleTag | null>(null);
+  const [hoverTag, setHoverTag] = useState<RoleTag | null>(null);
+  const why = hoverTag ?? pinned;
   /** 選到的招式（留著），以及正在滑過的那一招（暫時蓋過選取的） */
   const [pick, setPick] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
@@ -130,9 +139,11 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
                   key={t.label}
                   type="button"
                   className={`tag-pill ${t.tone}${why?.label === t.label ? ' on' : ''}`}
-                  onMouseEnter={() => setWhy(t)}
-                  onFocus={() => setWhy(t)}
-                  onClick={() => setWhy((w) => (w?.label === t.label ? null : t))}
+                  onMouseEnter={() => setHoverTag(t)}
+                  onMouseLeave={() => setHoverTag(null)}
+                  onFocus={() => setHoverTag(t)}
+                  onBlur={() => setHoverTag(null)}
+                  onClick={() => setPinned((w) => (w?.label === t.label ? null : t))}
                 >
                   <span className="tag-ico" aria-hidden>{t.icon}</span>
                   {t.label}
