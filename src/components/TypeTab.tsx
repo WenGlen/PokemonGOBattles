@@ -166,7 +166,7 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
                 {/* 防禦與 HP 不單獨列——在對戰裡它們從來不是分開用的，
                     拆成兩欄只會讓人去比兩個沒辦法單獨解讀的數字。拆開的值在解析卡的耐久軸上 */}
                 <SortHead k="bulk" sort={sort} setSort={setSort} title="防禦 × HP，越大越耐打">耐久</SortHead>
-                <th className="left">推薦招式</th>
+                <th className="left mv-col">推薦招式</th>
                 <th title="加進我的箱子" />
               </tr>
             </thead>
@@ -202,7 +202,7 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
                     </td>
                     <td className="num">{r.atk.toFixed(1)}<Bar v={r.atk} max={max.atk} /></td>
                     <td className="num">{Math.round(r.bulk).toLocaleString()}<Bar v={r.bulk} max={max.bulk} /></td>
-                    <td className="left sm">
+                    <td className="left sm mv-col">
                       {r.moveset
                         ? r.moveset.map((id) => {
                             const m = data.moveById.get(id);

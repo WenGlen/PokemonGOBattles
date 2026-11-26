@@ -41,8 +41,10 @@ function Marks({ mult, size = 13 }: { mult: number; size?: number }) {
  * 兩面共用同一套顏色（見 effClass）：紅橘＝倍率高、綠藍＝倍率低。
  *
  * 格子裡不寫倍率。十八個 ×1.00、×0.63 排在一起只會互相干擾，
- * 數字改放在表頭的圖例上講一次；圖例只列真的出現的那幾段，
+ * 數字改放在**格子底下的圖例**上講一次；圖例只列真的出現的那幾段，
  * 精確值（×0.391 之類）留在滑過格子的 tooltip 裡。
+ *
+ * 沒有標題——它就擺在寶可夢旁邊，十八個屬性圖示自己說得清楚是什麼。
  *
  * @param types 防守方的屬性（1 或 2 個）
  * @param atk 要畫外框的那一招，null 就是純防守面
@@ -65,22 +67,6 @@ export default function TypeMatrix({ types, atk }: { types: string[]; atk: AtkFo
 
   return (
     <section className="tm">
-      <div className="tm-bar">
-        <h4 title="底色與記號是這隻挨打的倍率；滑過或點右邊的招式，外框會畫出那一招打得動誰">
-          屬性克制
-        </h4>
-        <div className="tm-right">
-          {atk && <span className="tm-hint">外框為招式倍率</span>}
-          <div className="tm-legend">
-            {legend.map((m) => (
-              <span key={m} className={`tm-lg ef-${effClass(m)}`}>
-                <Marks mult={m} size={12} />×{m.toFixed(2)}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
       <div className="tm-grid">
         {cells.map(({ t, def, hit }) => {
           const fill = effClass(def);
@@ -101,6 +87,17 @@ export default function TypeMatrix({ types, atk }: { types: string[]; atk: AtkFo
             </div>
           );
         })}
+      </div>
+
+      <div className="tm-bar">
+        {atk && <span className="tm-hint">外框為招式倍率</span>}
+        <div className="tm-legend">
+          {legend.map((m) => (
+            <span key={m} className={`tm-lg ef-${effClass(m)}`}>
+              <Marks mult={m} size={12} />×{m.toFixed(2)}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   );

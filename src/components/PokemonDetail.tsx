@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PokemonIcon, TypeIcon } from '@/components/Icon';
+import { BoltIcon, BurstIcon, PokemonIcon, TypeIcon } from '@/components/Icon';
 import Radar from '@/components/Radar';
 import TypeMatrix from '@/components/TypeMatrix';
 import {
@@ -29,6 +29,38 @@ export interface DetailStats {
   moveset: string[] | null;
 }
 
+/**
+ * 一招的數值。
+ *
+ * 順序固定成「威力 → 能量 → 時間 → 比值」：先看打多痛、再看多貴、
+ * 再看要等多久，最後才是算出來的比值。
+ * 威力與能量用圖示不寫字（「力」「⚡」各佔一格字寬卻只是標籤），
+ * 回合數直接換成秒——遊戲裡感覺得到的是時間，不是回合。
+ */
+function MoveNums({ m }: { m: MoveData }) {
+  const fast = isFast(m);
+  const r = fastRates(m);
+  const buff = !fast && m.buffs && (m.buffs[0] || m.buffs[1])
+    ? `${m.buffTarget === 'self' ? '自' : '敵'} ${[
+        m.buffs[0] ? `攻${m.buffs[0] > 0 ? '+' : ''}${m.buffs[0]}` : '',
+        m.buffs[1] ? `防${m.buffs[1] > 0 ? '+' : ''}${m.buffs[1]}` : '',
+      ].filter(Boolean).join('、')}`
+    : '';
+  return (
+    <span className="dim mv-nums">
+      <BurstIcon size={11} />{m.power}
+      <i>·</i>
+      <BoltIcon size={11} />{fast ? `+${m.energyGain}` : m.energy}
+      {fast && <><i>·</i>{(m.turns * 0.5).toFixed(1)} s</>}
+      <i>·</i>
+      {fast
+        ? `Dpt ${r.dpt.toFixed(2)} · Ept ${r.ept.toFixed(2)}`
+        : `Dpe ${dpe(m).toFixed(2)}`}
+      {buff && <><i>·</i>{buff}</>}
+    </span>
+  );
+}
+
 /** 招式清單裡的一列。推薦的那幾招放大；滑過或點一下就把克制表的外框換成這一招 */
 function MoveRow({ m, rec, on, onPick, onHover }: {
   m: MoveData;
@@ -37,8 +69,6 @@ function MoveRow({ m, rec, on, onPick, onHover }: {
   onPick: () => void;
   onHover: (hovering: boolean) => void;
 }) {
-  const fast = isFast(m);
-  const r = fastRates(m);
   return (
     <button
       type="button"
@@ -53,17 +83,7 @@ function MoveRow({ m, rec, on, onPick, onHover }: {
     >
       <TypeIcon type={m.type} size={rec ? 18 : 13} />
       <b>{zhName(m)}</b>
-      <span className="dim">
-        {fast
-          ? `${m.power}力 · ${m.turns}回合 · ⚡+${m.energyGain} · DPT ${r.dpt.toFixed(2)} · EPT ${r.ept.toFixed(2)}`
-          : `${m.power}力 · ⚡${m.energy} · DPE ${dpe(m).toFixed(2)}`}
-        {!fast && m.buffs && (m.buffs[0] || m.buffs[1])
-          ? ` · ${m.buffTarget === 'self' ? '自身' : '對手'} ${[
-              m.buffs[0] ? `攻${m.buffs[0] > 0 ? '+' : ''}${m.buffs[0]}` : '',
-              m.buffs[1] ? `防${m.buffs[1] > 0 ? '+' : ''}${m.buffs[1]}` : '',
-            ].filter(Boolean).join('、')}`
-          : ''}
-      </span>
+      <MoveNums m={m} />
       {rec && <em>推薦</em>}
     </button>
   );
@@ -115,53 +135,60 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
 
   return (
     <div className="pd">
-      <div className="pd-head">
-        <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={144} shadow={Boolean(p.shadow)} />
-        <div className="pd-id">
-          <h3>{zhName(p)}<small className="dim">#{p.dex}</small></h3>
-          <div className="pd-ty">
-            {p.types.map((t) => (
-              <span key={t} className="chip type"><TypeIcon type={t} size={15} label /></span>
-            ))}
-          </div>
-          {/* 排名是這張表的頭條事實，放在名字旁邊而不是擠進雷達圖旁邊的角落 */}
-          <div className="pd-rank" title="pvpoke 在這個聯盟的總排名與評分">
-            {st.rank === null
-              ? <span className="dim">未上榜</span>
-              : <>第 <b>{st.rank}</b> 名{st.score !== null && <small>· {st.score.toFixed(1)} 分</small>}</>}
-          </div>
-        </div>
-        {tags.length > 0 && (
-          <div className="pd-tagbox">
-            <div className="pd-tags">
-              {tags.map((t) => (
-                <button
-                  key={t.label}
-                  type="button"
-                  className={`tag-pill ${t.tone}${why?.label === t.label ? ' on' : ''}`}
-                  onMouseEnter={() => setHoverTag(t)}
-                  onMouseLeave={() => setHoverTag(null)}
-                  onFocus={() => setHoverTag(t)}
-                  onBlur={() => setHoverTag(null)}
-                  onClick={() => setPinned((w) => (w?.label === t.label ? null : t))}
-                >
-                  <span className="tag-ico" aria-hidden>{t.icon}</span>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            {/* 依據就寫在標籤正下方，不用把視線拉到別的地方找 */}
-            <p className="pd-why">
-              {why
-                ? <><b>{why.icon} {why.label}</b>：{why.why}</>
-                : '滑過或點一下標籤，看它是怎麼算出來的'}
-            </p>
-          </div>
-        )}
-        <button type="button" className="panel-x" onClick={onClose} aria-label="收起這張卡">×</button>
-      </div>
+      <button type="button" className="panel-x" onClick={onClose} aria-label="收起這張卡">×</button>
 
-      <TypeMatrix types={p.types} atk={atk} />
+      {/* 上半分兩欄：左邊是「牠是誰」，右邊是「牠怕什麼」 */}
+      <div className="pd-top">
+        <div className="pd-who">
+          <div className="pd-head">
+            <PokemonIcon key={p.icon} icon={p.icon} alt={zhName(p)} size={144} shadow={Boolean(p.shadow)} />
+            <div className="pd-id">
+              <h3>{zhName(p)}<small className="dim">#{p.dex}</small></h3>
+              <div className="pd-ty">
+                {p.types.map((t) => (
+                  <span key={t} className="chip type"><TypeIcon type={t} size={15} label /></span>
+                ))}
+              </div>
+              {/* 名次貼齊頭像的下緣，跟屬性之間自然留出一段距離 */}
+              <div className="pd-rank" title="pvpoke 在這個聯盟的總排名與評分">
+                {st.rank === null
+                  ? <span className="dim">未上榜</span>
+                  : <>第 <b>{st.rank}</b> 名{st.score !== null && <small>· {st.score.toFixed(1)} 分</small>}</>}
+              </div>
+            </div>
+          </div>
+
+          {tags.length > 0 && (
+            <div className="pd-tagbox">
+              <div className="pd-tags">
+                {tags.map((t) => (
+                  <button
+                    key={t.label}
+                    type="button"
+                    className={`tag-pill ${t.tone}${why?.label === t.label ? ' on' : ''}`}
+                    onMouseEnter={() => setHoverTag(t)}
+                    onMouseLeave={() => setHoverTag(null)}
+                    onFocus={() => setHoverTag(t)}
+                    onBlur={() => setHoverTag(null)}
+                    onClick={() => setPinned((w) => (w?.label === t.label ? null : t))}
+                  >
+                    <span className="tag-ico" aria-hidden>{t.icon}</span>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              {/* 依據就寫在標籤正下方，不用把視線拉到別的地方找 */}
+              <p className="pd-why">
+                {why
+                  ? <><b>{why.icon} {why.label}</b>：{why.why}</>
+                  : '滑過或點一下標籤，看它是怎麼算出來的'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <TypeMatrix types={p.types} atk={atk} />
+      </div>
 
       <div className="pd-cols">
         <div className="pd-col">

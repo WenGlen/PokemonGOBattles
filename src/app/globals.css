@@ -40,6 +40,10 @@
   --b5: #227a47;
 }
 
+/* 形狀就是能不能按的提示：
+   按鈕、輸入框、選單一律方形圓角（8px）；
+   純標示、按不下去的東西一律膠囊。整站只有這兩種形狀，不要再有第三種。 */
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -79,7 +83,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .leagues.off button:hover { border-color: var(--line); color: var(--muted); }
 .leagues button {
   background: var(--surface); border: 1px solid var(--line); color: var(--muted);
-  padding: 6px 13px; border-radius: 999px; cursor: pointer; transition: .12s;
+  padding: 6px 13px; border-radius: 8px; cursor: pointer; transition: .12s;
 }
 .leagues button:hover { border-color: var(--accent); color: var(--text); }
 .leagues button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
@@ -176,7 +180,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .act .dmg { font-variant-numeric: tabular-nums; font-weight: 600; }
 .act .dmg.you { color: var(--you); }
 .act .dmg.foe { color: var(--foe); }
-.act .tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); }
+.act .tag { font-size: 10px; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); }
 .act .tag.shield { color: var(--accent); border-color: var(--accent); }
 .act .tag.cmp { color: var(--warn); border-color: var(--warn); }
 .act .prog { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
@@ -240,7 +244,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .cg-panel { border-top: 1px solid var(--line); }
 .cg-filter { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; padding: 9px 13px; border-bottom: 1px solid var(--line); }
 .cg-filter button {
-  font: inherit; font-size: 11.5px; padding: 3px 10px; border-radius: 999px;
+  font: inherit; font-size: 11.5px; padding: 3px 10px; border-radius: 8px;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); cursor: pointer;
 }
 .cg-filter button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
@@ -355,7 +359,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tbl-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .tbl-bar { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; padding: 9px 12px; border-bottom: 1px solid var(--line); }
 .tbl-bar button {
-  font: inherit; font-size: 12px; padding: 5px 12px; border-radius: 999px;
+  font: inherit; font-size: 12px; padding: 5px 12px; border-radius: 8px;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); cursor: pointer;
 }
 .tbl-bar button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
@@ -468,14 +472,17 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .panel.compact h2 { font-size: 12px; }
 .panel.compact .field { margin-bottom: 7px; }
 .panel-x {
-  margin-left: auto; width: 20px; height: 20px; line-height: 1; padding: 0;
-  border: 1px solid var(--line); border-radius: 5px; background: var(--surface-2);
-  color: var(--muted); cursor: pointer; font-size: 13px;
+  margin-left: auto; width: 22px; height: 22px; line-height: 1; padding: 0;
+  border: 1px solid transparent; border-radius: 6px; background: none;
+  color: var(--muted); cursor: pointer; font-size: 14px;
 }
+.panel-x:hover { border-color: var(--line); background: var(--surface-2); color: var(--text); }
 
 @media (max-width: 720px) {
   .tabs button { flex: 0 1 auto; padding: 7px 11px; font-size: 12.5px; white-space: nowrap; }
   .navbar .leagues { margin-left: 0; }
+  /* 手機上一列只放得下排名、名字、屬性與兩個數字，招式讓位 */
+  .tbl .mv-col { display: none; }
   .sides.three { grid-template-columns: 1fr; }
   .tbl-bar .hint { margin-left: 0; }
   .tbl-bar .pick-right { margin-left: 0; }
@@ -494,36 +501,46 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 @media (min-width: 1000px) { .pd-deck.two { grid-template-columns: 1fr 1fr; } }
 
 .pd {
+  position: relative;
   /* 卡片自己當量測基準：一隻獨佔整列、兩隻各半，左右欄要不要併都看卡片實際寬度 */
   container-type: inline-size;
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 13px 14px 15px;
 }
 
-/* 頭像、名字、定位標籤同一排；頭像的高度決定這一排多高 */
-.pd-head { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 13px; }
+/* 上半左右兩欄：左邊是「牠是誰」（頭像、名字、屬性、名次、標籤），右邊是克制表 */
+.pd-top {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px; align-items: start; margin-bottom: 14px;
+}
+.pd-who { min-width: 0; }
+
+/* 頭像與名字同一排；頭像的高度決定這一排多高，名次靠 margin-top:auto 貼齊下緣 */
+.pd-head { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .pd-head .pic { background: var(--surface-2); border-radius: 16px; }
 .pd-head .pic.shadow { border-radius: 50%; }
 /* 可縮不可長：擠的時候名字自己折行，不要把 × 推到下一列 */
-.pd-id { min-width: 0; flex: 0 1 auto; padding-top: 2px; }
+.pd-id { min-width: 0; flex: 1 1 auto; padding-top: 2px; display: flex; flex-direction: column; }
 .pd-id h3 { margin: 0 0 6px; font-size: 18px; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
 .pd-id h3 small { font-size: 11.5px; font-weight: 400; font-variant-numeric: tabular-nums; }
 .pd-ty { display: flex; gap: 5px; flex-wrap: wrap; }
 .pd-ty .chip { font-size: 11.5px; padding: 2px 9px 2px 5px; }
 .pd-rank {
-  display: inline-flex; align-items: baseline; gap: 4px; margin-top: 8px;
-  padding: 2px 11px; border-radius: 999px; font-size: 11.5px; color: var(--muted);
+  /* 直排的 flex 項目預設會撐滿整欄寬，膠囊要自己收回內容寬；
+     margin-top:auto 把它頂到頭像的下緣 */
+  display: inline-flex; align-self: flex-start; align-items: baseline; gap: 4px; margin-top: auto;
+  padding: 3px 12px; border-radius: 999px; font-size: 11.5px; color: var(--muted);
   background: var(--surface-2); border: 1px solid var(--line);
 }
 .pd-rank b { font-size: 16px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
 .pd-rank small { font-size: 11px; }
 
 /* 標籤跟編號之間留寬一點，不然會黏成一團 */
-.pd-tagbox { flex: 1; min-width: 0; margin-left: 10px; padding-top: 2px; }
+.pd-tagbox { min-width: 0; }
 .pd-tags { display: flex; gap: 6px; flex-wrap: wrap; align-content: flex-start; }
 .tag-pill {
   font: inherit; font-size: 11.5px; font-weight: 600; line-height: 1.5;
-  padding: 3px 10px; border-radius: 999px; cursor: pointer;
+  padding: 3px 10px; border-radius: 8px; cursor: pointer;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
   transition: background .12s;
 }
@@ -564,6 +581,10 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .pd-move.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .pd-move b { font-weight: 600; }
 .pd-move .dim { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+/* 招式數值：圖示跟著數字走，分隔點自己留間距 */
+.mv-nums { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+.mv-nums i { font-style: normal; margin: 0 3px; opacity: .55; }
+.mv-nums .mk { display: block; }
 /* 推薦的那幾招直接在清單裡放大，不用另外拉一條出來講同一件事 */
 .pd-move.rec { padding: 8px 9px; margin: 3px 0; background: var(--surface-2); }
 .pd-move.rec b { font-size: 15px; }
@@ -585,9 +606,9 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 @container (max-width: 470px) {
   .pd-cols { grid-template-columns: 1fr; gap: 13px; }
 }
-/* 兩隻並排或手機：標籤擠在頭像旁邊會變成一行一個，改成自己占一列（排在 × 之後） */
+/* 卡片擠到一半寬度或手機：上半兩欄併回一欄，克制表回到整排撐滿 */
 @container (max-width: 620px) {
-  .pd-tagbox { order: 4; flex-basis: 100%; margin-left: 0; padding-top: 7px; }
+  .pd-top { grid-template-columns: minmax(0, 1fr); gap: 12px; }
 }
 @media (max-width: 720px) {
   .pd-cols { grid-template-columns: 1fr; gap: 13px; }
@@ -774,11 +795,12 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 }
 
 /* ── 十八屬性克制 ──────────────────────────────────── */
-.tm { margin-bottom: 16px; }
-.tm-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.tm-bar h4 { margin: 0; font-size: 11.5px; font-weight: 600; color: var(--muted); }
-/* 招式說明與圖例一起靠右，圖例永遠在最右邊，有選招式才多一句話 */
-.tm-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tm { min-width: 0; }
+/* 圖例在格子下面、整排靠右；有選招式才在左邊多一句話 */
+.tm-bar {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 10px; flex-wrap: wrap; margin-top: 9px;
+}
 .tm-hint { font-size: 11px; color: var(--muted); }
 .tm-legend { display: flex; align-items: center; gap: 9px; }
 .tm-lg {
@@ -792,7 +814,7 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 屬性名一律維持灰色，訊號只放在數字上——十八格都上色就等於都沒上色 */
 .tm-cell {
   display: grid; grid-template-columns: 16px 1fr auto; gap: 6px; align-items: center;
-  padding: 6px 9px; border-radius: 8px; font-size: 11.5px; color: var(--muted);
+  padding: 6px 9px; border-radius: 999px; font-size: 11.5px; color: var(--muted);
   background: var(--surface-2);
   /* outline 不占位置，所以外框粗細變化不會讓十八格位移 */
   outline: 0 solid transparent; outline-offset: -2px; transition: outline-width .1s, outline-color .1s;

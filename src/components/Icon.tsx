@@ -95,3 +95,15 @@ export function BurstIcon({ size = 13 }: { size?: number }) {
     </svg>
   );
 }
+
+/**
+ * 閃電（能量）。
+ * @param size 邊長 px
+ */
+export function BoltIcon({ size = 12 }: { size?: number }) {
+  return (
+    <svg className="mk" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M13.6 1.2 4.3 13.4h6.1l-1.1 9.4 9.4-12.2h-6.2l1.1-9.4Z" fill="currentColor" />
+    </svg>
+  );
+}

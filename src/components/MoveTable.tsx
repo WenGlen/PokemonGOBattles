@@ -112,13 +112,13 @@ export default function MoveTable({ data }: { data: AppData }) {
                 <>
                   <SortHead k="turns" sort={sort} setSort={setSort} defaultDir={1}>回合</SortHead>
                   <SortHead k="energy" sort={sort} setSort={setSort}>能量</SortHead>
-                  <SortHead k="dpt" sort={sort} setSort={setSort} title="每回合傷害 = 威力 ÷ 回合數">DPT</SortHead>
-                  <SortHead k="ept" sort={sort} setSort={setSort} title="每回合能量 = 能量獲得 ÷ 回合數">EPT</SortHead>
+                  <SortHead k="dpt" sort={sort} setSort={setSort} title="每回合傷害 = 威力 ÷ 回合數">Dpt</SortHead>
+                  <SortHead k="ept" sort={sort} setSort={setSort} title="每回合能量 = 能量獲得 ÷ 回合數">Ept</SortHead>
                 </>
               ) : (
                 <>
                   <SortHead k="energy" sort={sort} setSort={setSort} defaultDir={1}>能量</SortHead>
-                  <SortHead k="dpe" sort={sort} setSort={setSort} title="每點能量的傷害 = 威力 ÷ 能量">DPE</SortHead>
+                  <SortHead k="dpe" sort={sort} setSort={setSort} title="每點能量的傷害 = 威力 ÷ 能量">Dpe</SortHead>
                   <th className="left">能力變化</th>
                 </>
               )}

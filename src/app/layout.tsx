@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '寶可夢 GO 對戰模擬器',
+  title: 'Pokémon GO 對戰表',
   description: '照 2026-06-23 新版對戰系統計算出招時機的逐回合模擬器',
 };
 

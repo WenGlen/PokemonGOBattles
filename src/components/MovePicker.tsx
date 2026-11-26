@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { TypeIcon } from '@/components/Icon';
+import { BoltIcon, BurstIcon, TypeIcon } from '@/components/Icon';
 import { zhName, type MoveData } from '@/lib/types';
 
 /** 一列招式：屬性圖示 ＋ 名字 ＋ 數值 */
@@ -10,9 +10,11 @@ function Row({ m, fast }: { m: MoveData; fast: boolean }) {
     <>
       <TypeIcon type={m.type} size={15} />
       <span className="mp-name">{zhName(m)}</span>
-      <span className="mp-num">
-        {m.power}力
-        {fast ? ` · ${m.turns}回合 · ⚡+${m.energyGain}` : ` · ⚡${m.energy}`}
+      <span className="mp-num mv-nums">
+        <BurstIcon size={11} />{m.power}
+        <i>·</i>
+        <BoltIcon size={11} />{fast ? `+${m.energyGain}` : m.energy}
+        {fast && <><i>·</i>{(m.turns * 0.5).toFixed(1)} s</>}
       </span>
     </>
   );

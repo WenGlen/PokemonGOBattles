@@ -14,12 +14,12 @@ import { LEAGUES, type LeagueCp } from '@/lib/stats';
 import type { PokemonData } from '@/lib/types';
 
 const TABS = [
-  { id: 'pokemon', label: '寶可夢表', league: true },
-  { id: 'moves', label: '招式表', league: false },
-  { id: 'types', label: '屬性表', league: true },
-  { id: 'team', label: '對戰組合表', league: true },
-  { id: 'sim', label: '模擬器', league: true },
-  { id: 'box', label: '我的箱子', league: true },
+  { id: 'pokemon', label: '寶可夢', league: true },
+  { id: 'types', label: '屬性', league: true },
+  { id: 'moves', label: '招式', league: false },
+  { id: 'team', label: '隊伍', league: true },
+  { id: 'sim', label: '對戰模擬', league: true },
+  { id: 'box', label: '箱子', league: true },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -66,7 +66,7 @@ export default function Page() {
   return (
     <div className="wrap">
       <header className="top">
-        <h1>寶可夢 GO 對戰模擬器</h1>
+        <h1>Pokémon GO 對戰表</h1>
         <span className="chip">2026-06-23 新版系統</span>
         <span className="meta">
           資料 {meta.gamemasterTimestamp.slice(0, 10)} · {meta.source.repo} · 驗證 <b>{okCount}/{meta.checks.length} 通過</b>
@@ -85,7 +85,7 @@ export default function Page() {
             <button
               key={lg.cp}
               disabled={!showLeague}
-              title={showLeague ? lg.name : '招式表不分聯盟'}
+              title={showLeague ? lg.name : '招式不分聯盟'}
               aria-pressed={cp === lg.cp}
               onClick={() => setCp(lg.cp)}
             >
