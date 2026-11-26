@@ -471,6 +471,8 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .panel.compact { padding: 11px; }
 .panel.compact h2 { font-size: 12px; }
 .panel.compact .field { margin-bottom: 7px; }
+/* 卡片的 × 絕對定位在右上角，所以它不佔版位、不會把頭像或名字推下去 */
+.pd > .panel-x { position: absolute; top: 11px; right: 12px; z-index: 2; margin-left: 0; }
 .panel-x {
   margin-left: auto; width: 22px; height: 22px; line-height: 1; padding: 0;
   border: 1px solid transparent; border-radius: 6px; background: none;
@@ -510,13 +512,15 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 
 /* 上半左右兩欄：左邊是「牠是誰」（頭像、名字、屬性、名次、標籤），右邊是克制表 */
 .pd-top {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
   gap: 18px; align-items: start; margin-bottom: 14px;
 }
+/* 克制表往下讓一段，右上角那塊留給 × */
+.pd-top > .tm { margin-top: 24px; }
 .pd-who { min-width: 0; }
 
 /* 頭像與名字同一排；頭像的高度決定這一排多高，名次靠 margin-top:auto 貼齊下緣 */
-.pd-head { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.pd-head { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .pd-head .pic { background: var(--surface-2); border-radius: 16px; }
 .pd-head .pic.shadow { border-radius: 50%; }
 /* 可縮不可長：擠的時候名字自己折行，不要把 × 推到下一列 */
@@ -549,8 +553,8 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 .tag-pill.plain { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
 .tag-pill:hover, .tag-pill.on { background: color-mix(in srgb, currentColor 16%, transparent); }
 .pd-why {
-  margin: 9px 0 0; min-height: 2.6em; padding-left: 9px;
-  border-left: 2px solid var(--line); font-size: 11.5px; line-height: 1.55; color: var(--muted);
+  margin: 9px 0 0; min-height: 2.6em;
+  font-size: 11.5px; line-height: 1.55; color: var(--muted);
 }
 .pd-why b { color: var(--text); }
 
@@ -609,6 +613,9 @@ header.top .meta b { color: var(--good); font-weight: 600; }
 /* 卡片擠到一半寬度或手機：上半兩欄併回一欄，克制表回到整排撐滿 */
 @container (max-width: 620px) {
   .pd-top { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  /* 疊成一欄時克制表不用讓位，改成名字自己閃開 × */
+  .pd-top > .tm { margin-top: 0; }
+  .pd-id { padding-right: 26px; }
 }
 @media (max-width: 720px) {
   .pd-cols { grid-template-columns: 1fr; gap: 13px; }

@@ -181,7 +181,7 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
               <p className="pd-why">
                 {why
                   ? <><b>{why.icon} {why.label}</b>：{why.why}</>
-                  : '滑過或點一下標籤，看它是怎麼算出來的'}
+                  : '滑過或點擊可看標籤說明'}
               </p>
             </div>
           )}
