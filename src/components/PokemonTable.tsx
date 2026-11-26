@@ -1,58 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
+import Bar from '@/components/Bar';
 import { PokemonIcon, TypeIcon } from '@/components/Icon';
+import MonDeck, { MAX_PICKED } from '@/components/MonDeck';
 import SortHead, { type Sort } from '@/components/SortHead';
 import TypePicker from '@/components/TypePicker';
-import PokemonDetail from '@/components/PokemonDetail';
-import { buildRadarContext, buildTagContext, radarValues } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
 import type { Box } from '@/lib/collection';
-import { battleStats, suggestedBuild, type LeagueCp } from '@/lib/stats';
+import { buildContexts, buildRows, type MonRow } from '@/lib/rows';
+import { suggestedBuild, type LeagueCp } from '@/lib/stats';
 import { effBucket, effectiveness } from '@/lib/typeChart';
-import { zhName, type PokemonData } from '@/lib/types';
+import { zhName } from '@/lib/types';
 
 type Key = 'rank' | 'zh' | 'dex' | 'atk' | 'def' | 'hp' | 'bulk';
-
-/** 同時能攤開幾隻來比 */
-const MAX_PICKED = 2;
-
-interface Row {
-  p: PokemonData;
-  /** 這個聯盟的排名，沒上榜是 null */
-  rank: number | null;
-  score: number | null;
-  cp: number;
-  level: number;
-  atk: number;
-  def: number;
-  hp: number;
-  /** 耐久 = 防禦 × HP，和 pvpoke 的 stat product 同一個概念 */
-  bulk: number;
-  moveset: string[] | null;
-}
-
-/**
- * 數值底下的細長條，拿表上最高的當 100%。
- *
- * 右邊對齊是為了跟右對齊的數字共用同一條邊，掃一眼就比得出長短；
- * 最小留 2% 才不會讓小數值看起來像沒有。
- * 每 20% 換一個顏色（紅→橙→黃→黃綠→綠），長度相近時用顏色補一刀；
- * 顏色是長度的重複編碼，不是唯一資訊，所以色覺差異不影響判讀。
- *
- * @param v 這一列的值
- * @param max 這一欄目前的最大值
- */
-function Bar({ v, max }: { v: number; max: number }) {
-  const ratio = v / max;
-  // [0,20) 是第 1 段…[80,100] 是第 5 段；剛好 100% 會算成第 6 段，夾回來
-  const band = Math.min(5, Math.floor(ratio * 5) + 1);
-  return (
-    <span className="bar" aria-hidden="true">
-      <i className={`b${band}`} style={{ width: `${Math.max(2, ratio * 100).toFixed(1)}%` }} />
-    </span>
-  );
-}
 
 /**
  * 寶可夢表。
@@ -71,43 +32,12 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
   const [resist, setResist] = useState('');
   const [sort, setSort] = useState<Sort<Key>>({ key: 'rank', dir: 1 });
   const [picked, setPicked] = useState<string[]>([]);
-  const deckRef = useRef<HTMLDivElement>(null);
 
-  const rows = useMemo<Row[]>(() => {
-    const rowsFor = data.rowsFor(cp);
-    const rankOf = new Map(rowsFor.map((r, i) => [r.id, { rank: i + 1, score: r.score, moveset: r.moveset }]));
-    return data.gm.pokemon.map((p) => {
-      const r = rankOf.get(p.id);
-      const build = suggestedBuild(p, cp);
-      const st = battleStats(p.stats, build.ivs, build.level, Boolean(p.shadow));
-      return {
-        p,
-        rank: r?.rank ?? null,
-        score: r?.score ?? null,
-        cp: st.cp,
-        level: build.level,
-        atk: st.atk,
-        def: st.def,
-        hp: st.hp,
-        bulk: st.def * st.hp,
-        moveset: r?.moveset ?? null,
-      };
-    });
-  }, [data, cp]);
+  const rows = useMemo(() => buildRows(data, cp), [data, cp]);
 
   const rowById = useMemo(() => new Map(rows.map((r) => [r.p.id, r])), [rows]);
 
-  /**
-   * 標籤門檻與雷達圖的百分位都跟同聯盟上榜的那一批比，所以每換一個聯盟要重算。
-   * 用整個聯盟當母體（不是全部 1619 隻），因為「肉盾」要比的對象是實戰會遇到的人。
-   */
-  const pool = useMemo(() => {
-    const ranked = new Set(data.rowsFor(cp).map((r) => r.id));
-    return rows.filter((r) => ranked.has(r.p.id)).map((r) => radarValues(r.p, r, data.moveById));
-  }, [rows, data, cp]);
-
-  const tagCtx = useMemo(() => buildTagContext(pool), [pool]);
-  const radarCtx = useMemo(() => buildRadarContext(pool), [pool]);
+  const { tagCtx, radarCtx } = useMemo(() => buildContexts(rows, data, cp), [rows, data, cp]);
 
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -140,7 +70,7 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
     bulk: Math.max(1, ...shown.map((r) => r.bulk)),
   }), [shown]);
 
-  const deck = picked.map((id) => rowById.get(id)).filter(Boolean) as Row[];
+  const deck = picked.map((id) => rowById.get(id)).filter(Boolean) as MonRow[];
 
   /**
    * 已經選了就取消，還沒選就加進去；滿了就把最早選的那隻擠掉。
@@ -153,40 +83,9 @@ export default function PokemonTable({ data, cp, box }: { data: AppData; cp: Lea
         : [...prev, id].slice(-MAX_PICKED)
     );
 
-  // 卡片在表格上面，列表捲到一半點新的一隻時卡片可能在畫面外；
-  // nearest 只在真的看不到時才捲，已經看得到就不動。
-  useEffect(() => {
-    if (picked.length) deckRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }, [picked]);
-
   return (
     <>
-      {deck.length > 0 && (
-        <div ref={deckRef} className="pd-deckwrap">
-          <div className={`pd-deck${deck.length > 1 ? ' two' : ''}`}>
-            {deck.map((r, i) => {
-              // 兩張卡同時開著的時候，各自把對方疊成虛線，一眼看出誰的形狀大
-              const other = deck.length === 2 ? deck[1 - i] : null;
-              return (
-                <PokemonDetail
-                  key={r.p.id}
-                  p={r.p}
-                  data={data}
-                  ctx={tagCtx}
-                  radarCtx={radarCtx}
-                  compare={other ? radarValues(other.p, other, data.moveById) : null}
-                  st={{
-                    rank: r.rank, score: r.score, cp: r.cp, level: r.level,
-                    atk: r.atk, def: r.def, hp: r.hp, bulk: r.bulk, moveset: r.moveset,
-                  }}
-                  onClose={() => toggle(r.p.id)}
-                />
-              );
-            })}
-          </div>
-          <p className="pd-note">最多同時放兩隻，再點第三隻會換掉先選的那一隻。</p>
-        </div>
-      )}
+      <MonDeck deck={deck} data={data} tagCtx={tagCtx} radarCtx={radarCtx} onClose={toggle} />
 
       <div className="tbl-wrap">
         <div className="tbl-bar">

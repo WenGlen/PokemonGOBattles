@@ -150,7 +150,7 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
         <button type="button" className="panel-x" onClick={onClose} aria-label="收起這張卡">×</button>
       </div>
 
-      <TypeMatrix p={p} atk={atk} />
+      <TypeMatrix types={p.types} atk={atk} />
 
       <div className="pd-cols">
         <div className="pd-col">

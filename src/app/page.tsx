@@ -7,6 +7,7 @@ import Simulator from '@/components/Simulator';
 import MoveTable from '@/components/MoveTable';
 import PokemonTable from '@/components/PokemonTable';
 import TeamTable from '@/components/TeamTable';
+import TypeTab from '@/components/TypeTab';
 import { useAppData } from '@/lib/app-data';
 import { useBox } from '@/lib/collection';
 import { LEAGUES, type LeagueCp } from '@/lib/stats';
@@ -15,6 +16,7 @@ import type { PokemonData } from '@/lib/types';
 const TABS = [
   { id: 'pokemon', label: '寶可夢表', league: true },
   { id: 'moves', label: '招式表', league: false },
+  { id: 'types', label: '屬性表', league: true },
   { id: 'team', label: '對戰組合表', league: true },
   { id: 'sim', label: '模擬器', league: true },
   { id: 'box', label: '我的箱子', league: true },
@@ -96,6 +98,7 @@ export default function Page() {
       {tab === 'sim' && <Simulator data={data} cp={cp} />}
       {tab === 'moves' && <MoveTable data={data} />}
       {tab === 'pokemon' && <PokemonTable data={data} cp={cp} box={box} />}
+      {tab === 'types' && <TypeTab data={data} cp={cp} box={box} />}
       {tab === 'team' && <TeamTable data={data} cp={cp} />}
       {tab === 'box' && <BoxTab data={data} cp={cp} box={box} />}
 

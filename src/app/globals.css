@@ -796,3 +796,41 @@ header.top .meta b { color: var(--good); font-weight: 600; }
   padding: 2px 8px 2px 4px; border-radius: 999px;
   background: var(--surface-2); border: 1px solid var(--line); margin-right: 5px;
 }
+
+/* ── 屬性表 ──────────────────────────────────────────────
+   十八格不照圖鑑排，照抵抗程度分五欄：欄位固定在同一個位置，
+   換一個組合用掃的就知道第一欄多了誰、第五欄少了誰。 */
+.tg-wrap {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 12px; margin-bottom: 12px;
+}
+.tg-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.tg-combo { display: inline-flex; align-items: center; gap: 6px; margin-left: 2px; }
+.tg-combo .dim { color: var(--muted); font-size: 11.5px; }
+
+/* 「普通」通常裝了一半以上的屬性，給它兩倍寬、內部再排兩列，
+   不然整區的高度被最無聊的那一欄撐開，旁邊四欄全是空白 */
+.tg-grid { display: grid; grid-template-columns: 1fr 1fr 2fr 1fr 1fr; gap: 8px; align-items: start; }
+.tg-col { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.tg-cells { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; align-content: start; }
+.tg-col[data-b='0'] .tg-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* 倍率搬到欄標題之後格子就沒有顏色線索了。解析卡那張表不敢整片上色是因為
+   十八格混在一起，這裡欄位本身就是分組，整欄同一個淡色反而是一道五階的梯度 */
+.tg-cells .tm-cell.bad { background: color-mix(in srgb, var(--foe) 9%, var(--surface-2)); }
+.tg-cells .tm-cell.good { background: color-mix(in srgb, var(--good) 9%, var(--surface-2)); }
+.tg-col h4 {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+  margin: 0 0 1px; padding: 0 3px; font-size: 11px; font-weight: 600;
+  color: var(--muted); letter-spacing: .04em;
+}
+/* 訊號放在數字上，標題本身維持灰色——跟解析卡那張克制表同一個規矩 */
+.tg-col h4 em { font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tg-col h4 span { margin-left: auto; font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.tg-col[data-b='2'] h4 span, .tg-col[data-b='1'] h4 span { color: var(--foe); }
+.tg-col[data-b='-1'] h4 span, .tg-col[data-b='-2'] h4 span { color: var(--good); }
+.tg-col.empty { opacity: .4; }
+
+@media (max-width: 760px) {
+  .tg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tg-col[data-b='0'] .tg-cells { grid-template-columns: minmax(0, 1fr); }
+}

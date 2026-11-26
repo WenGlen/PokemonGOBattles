@@ -3,7 +3,7 @@
 import { TypeIcon } from '@/components/Icon';
 import { ALL_TYPES } from '@/lib/analysis';
 import { effBucket, effectiveness, TYPE_ZH } from '@/lib/typeChart';
-import { zhName, type MoveData, type PokemonData } from '@/lib/types';
+import { zhName, type MoveData } from '@/lib/types';
 
 /** 外框要照哪一招畫；strong 是滑過（比選取更粗） */
 export interface AtkFocus {
@@ -22,9 +22,10 @@ export interface AtkFocus {
  * 一個填色一個描邊就能同時看，而且外框用 outline 不是 border——
  * outline 不占位置，粗細變化不會讓十八格跟著位移。
  *
+ * @param types 防守方的屬性（1 或 2 個）
  * @param atk 要畫外框的那一招，null 就是純防守面
  */
-export default function TypeMatrix({ p, atk }: { p: PokemonData; atk: AtkFocus | null }) {
+export default function TypeMatrix({ types, atk }: { types: string[]; atk: AtkFocus | null }) {
   return (
     <section className="tm">
       <div className="tm-bar">
@@ -40,7 +41,7 @@ export default function TypeMatrix({ p, atk }: { p: PokemonData; atk: AtkFocus |
 
       <div className="tm-grid">
         {ALL_TYPES.map((t) => {
-          const def = effectiveness(t, p.types);
+          const def = effectiveness(t, types);
           const db = effBucket(def);
           const fill = db === 0 ? '' : `${db > 0 ? 'bad' : 'good'}${Math.abs(db) >= 2 ? '2' : ''}`;
 
