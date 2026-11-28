@@ -454,6 +454,17 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tbl .bar i.b3 { background: var(--b3); }
 .tbl .bar i.b4 { background: var(--b4); }
 .tbl .bar i.b5 { background: var(--b5); }
+
+/* Dpe 的三段式長條：一段 = 1.0，由右往左填。
+   整段滿或整段空的只給一半寬度，寬度讓給唯一在變的那一段 */
+.tbl .dbar { display: flex; align-items: stretch; gap: 2px; height: 3px; margin: 2px 0 1px; }
+.tbl .dbar > span { background: color-mix(in srgb, var(--line) 65%, transparent); border-radius: 2px; overflow: hidden; }
+.tbl .dbar > span > i { display: block; height: 100%; margin-left: auto; border-radius: 2px; }
+.tbl .dbar i.b1 { background: var(--b1); }
+.tbl .dbar i.b2 { background: var(--b2); }
+.tbl .dbar i.b3 { background: var(--b3); }
+.tbl .dbar i.b4 { background: var(--b4); }
+.tbl .dbar i.b5 { background: var(--b5); }
 .tbl .mv { display: inline-flex; align-items: center; gap: 3px; margin-right: 8px; white-space: nowrap; }
 .tbl-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12.5px; }
 

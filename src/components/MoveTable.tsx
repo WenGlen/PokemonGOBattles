@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Bar from '@/components/Bar';
 import DamageCalc, { MAX_CALC } from '@/components/DamageCalc';
 import { TypeIcon } from '@/components/Icon';
 import SortHead, { type Sort } from '@/components/SortHead';
@@ -19,6 +20,34 @@ interface Row {
   ept: number;
   dpe: number;
   users: number;
+}
+
+/** Dpe 的滿格：3 以上在 PvP 已經是頂規，拿它當三段的上限 */
+const DPE_FULL = 3;
+
+/**
+ * Dpe 的三段式長條。
+ *
+ * 一段代表 1.0 的 Dpe，由右往左填：2.5 就是右邊兩段滿、左邊那段畫一半。
+ * 整段滿或整段空的只畫一半長度，把寬度讓給唯一在變的那一段——
+ * 主流大招的 Dpe 幾乎都落在 2.x，差別全在小數那一段，
+ * 平均分三等份的話那一段只占三分之一，根本比不出來。
+ *
+ * @param v Dpe
+ */
+function DpeBar({ v }: { v: number }) {
+  // 由左到右分別是 [2,3)、[1,2)、[0,1)，所以右邊先填滿
+  const segs = [2, 1, 0].map((base) => Math.max(0, Math.min(1, v - base)));
+  const band = Math.min(5, Math.floor((Math.min(v, DPE_FULL) / DPE_FULL) * 5) + 1);
+  return (
+    <span className="dbar" aria-hidden="true">
+      {segs.map((f, i) => (
+        <span key={i} style={{ flex: f === 0 || f === 1 ? 0.5 : 1 }}>
+          <i className={`b${band}`} style={{ width: `${(f * 100).toFixed(1)}%` }} />
+        </span>
+      ))}
+    </span>
+  );
 }
 
 /** 能力變化寫成人看得懂的字 */
@@ -93,6 +122,12 @@ export default function MoveTable({ data }: { data: AppData }) {
     });
   }, [rows, q, type, sort, kind]);
 
+  /** 長條的基準：拿目前這張表看得到的那一批比，換快招大招或篩選就跟著重算 */
+  const max = useMemo(() => ({
+    power: Math.max(1, ...shown.map((r) => r.m.power)),
+    energy: Math.max(1, ...shown.map((r) => (kind === 'fast' ? r.m.energyGain : r.m.energy))),
+  }), [shown, kind]);
+
   return (
     <>
       {/* 計算在上面、挑招在下面：挑完往上看結果，不用來回捲 */}
@@ -149,18 +184,19 @@ export default function MoveTable({ data }: { data: AppData }) {
                   <TypeIcon type={r.m.type} size={14} />
                   <span>{zhName(r.m)}</span>
                 </td>
-                <td>{r.m.power}</td>
+                <td className="num">{r.m.power}<Bar v={r.m.power} max={max.power} /></td>
                 {kind === 'fast' ? (
                   <>
                     <td>{r.m.turns}</td>
-                    <td>+{r.m.energyGain}</td>
+                    <td className="num">+{r.m.energyGain}<Bar v={r.m.energyGain} max={max.energy} /></td>
                     <td className="num">{r.dpt.toFixed(2)}</td>
                     <td className="num">{r.ept.toFixed(2)}</td>
                   </>
                 ) : (
                   <>
-                    <td>{r.m.energy}</td>
-                    <td className="num">{r.dpe.toFixed(2)}</td>
+                    {/* 大招的能量是成本，越便宜越好，所以顏色反過來 */}
+                    <td className="num">{r.m.energy}<Bar v={r.m.energy} max={max.energy} invert /></td>
+                    <td className="num">{r.dpe.toFixed(2)}<DpeBar v={r.dpe} /></td>
                     <td className="left sm">{buffText(r.m) ?? '—'}</td>
                   </>
                 )}

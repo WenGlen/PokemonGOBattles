@@ -10,11 +10,13 @@
  *
  * @param v 這一列的值
  * @param max 這一欄目前的最大值
+ * @param invert 長度照舊，顏色反過來。
+ *   大招的能量是成本，越便宜越好，拿同一套「越長越綠」會講反話
  */
-export default function Bar({ v, max }: { v: number; max: number }) {
+export default function Bar({ v, max, invert = false }: { v: number; max: number; invert?: boolean }) {
   const ratio = v / max;
   // [0,20) 是第 1 段…[80,100] 是第 5 段；剛好 100% 會算成第 6 段，夾回來
-  const band = Math.min(5, Math.floor(ratio * 5) + 1);
+  const band = Math.min(5, Math.floor((invert ? 1 - ratio : ratio) * 5) + 1);
   return (
     <span className="bar" aria-hidden="true">
       <i className={`b${band}`} style={{ width: `${Math.max(2, ratio * 100).toFixed(1)}%` }} />
