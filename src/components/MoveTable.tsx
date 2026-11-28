@@ -132,12 +132,19 @@ export default function MoveTable({ data }: { data: AppData }) {
                 </>
               )}
               <SortHead k="users" sort={sort} setSort={setSort} title="有幾隻寶可夢學得會">會的隻數</SortHead>
-              <th title="加進上面的打擊計算" />
             </tr>
           </thead>
           <tbody>
             {shown.map((r) => (
-              <tr key={r.m.id}>
+              // 整列可以點：點一下丟進上面的打擊計算，再點一下拿掉
+              <tr
+                key={r.m.id}
+                className={picked.includes(r.m.id) ? 'on' : undefined}
+                aria-selected={picked.includes(r.m.id)}
+                title="點一下加進上面的打擊計算（最多三招）"
+                style={{ cursor: 'pointer' }}
+                onClick={() => togglePick(r.m.id)}
+              >
                 <td className="left nm">
                   <TypeIcon type={r.m.type} size={14} />
                   <span>{zhName(r.m)}</span>
@@ -158,15 +165,6 @@ export default function MoveTable({ data }: { data: AppData }) {
                   </>
                 )}
                 <td>{r.users}</td>
-                <td className="num">
-                  <button
-                    className={`bx-btn${picked.includes(r.m.id) ? ' on' : ''}`}
-                    title={picked.includes(r.m.id) ? '已在打擊計算裡，按一下移除' : '加進上面的打擊計算（最多三招）'}
-                    onClick={() => togglePick(r.m.id)}
-                  >
-                    {picked.includes(r.m.id) ? '✓' : '＋'}
-                  </button>
-                </td>
               </tr>
             ))}
           </tbody>

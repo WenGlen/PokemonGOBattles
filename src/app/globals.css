@@ -483,16 +483,14 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
 /* ── 打擊計算 ──────────────────────────────────────── */
 .dc { margin-top: 0; margin-bottom: 14px; }
-.dc-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+/* 左邊是挨打的那一方，右邊是打過去的那幾招 */
+.dc-cols { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 14px; align-items: start; }
+.dc-def { display: flex; flex-direction: column; gap: 7px; }
+.dc-def .tp, .dc-def .tp.wide { width: 100%; }
 .dc-label { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
-.dc-bar input {
-  width: 72px; font: inherit; font-size: 13px; padding: 6px 9px; border-radius: 8px;
-  border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
-  font-variant-numeric: tabular-nums;
-}
-.dc-bar input:focus { border-color: var(--accent); outline: none; }
 .dc-mult { display: inline-flex; align-items: center; gap: 2px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.dc .dc-dmg { font-size: 15px; font-weight: 700; }
+.dc .dc-power { font-size: 15px; font-weight: 700; }
+@media (max-width: 720px) { .dc-cols { grid-template-columns: minmax(0, 1fr); } }
 
 /* 自己會上下捲的大區塊收窄並置中。
    整排撐滿的話，滑鼠放在上面滾輪只捲得動區塊內部，整頁反而捲不動；
