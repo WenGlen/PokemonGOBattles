@@ -7,7 +7,7 @@ import TypePicker from '@/components/TypePicker';
 import { Marks } from '@/components/TypeMatrix';
 import { isFast } from '@/lib/analysis';
 import type { AppData } from '@/lib/app-data';
-import { MULT, effClass, effectiveness } from '@/lib/typeChart';
+import { MULT, effBucket, effClass, effectiveness } from '@/lib/typeChart';
 import { zhName } from '@/lib/types';
 
 /** 同時比幾招 */
@@ -61,7 +61,7 @@ export default function DamageCalc({ data, picked, onRemove }: {
             <thead>
               <tr>
                 <th className="left">招式</th>
-                <th title="這一招打在左邊那組屬性上的倍率">倍率</th>
+                <th title="這一招打在左邊那組屬性上的倍率">攻擊倍率</th>
                 <th title="攻方自己也是這個屬性時 ×1.2">本系加成</th>
                 <th title="威力 × 倍率，開本系再 ×1.2">有效威力</th>
                 <th title="大招是每點能量的有效威力；快招沒有能量成本，看的是每回合">能量效率</th>
@@ -82,7 +82,11 @@ export default function DamageCalc({ data, picked, onRemove }: {
                       <MoveNums m={m} ratios={false} />
                     </td>
                     <td className={`num ef-${effClass(eff)}`} title={`×${eff.toFixed(3)}`}>
-                      <span className="dc-mult"><Marks mult={eff} size={11} />×{eff.toFixed(2)}</span>
+                      {/* 這一欄講的是「打過去」，所以只有打得動才畫爆炸；
+                          被擋下來是沒有記號的綠字，不要在攻擊欄畫盾牌 */}
+                      <span className="dc-mult">
+                        {effBucket(eff) > 0 && <Marks mult={eff} size={11} />}×{eff.toFixed(2)}
+                      </span>
                     </td>
                     <td className="num">
                       <button
