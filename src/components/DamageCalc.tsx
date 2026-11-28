@@ -62,9 +62,9 @@ export default function DamageCalc({ data, picked, onRemove }: {
               <tr>
                 <th className="left">招式</th>
                 <th title="這一招打在左邊那組屬性上的倍率">倍率</th>
+                <th title="攻方自己也是這個屬性時 ×1.2">本系加成</th>
                 <th title="威力 × 倍率，開本系再 ×1.2">有效威力</th>
-                <th title="快招看每回合、大招看每點能量">效率</th>
-                <th title="攻方自己也是這個屬性時 ×1.2">本系</th>
+                <th title="大招是每點能量的有效威力；快招沒有能量成本，看的是每回合">能量效率</th>
                 <th />
               </tr>
             </thead>
@@ -84,10 +84,6 @@ export default function DamageCalc({ data, picked, onRemove }: {
                     <td className={`num ef-${effClass(eff)}`} title={`×${eff.toFixed(3)}`}>
                       <span className="dc-mult"><Marks mult={eff} size={11} />×{eff.toFixed(2)}</span>
                     </td>
-                    <td className="num dc-power">{power.toFixed(1)}</td>
-                    <td className="num dim">
-                      {fast ? (power / m.turns).toFixed(2) : (power / m.energy).toFixed(2)}
-                    </td>
                     <td className="num">
                       <button
                         className={`bx-btn${on ? ' on' : ''}`}
@@ -97,6 +93,11 @@ export default function DamageCalc({ data, picked, onRemove }: {
                       >
                         {on ? '✓' : '＋'}
                       </button>
+                    </td>
+                    <td className="num dc-power">{power.toFixed(1)}</td>
+                    {/* 快招沒有能量成本，所以那一格看的是每回合 */}
+                    <td className="num dim" title={fast ? '每回合' : '每點能量'}>
+                      {fast ? (power / m.turns).toFixed(2) : (power / m.energy).toFixed(2)}
                     </td>
                     <td className="num">
                       <button className="bx-btn" title="從計算裡拿掉" onClick={() => onRemove(m.id)}>×</button>
