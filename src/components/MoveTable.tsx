@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import DamageCalc, { MAX_CALC } from '@/components/DamageCalc';
 import { TypeIcon } from '@/components/Icon';
 import SortHead, { type Sort } from '@/components/SortHead';
 import TypePicker from '@/components/TypePicker';
@@ -45,6 +46,10 @@ export default function MoveTable({ data }: { data: AppData }) {
   const [q, setQ] = useState('');
   const [type, setType] = useState('');
   const [sort, setSort] = useState<Sort<Key>>({ key: 'dpe', dir: -1 });
+  /** 丟進上面打擊計算的那幾招，順序就是按下去的順序，滿了擠掉最早的 */
+  const [picked, setPicked] = useState<string[]>([]);
+  const togglePick = (id: string) =>
+    setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id].slice(-MAX_CALC)));
 
   /** 每個招式有幾隻寶可夢學得會 */
   const userCount = useMemo(() => {
@@ -89,7 +94,11 @@ export default function MoveTable({ data }: { data: AppData }) {
   }, [rows, q, type, sort, kind]);
 
   return (
-    <div className="tbl-wrap">
+    <>
+      {/* 計算在上面、挑招在下面：挑完往上看結果，不用來回捲 */}
+      <DamageCalc data={data} picked={picked} onRemove={(id) => setPicked((p) => p.filter((x) => x !== id))} />
+
+      <div className="tbl-wrap">
       <div className="tbl-bar">
         {([['fast', '快招'], ['charged', '大招']] as const).map(([k, label]) => (
           <button key={k} aria-pressed={kind === k} onClick={() => {
@@ -123,6 +132,7 @@ export default function MoveTable({ data }: { data: AppData }) {
                 </>
               )}
               <SortHead k="users" sort={sort} setSort={setSort} title="有幾隻寶可夢學得會">會的隻數</SortHead>
+              <th title="加進上面的打擊計算" />
             </tr>
           </thead>
           <tbody>
@@ -148,12 +158,22 @@ export default function MoveTable({ data }: { data: AppData }) {
                   </>
                 )}
                 <td>{r.users}</td>
+                <td className="num">
+                  <button
+                    className={`bx-btn${picked.includes(r.m.id) ? ' on' : ''}`}
+                    title={picked.includes(r.m.id) ? '已在打擊計算裡，按一下移除' : '加進上面的打擊計算（最多三招）'}
+                    onClick={() => togglePick(r.m.id)}
+                  >
+                    {picked.includes(r.m.id) ? '✓' : '＋'}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
         {shown.length === 0 && <div className="tbl-empty">找不到符合的招式</div>}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

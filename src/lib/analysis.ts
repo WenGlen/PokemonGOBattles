@@ -344,6 +344,14 @@ export interface RoleTag {
   why: string;
   /** 標籤前面的小圖，掃過去先看圖再讀字 */
   icon: string;
+  /**
+   * 判斷依據的招式不在推薦組合裡。
+   *
+   * 標籤是拿「學得會的全部招式」算的，但你實際會帶的是推薦那組——
+   * 例如「誘餌好用」靠的是最便宜與最貴那兩招，兩招不一定都在推薦裡。
+   * 這種標籤畫面上轉灰：它說的是潛力，不是你現在這組的實力。
+   */
+  offRec: boolean;
 }
 
 /**
@@ -378,12 +386,13 @@ const TAG_ICON: Record<string, string> = {
  */
 export function roleTags(
   p: PokemonData,
-  st: { atk: number; def: number; hp: number },
+  st: { atk: number; def: number; hp: number; moveset?: string[] | null },
   moveById: Map<string, MoveData>,
   ctx: TagContext
 ): RoleTag[] {
-  // 配圖統一在最後補，這裡只管判斷
-  const tags: Omit<RoleTag, 'icon'>[] = [];
+  // 配圖與「在不在推薦裡」統一在最後補，這裡只管判斷。
+  // from 是這個標籤的依據招式；沒有 from 的（體質、屬性）跟招式無關
+  const tags: (Omit<RoleTag, 'icon' | 'offRec'> & { from?: string[] })[] = [];
   const fasts = p.fast.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
   const chargeds = p.charged.map((id) => moveById.get(id)).filter(Boolean) as MoveData[];
   const bulk = st.def * st.hp;
@@ -404,33 +413,44 @@ export function roleTags(
   }
 
   // ── 快招 ──
-  if (fasts.some((m) => m.turns === 1)) {
-    tags.push({ tone: 'good', label: '出招快', why: '有 1 回合（0.5 秒）的快招，搶 CMP 與反應都佔便宜' });
+  const quick = fasts.filter((m) => m.turns === 1);
+  if (quick.length) {
+    tags.push({ tone: 'good', label: '出招快', why: '有 1 回合（0.5 秒）的快招，搶 CMP 與反應都佔便宜', from: quick.map((m) => m.id) });
   }
+  const eptBest = fasts.filter((m) => fastRates(m).ept === bestEpt);
   if (bestEpt >= ctx.ept.p80) {
-    tags.push({ tone: 'good', label: '充能快', why: `最佳快招每回合 ${bestEpt.toFixed(2)} 能量，同聯盟前 20%（門檻 ${ctx.ept.p80.toFixed(2)}）` });
+    tags.push({ tone: 'good', label: '充能快', why: `最佳快招每回合 ${bestEpt.toFixed(2)} 能量，同聯盟前 20%（門檻 ${ctx.ept.p80.toFixed(2)}）`, from: eptBest.map((m) => m.id) });
   }
+  const dptBest = fasts.filter((m) => fastRates(m).dpt === bestDpt);
   if (bestDpt >= ctx.dpt.p80) {
-    tags.push({ tone: 'good', label: '快招就會痛', why: `最佳快招每回合 ${bestDpt.toFixed(2)} 傷害，同聯盟前 20%（門檻 ${ctx.dpt.p80.toFixed(2)}）` });
+    tags.push({ tone: 'good', label: '快招就會痛', why: `最佳快招每回合 ${bestDpt.toFixed(2)} 傷害，同聯盟前 20%（門檻 ${ctx.dpt.p80.toFixed(2)}）`, from: dptBest.map((m) => m.id) });
   }
 
   // ── 大招 ──
   const energies = chargeds.map((m) => m.energy).filter((e) => e > 0);
   const cheapest = energies.length ? Math.min(...energies) : 0;
   if (cheapest && cheapest <= 35) {
-    tags.push({ tone: 'good', label: '大招便宜', why: `最便宜的大招只要 ${cheapest} 能量，壓力給得快` });
+    const cheap = chargeds.filter((m) => m.energy === cheapest);
+    tags.push({ tone: 'good', label: '大招便宜', why: `最便宜的大招只要 ${cheapest} 能量，壓力給得快`, from: cheap.map((m) => m.id) });
   }
   const bestDpe = Math.max(0, ...chargeds.map((m) => dpe(m)));
   if (bestDpe >= 2) {
-    tags.push({ tone: 'good', label: '高爆發', why: `最佳大招每點能量 ${bestDpe.toFixed(2)} 傷害（DPE ≥ 2 算高）` });
+    const burst = chargeds.filter((m) => dpe(m) === bestDpe);
+    tags.push({ tone: 'good', label: '高爆發', why: `最佳大招每點能量 ${bestDpe.toFixed(2)} 傷害（DPE ≥ 2 算高）`, from: burst.map((m) => m.id) });
   }
-  if (energies.length >= 2 && Math.max(...energies) - cheapest >= 15) {
-    tags.push({ tone: 'good', label: '誘餌好用', why: `便宜 ${cheapest} 與最貴 ${Math.max(...energies)} 能量差 ${Math.max(...energies) - cheapest}，騙盾空間大` });
+  const dearest = energies.length ? Math.max(...energies) : 0;
+  if (energies.length >= 2 && dearest - cheapest >= 15) {
+    // 誘餌要「便宜的騙盾、貴的收割」，所以兩頭都得真的帶在身上
+    const pair = [
+      chargeds.find((m) => m.energy === cheapest)?.id,
+      chargeds.find((m) => m.energy === dearest)?.id,
+    ].filter(Boolean) as string[];
+    tags.push({ tone: 'good', label: '誘餌好用', why: `便宜 ${cheapest} 與最貴 ${dearest} 能量差 ${dearest - cheapest}，騙盾空間大`, from: pair });
   }
   const selfBuff = chargeds.find((m) => m.buffTarget === 'self' && m.buffs && (m.buffs[0] > 0 || m.buffs[1] > 0));
-  if (selfBuff) tags.push({ tone: 'good', label: '自帶強化', why: `${zhOf(selfBuff)} 會提升自己的能力` });
+  if (selfBuff) tags.push({ tone: 'good', label: '自帶強化', why: `${zhOf(selfBuff)} 會提升自己的能力`, from: [selfBuff.id] });
   const debuff = chargeds.find((m) => m.buffTarget !== 'self' && m.buffs && (m.buffs[0] < 0 || m.buffs[1] < 0));
-  if (debuff) tags.push({ tone: 'good', label: '能降對手', why: `${zhOf(debuff)} 會降低對手的能力` });
+  if (debuff) tags.push({ tone: 'good', label: '能降對手', why: `${zhOf(debuff)} 會降低對手的能力`, from: [debuff.id] });
   const selfDebuff = chargeds.every((m) => m.buffTarget === 'self' && m.buffs && (m.buffs[0] < 0 || m.buffs[1] < 0));
   if (chargeds.length > 0 && selfDebuff) {
     tags.push({ tone: 'bad', label: '丟招有代價', why: '所有大招丟出去都會降自己的能力，不能亂丟' });
@@ -448,7 +468,13 @@ export function roleTags(
     tags.push({ tone: 'bad', label: '有雙重弱點', why: `被 ${d.weak2.map((t) => TYPE_ZH[t]).join('、')} 打到 ×2.56` });
   }
 
-  return tags.map((t) => ({ ...t, icon: TAG_ICON[t.label] ?? '•' }));
+  // 沒有推薦組合（沒上榜）就分不出來，一律當成在推薦裡，不要整排轉灰
+  const rec = st.moveset && st.moveset.length ? new Set(st.moveset) : null;
+  return tags.map(({ from, ...t }) => ({
+    ...t,
+    icon: TAG_ICON[t.label] ?? '•',
+    offRec: Boolean(rec && from && from.length > 0 && !from.every((id) => rec.has(id))),
+  }));
 }
 
 /* ── 雷達圖 ────────────────────────────────────────── */

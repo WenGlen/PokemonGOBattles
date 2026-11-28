@@ -107,6 +107,23 @@ function effDef(s: Side): number {
 }
 
 /**
+ * 傷害公式本體，與 pvpoke DamageCalculator.damage 等價。
+ *
+ * 抽出來是為了讓不在對戰裡的地方（招式分頁的打擊計算）也能用同一條式子——
+ * 複製一份公式出去，兩邊遲早會不一樣。
+ *
+ * @param power 招式威力
+ * @param atk 攻方實戰攻擊力（已含能力階級）
+ * @param def 守方實戰防禦力（已含能力階級）
+ * @param eff 屬性倍率，用 effectiveness() 算
+ * @param stab 本系加成要不要算進去
+ * @returns 整數傷害，最低 1
+ */
+export function rawDamage(power: number, atk: number, def: number, eff: number, stab: boolean): number {
+  return Math.floor(power * (stab ? MULT.STAB : 1) * (atk / def) * eff * 0.5 * MULT.BONUS) + 1;
+}
+
+/**
  * 傷害公式，與 pvpoke DamageCalculator.damage 等價。
  * @returns 整數傷害，最低 1
  */
@@ -117,11 +134,13 @@ export function damage(
   atkStageOverride?: number,
   defStageOverride?: number
 ): number {
-  const stab = attacker.loadout.pokemon.types.includes(move.type) ? MULT.STAB : 1;
-  const eff = effectiveness(move.type, defender.loadout.pokemon.types);
-  const atk = attacker.base.atk * stageMultiplier(atkStageOverride ?? attacker.atkStage);
-  const def = defender.base.def * stageMultiplier(defStageOverride ?? defender.defStage);
-  return Math.floor(move.power * stab * (atk / def) * eff * 0.5 * MULT.BONUS) + 1;
+  return rawDamage(
+    move.power,
+    attacker.base.atk * stageMultiplier(atkStageOverride ?? attacker.atkStage),
+    defender.base.def * stageMultiplier(defStageOverride ?? defender.defStage),
+    effectiveness(move.type, defender.loadout.pokemon.types),
+    attacker.loadout.pokemon.types.includes(move.type)
+  );
 }
 
 /** 招式會不會讓自己掉攻擊（例如 Superpower）——影響誘餌與開盾判斷 */

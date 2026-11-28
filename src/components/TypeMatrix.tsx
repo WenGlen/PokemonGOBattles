@@ -16,7 +16,7 @@ export interface AtkFocus {
  * @param mult 倍率
  * @param size 單個記號的邊長 px
  */
-function Marks({ mult, size = 13 }: { mult: number; size?: number }) {
+export function Marks({ mult, size = 13 }: { mult: number; size?: number }) {
   const { kind, count } = effMarks(mult);
   if (!kind) return null;
   const Ico = kind === 'burst' ? BurstIcon : ShieldIcon;

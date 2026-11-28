@@ -134,7 +134,7 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
                   <button
                     key={t.label}
                     type="button"
-                    className={`tag-pill ${t.tone}${why?.label === t.label ? ' on' : ''}`}
+                    className={`tag-pill ${t.tone}${t.offRec ? ' off' : ''}${why?.label === t.label ? ' on' : ''}`}
                     onMouseEnter={() => setHoverTag(t)}
                     onMouseLeave={() => setHoverTag(null)}
                     onFocus={() => setHoverTag(t)}
@@ -149,7 +149,7 @@ export default function PokemonDetail({ p, data, ctx, radarCtx, compare, st, onC
               {/* 依據就寫在標籤正下方，不用把視線拉到別的地方找 */}
               <p className="pd-why">
                 {why
-                  ? <><b>{why.icon} {why.label}</b>：{why.why}</>
+                  ? <><b>{why.icon} {why.label}</b>：{why.why}{why.offRec && <span className="dim">（依據的招式不在推薦組合裡）</span>}</>
                   : '滑過或點擊可看標籤說明'}
               </p>
             </div>
