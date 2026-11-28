@@ -16,7 +16,7 @@ export const MAX_CALC = 3;
 /**
  * 打擊計算。
  *
- * 左邊選一組防守屬性（不選就是 ×1），右邊從下面的招式表點進來最多三招，
+ * 左邊選一組防守方屬性（不選就是 ×1），右邊從下面的招式表點進來最多三招，
  * 算這幾招打在那組屬性上的**有效威力** ＝ 威力 × 倍率（本系再 ×1.2）。
  *
  * 只算到有效威力就停：再往下的實際傷害要看攻守雙方的攻擊與防禦，
@@ -51,7 +51,7 @@ export default function DamageCalc({ data, picked, onRemove }: {
 
       <div className="dc-cols">
         <div className="dc-def">
-          <span className="dc-label">防守屬性</span>
+          <span className="dc-label">防守方屬性</span>
           <TypePicker value={t1} onChange={setT1} anyLabel="不限" title="挨打那一方的屬性" />
           <TypePicker value={t2} onChange={setT2} anyLabel="不限" title="只有一種屬性就留空" />
         </div>
@@ -78,7 +78,7 @@ export default function DamageCalc({ data, picked, onRemove }: {
                   <tr key={m.id}>
                     <td className="left nm nowrap">
                       <TypeIcon type={m.type} size={14} />
-                      <span>{zhName(m)}</span>
+                      <span className="mv-name">{zhName(m)}</span>
                       <MoveNums m={m} ratios={false} />
                     </td>
                     <td className={`num ef-${effClass(eff)}`} title={`×${eff.toFixed(3)}`}>

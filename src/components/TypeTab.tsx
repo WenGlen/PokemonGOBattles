@@ -116,33 +116,32 @@ export default function TypeTab({ data, cp, box }: { data: AppData; cp: LeagueCp
           <TypePicker value={t2} onChange={setT2} anyLabel="第二屬性" big title="可以不選，只有一種屬性就留空" />
         </div>
 
-        {/* 還沒選屬性時十八格都是 ×1.00，那是一整片沒有資訊的格子，不如不畫。
+        {/* 還沒選屬性時十八格都是 ×1.00，整排落在「普通」——留著空的五欄當底，
+            選下去才看得出哪幾格搬走了。
             GO 沒有免疫，原作的免疫在這裡一律折成 ×0.39，所以只有五桶 */}
-        {types.length > 0 && (
-          <div className="tg-grid">
-            {buckets.map((bk) => (
-              <div key={bk.b} data-b={bk.b} className={`tg-col${bk.hits.length ? '' : ' empty'}`}>
-                <h4>
-                  {bk.label}
-                  {bk.mult && <em>{bk.mult}</em>}
-                  <span>{bk.hits.length}</span>
-                </h4>
-                <div className="tg-cells">
-                  {bk.hits.map(({ t, mult }) => (
-                    <div key={t} className={`tm-cell ef-${effClass(mult)}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
-                      {/* 雙重的那兩欄圖示再大一圈，掃過去會先停在這裡 */}
-                      <TypeIcon type={t} size={Math.abs(bk.b) >= 2 ? 28 : 20} />
-                      <span className="tm-name">{TYPE_ZH[t]}</span>
-                      {/* 跟欄標題寫的不一樣才需要自己報數 */}
-                      {bk.base !== null && mult !== bk.base && <b>×{mult.toFixed(2)}</b>}
-                      {bk.base === null && bk.b === -2 && <b>×{mult.toFixed(2)}</b>}
-                    </div>
-                  ))}
-                </div>
+        <div className="tg-grid">
+          {buckets.map((bk) => (
+            <div key={bk.b} data-b={bk.b} className={`tg-col${bk.hits.length ? '' : ' empty'}`}>
+              <h4>
+                {bk.label}
+                {bk.mult && <em>{bk.mult}</em>}
+                <span>{bk.hits.length}</span>
+              </h4>
+              <div className="tg-cells">
+                {bk.hits.map(({ t, mult }) => (
+                  <div key={t} className={`tm-cell ef-${effClass(mult)}`} title={`挨 ${TYPE_ZH[t]} ×${mult.toFixed(3)}`}>
+                    {/* 雙重的那兩欄圖示再大一圈，掃過去會先停在這裡 */}
+                    <TypeIcon type={t} size={Math.abs(bk.b) >= 2 ? 28 : 20} />
+                    <span className="tm-name">{TYPE_ZH[t]}</span>
+                    {/* 跟欄標題寫的不一樣才需要自己報數 */}
+                    {bk.base !== null && mult !== bk.base && <b>×{mult.toFixed(2)}</b>}
+                    {bk.base === null && bk.b === -2 && <b>×{mult.toFixed(2)}</b>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </section>
 
       <MonDeck deck={deck} data={data} tagCtx={tagCtx} radarCtx={radarCtx} onClose={toggle} />

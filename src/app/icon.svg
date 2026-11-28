@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>Pokémon GO 對戰表</title>
+  <defs>
+    <clipPath id="s">
+      <path d="M32 5.87 53.87 14.4V30.67c0 13.07-9.07 23.73-21.87 27.47C19.2 54.4 10.13 43.73 10.13 30.67V14.4Z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#s)">
+    <rect width="64" height="31.5" fill="#d1281b"/>
+    <rect y="31.5" width="64" height="32.5" fill="#ffffff"/>
+    <rect y="29.4" width="64" height="4.2" fill="#2b2720"/>
+  </g>
+  <path d="M32 5.87 53.87 14.4V30.67c0 13.07-9.07 23.73-21.87 27.47C19.2 54.4 10.13 43.73 10.13 30.67V14.4Z" fill="none" stroke="#2b2720" stroke-width="3.2" stroke-linejoin="round"/>
+  <circle cx="32" cy="31.5" r="10.8" fill="#2b2720"/>
+  <circle cx="32" cy="31.5" r="8.8" fill="#ffffff"/>
+  <circle cx="32" cy="31.5" r="6.2" fill="none" stroke="#2b2720" stroke-width="0.95"/>
+</svg>

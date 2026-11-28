@@ -6,7 +6,11 @@
      按鈕、輸入框、標籤、格子是最亮的那一層——它們是要被讀的東西，
      擺在最亮的底上文字對比最好；卡片只是把它們圈在一起的容器 */
   --bg: #efe9db;
-  --surface: #faf7ef;
+  /* 卡片這一層是半透明的：右下角那顆超大站徽排在所有內容底下，
+     要透得過卡片才看得到。按鈕、輸入框、標籤一律用 --surface-2 或 --surface-solid，
+     那些是要被讀的東西，底下透出東西來會變髒 */
+  --surface: rgb(250 247 239 / .62);
+  --surface-solid: #faf7ef;
   --surface-2: #fffefb;
   --line: #e3dbcb;
   --text: #2b2720;
@@ -46,10 +50,14 @@
 
 * { box-sizing: border-box; }
 
+/* 底色只能掛在 html 上，不能掛 body：負 z-index 的子層（右下浮水印）
+   在堆疊順序上排在「body 自己的背景」之前，給 body 底色就會把它整片蓋掉。
+   掛 html 的話底色會傳給 canvas，照樣鋪滿整個視窗 */
+html { background: var(--bg); }
+
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC',
     'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
@@ -61,14 +69,39 @@ html, body {
 button, input, select { font: inherit; color: inherit; }
 
 .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 64px; }
+/* 手機上左右多留一點：卡片裡有自己會左右捲的表格，
+   要捲整頁就得從卡片外面下手，邊界太窄會按不到 */
+@media (max-width: 720px) { .wrap { padding-left: 24px; padding-right: 24px; } }
+
+/* 右下角的超大淡色站徽，跟著聯盟換球。
+   z-index -1 排在所有內容底下，所以按鈕、標籤、輸入框都是實色，不會被染到；
+   看得到是因為卡片那一層（--surface）本身半透明。
+   pointer-events 關掉才不會吃到點擊；位移用百分比不用 px，換尺寸時跑出畫面的比例才不變 */
+.wm {
+  position: fixed; right: 0; bottom: 0; z-index: -1;
+  pointer-events: none; user-select: none; line-height: 0;
+  transform: translate(20%, 22%);
+  opacity: .2;
+}
+.wm .logo { width: min(62vmin, 520px); height: auto; }
+@media (max-width: 720px) {
+  .wm { opacity: .16; }
+  .wm .logo { width: 76vmin; }
+}
 
 header.top {
-  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 11px; flex-wrap: wrap;
   margin-bottom: 18px;
 }
+header.top .logo { flex: none; }
+header.top .brandtxt { min-width: 0; }
 header.top h1 { font-size: 19px; margin: 0; letter-spacing: .3px; }
+/* 第一次進來的人要先知道這站在算什麼，分頁名字看不出來 */
+header.top .tagline { margin: 0; font-size: 11.5px; color: var(--muted); letter-spacing: .2px; }
 header.top .meta { color: var(--muted); font-size: 12.5px; margin-left: auto; }
 header.top .meta b { color: var(--good); font-weight: 600; }
+/* 綠勾要跟旁邊的字對齊——svg 直接塞進 inline 元素會吃到行高多出來的那幾 px */
+header.top .meta b.ok { display: inline-flex; vertical-align: -2px; }
 header.top .meta b.bad { color: var(--foe); }
 
 /* 分頁與聯盟同一排。align-items: stretch 讓兩組按鈕自動等高，不用去對 padding */
@@ -83,7 +116,7 @@ header.top .meta b.bad { color: var(--foe); }
 .leagues.off button { cursor: not-allowed; }
 .leagues.off button:hover { border-color: var(--line); color: var(--muted); }
 .leagues button {
-  background: var(--surface); border: 1px solid var(--line); color: var(--muted);
+  background: var(--surface-solid); border: 1px solid var(--line); color: var(--muted);
   padding: 6px 13px; border-radius: 8px; cursor: pointer; transition: .12s;
 }
 .leagues button:hover { border-color: var(--accent); color: var(--text); }
@@ -210,9 +243,25 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
 
 
-.foot { margin-top: 20px; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
-.foot a { color: var(--accent); }
-.foot code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+/* 署名、資料來源、免責一整塊，直接放在背景上不做卡片：
+   這裡不是內容，是落款，圈一個框反而會跟上面的資料卡片搶 */
+.brand {
+  display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;
+  margin-top: 26px;
+}
+.brand .brand-txt { display: flex; flex-direction: column; line-height: 1.45; min-width: 0; flex: 1 1 320px; }
+.brand .brand-txt b { font-size: 14px; }
+.brand .brand-txt span { font-size: 12px; color: var(--muted); }
+.brand .fb-btn {
+  margin-left: auto; flex: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 15px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--text);
+  font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.brand .fb-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.brand .brand-txt span a { color: var(--accent); }
 
 .loading { padding: 60px 0; text-align: center; color: var(--muted); }
 
@@ -335,7 +384,7 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .mp ul {
   position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0;
   margin: 0; padding: 4px; list-style: none; max-height: 260px; overflow: auto;
-  background: var(--surface); border: 1px solid var(--accent); border-radius: 8px;
+  background: var(--surface-solid); border: 1px solid var(--accent); border-radius: 8px;
   box-shadow: 0 8px 24px rgba(90, 76, 48, .16);
 }
 .mp li {
@@ -355,7 +404,7 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tabs button {
   font: inherit; font-size: 13.5px; font-weight: 600; padding: 7px 16px;
   border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 9px 9px 0 0;
-  background: var(--surface); color: var(--muted); cursor: pointer;
+  background: var(--surface-solid); color: var(--muted); cursor: pointer;
 }
 .tabs button:hover { color: var(--text); }
 .tabs button[aria-pressed='true'] { background: var(--surface-2); color: var(--accent); border-bottom-color: var(--accent); }
@@ -432,6 +481,10 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tbl .nm > * { vertical-align: middle; }
 .tbl .nm > * + * { margin-left: 6px; }
 .tbl .nm > span { font-weight: 500; }
+/* 招式名要比表格其他數字大一階：整張表是用招式名在認列的。
+   nowrap 是必要的——放大之後窄螢幕會從詞中間斷成「鱗／片噪音」，
+   寧可讓表格多捲一點也不要斷字（寶可夢名字那欄同理） */
+.tbl .nm .mv-name { font-size: 14px; font-weight: 600; white-space: nowrap; }
 .tbl .sm { font-size: 11.5px; }
 /* 這一格折行會把招式名跟它的數值拆到兩行，欄寬改由內容決定 */
 .tbl td.nowrap, .tbl .dim.nowrap { white-space: nowrap; }
@@ -444,7 +497,8 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tbl .trow.two .tic:first-child { position: relative; z-index: 1; transform: translateY(5px); }
 .tbl .trow.two .tic:last-child { margin-left: -7px; transform: translateY(-5px); }
 /* 疊在上面的那一個要有一圈底色，不然兩個圖示的邊會糊在一起 */
-.tbl .trow.two .tic:first-child .tic-dot { box-shadow: 0 0 0 2px var(--surface); }
+/* 兩個屬性疊起來時中間那圈隔開用的，要實色：半透明的話會在半透明卡片上再疊一層，變得比卡片還亮 */
+.tbl .trow.two .tic:first-child .tic-dot { box-shadow: 0 0 0 2px var(--surface-solid); }
 /* 數值下面的比例長條：底是整欄寬，填色靠右跟數字對齊 */
 .tbl .bar { display: block; height: 3px; margin: 2px 0 1px; border-radius: 2px; background: color-mix(in srgb, var(--line) 65%, transparent); }
 .tbl .bar i { display: block; height: 100%; margin-left: auto; border-radius: 2px; }
@@ -501,7 +555,23 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .dc-label { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 .dc-mult { display: inline-flex; align-items: center; gap: 2px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .dc .dc-power { font-size: 15px; font-weight: 700; }
-@media (max-width: 720px) { .dc-cols { grid-template-columns: minmax(0, 1fr); } }
+/* 手機版的打擊計算：
+   左右兩欄疊成上下，但屬性一、屬性二改左右並排——各佔一行太浪費高度。
+   招式那一格讓數字說明自己換一行，名字與屬性圖示放大：這一格是用來認招式的，
+   一行塞不下就該換行，不是把字縮小。桌機版不動。 */
+@media (max-width: 720px) {
+  .dc-cols { grid-template-columns: minmax(0, 1fr); }
+  .dc-def { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .dc-def .dc-label { flex: 1 1 100%; }
+  .dc-def .tp, .dc-def .tp.wide { flex: 1 1 0; width: auto; min-width: 0; }
+  .dc .tbl .nm.nowrap { white-space: normal; }
+  /* 圖示的尺寸是寫在 style 上的，只能用 !important 蓋 */
+  .dc .tbl .nm .tic-dot { width: 22px !important; height: 22px !important; }
+  .dc .tbl .nm .tic-dot img { width: 100%; height: 100%; }
+  /* inline-flex 改成 flex 就會自己換一行，不用去動 td 的 display——
+     td 一旦變 flex 就不再是表格儲存格，整列的高度會跟著垮掉 */
+  .dc .tbl .nm .mv-nums { display: flex; margin: 3px 0 0; }
+}
 
 /* 自己會上下捲的大區塊收窄並置中。
    整排撐滿的話，滑鼠放在上面滾輪只捲得動區塊內部，整頁反而捲不動；
@@ -959,7 +1029,7 @@ table.log { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 /* ── 列表：給一點層次，不要整片同一個字級 ────────────── */
 /* 名字不折行：窄螢幕折起來會變成「美錄梅／塔」，寧可整張表橫捲 */
 .tbl .nm-txt { display: inline-flex; flex-direction: column; line-height: 1.25; min-width: 0; white-space: nowrap; }
-.tbl .nm-txt b { font-size: 14px; font-weight: 600; }
+.tbl .nm-txt b { font-size: 15px; font-weight: 600; }
 .tbl .nm-txt small { font-size: 10.5px; font-variant-numeric: tabular-nums; }
 .tbl td.rk .rk-n { font-size: 14px; font-weight: 600; }
 .tbl td.rk .rk-n.top { color: var(--accent); }

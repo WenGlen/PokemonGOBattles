@@ -182,7 +182,7 @@ export default function MoveTable({ data }: { data: AppData }) {
               >
                 <td className="left nm">
                   <TypeIcon type={r.m.type} size={14} />
-                  <span>{zhName(r.m)}</span>
+                  <span className="mv-name">{zhName(r.m)}</span>
                 </td>
                 <td className="num">{r.m.power}<Bar v={r.m.power} max={max.power} /></td>
                 {kind === 'fast' ? (

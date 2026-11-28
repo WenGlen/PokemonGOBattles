@@ -109,6 +109,51 @@ export function BoltIcon({ size = 12 }: { size?: number }) {
 }
 
 /**
+ * 打勾（驗證通過）。
+ * @param size 邊長 px
+ */
+export function CheckIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg className="mk" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4.2 12.6 9.4 18 19.8 6.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * 信封（寄信）。
+ * @param size 邊長 px
+ */
+export function MailIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg className="mk" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M3 5.8h18v12.4H3Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.8 6.6 12 13.1l8.2-6.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/**
  * 展開／收合的三角箭頭。
  *
  * 用 SVG 不用 ▸ 這種字元：三角形字元只佔 em 框的一小塊，
